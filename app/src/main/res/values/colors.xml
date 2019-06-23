@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--<color name="colorPrimary">#3F51B5</color>-->
+    <color name="colorPrimary">#0990d0</color>
+    <color name="colorPrimary2">#11238D</color>
+    <color name="colorPrimaryToolbarLogin">#16bbcf</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <!--<color name="colorAccent">#16bbcf</color>-->
+    <color name="oper_text_color">#1db7bd</color>
+    <color name="equl_text_color">#ffffff</color>
+    <color name="main_backg_color">#ffffff</color>
+    <color name="input_backg_color">#ffffff</color>
+
+    <!--<color name="colorPrimary">#008577</color>-->
+    <!--<color name="colorPrimaryDark">#00574B</color>-->
+    <!--<color name="colorAccent">#D81B60</color>-->
+    <color name="colorBlue">#28A2CF</color>
+    <color name="colorBlueT">#6428a2cf</color>
+    <color name="colorPurple">#A130FF</color>
+    <color name="colorPurpleT">#64a130ff</color>
+    <color name="colorWhite">#ffffff</color>
+</resources>
