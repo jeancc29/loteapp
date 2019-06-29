@@ -60,6 +60,8 @@ public class SearchBTActivity extends Activity implements OnClickListener, IOCal
 	
 	private static String TAG = "SearchBTActivity";
 
+
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -466,6 +468,11 @@ public class SearchBTActivity extends Activity implements OnClickListener, IOCal
 						pos.POS_FeedLine();
 						pos.POS_S_SetBarcode("20160618", 0, 72, 3, 60, 0, 2);
 						pos.POS_FeedLine();
+
+						//Bitmap t = Utilidades.toBitmap(getString());
+
+						//pos.POS_PrintPicture(bm1, nPrintWidth, 1, nCompressMethod);
+
 					}
 					
 					if(nPrintContent >= 2)

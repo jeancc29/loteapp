@@ -40,6 +40,7 @@
     <string name="icon_whatsapp">&#xf4f0;</string>
     <string name="icon_sms">&#xf3b2;</string>
     <string name="icon_delete">&#xf37f;</string>
+    <string name="icon_bluetooth">&#xf116;</string>
 
 
     <string-array name="tickets">
@@ -61,4 +62,6 @@
     <string name="ok_label">OK</string>
     <string name="dismiss_label">Dismiss</string>
     <string name="clear_all_label">Clear all</string>
+
+
 </resources>
