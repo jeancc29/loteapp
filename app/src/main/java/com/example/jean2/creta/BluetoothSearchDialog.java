@@ -53,8 +53,9 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
     Context mActivity;
 
     ExecutorService es = Executors.newScheduledThreadPool(30);
-    Pos mPos = new Pos();
+    static Pos mPos = new Pos();
     BTPrinting mBt = new BTPrinting();
+    public static Activity mActivity1;
 
     private static String TAG = "SearchBTActivity";
 
@@ -64,7 +65,7 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
 
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_searchbluetooth, null);
-
+        mActivity1 = getActivity();
     //    progressBar = (ProgressBar)view.findViewById(R.id.progressBarPrincipal);
         progressBarSearchStatus = (ProgressBar) view.findViewById(R.id.progressBarSearchStatus);
         linearlayoutdevices = (LinearLayout) view.findViewById(R.id.linearlayoutdevices);
@@ -108,7 +109,8 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
     @Override
     public void onAttach(Context context) {
         mContext = context;
-        mActivity = context;
+        mActivity1 = getActivity();
+        mActivity = getActivity();
         super.onAttach(context);
         //try {
         //listener = (DuplicarDialog.DuplicarDialogListener) context;
@@ -436,13 +438,20 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
     }
 
     static int dwWriteIndex = 1;
-    public class TaskPrint implements Runnable
+    public static class TaskPrint implements Runnable
     {
         Pos pos = null;
+        Bitmap ticketImg;
 
         public TaskPrint(Pos pos)
         {
             this.pos = pos;
+        }
+
+        public TaskPrint(Bitmap ticketImg)
+        {
+            this.pos = mPos;
+            this.ticketImg = ticketImg;
         }
 
         @Override
@@ -452,12 +461,12 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
             final boolean bPrintResult = PrintTicket(AppStart.nPrintWidth, AppStart.bCutter, AppStart.bDrawer, AppStart.bBeeper, AppStart.nPrintCount, AppStart.nPrintContent, AppStart.nCompressMethod, AppStart.bCheckReturn);
             final boolean bIsOpened = pos.GetIO().IsOpened();
 
-            getActivity().runOnUiThread(new Runnable(){
+            mActivity1.runOnUiThread(new Runnable(){
                 @Override
                 public void run() {
                     // TODO Auto-generated method stub
-                    Toast.makeText(mActivity.getApplicationContext(), bPrintResult ? getResources().getString(R.string.printsuccess) : getResources().getString(R.string.printfailed), Toast.LENGTH_SHORT).show();
-                    btnPrint.setEnabled(bIsOpened);
+                    Toast.makeText(mActivity1.getApplicationContext(), bPrintResult ? mActivity1.getResources().getString(R.string.printsuccess) : mActivity1.getResources().getString(R.string.printfailed), Toast.LENGTH_SHORT).show();
+                    //btnPrint.setEnabled(bIsOpened);
                 }
             });
 
@@ -477,59 +486,64 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
                 Bitmap bmBlackWhite = getImageFromAssetsFile("blackwhite.png");
                 Bitmap bmIu = getImageFromAssetsFile("iu.jpeg");
                 Bitmap bmYellowmen = getImageFromAssetsFile("yellowmen.png");
-                for(int i = 0; i < nCount; ++i)
-                {
-                    if(!pos.GetIO().IsOpened())
-                        break;
 
-                    Log.d("nPrintWidth", String.valueOf(nPrintWidth));
-                    Log.d("nPrintContent", String.valueOf(nPrintContent));
+                pos.POS_PrintPicture(this.ticketImg, nPrintWidth, 1, nCompressMethod);
+                if(!pos.GetIO().IsOpened())
+//                        break;
 
-                    if(1 >= 1)
-                    {
-                        pos.POS_FeedLine();
-                        pos.POS_S_Align(1);
-                        pos.POS_S_TextOut("REC" + String.format("%03d", i) + "\r\nCaysn Printer\r\n测试页\r\n\r\n", 0, 1, 1, 0, 0x100);
-                        pos.POS_S_TextOut("扫二维码下载苹果APP\r\n", 0, 0, 0, 0, 0x100);
-                        pos.POS_S_SetQRcode("https://appsto.re/cn/2KF_bb.i", 8, 0, 3);
-                        pos.POS_FeedLine();
-                        pos.POS_S_SetBarcode("20160618", 0, 72, 3, 60, 0, 2);
-                        pos.POS_FeedLine();
-
-                        //Bitmap t = Utilidades.toBitmap(getString());
-
-                        //pos.POS_PrintPicture(bm1, nPrintWidth, 1, nCompressMethod);
-
-                    }
-
-                    if(nPrintContent >= 2)
-                    {
-                        if(bm1 != null)
-                        {
-                            pos.POS_PrintPicture(bm1, nPrintWidth, 1, nCompressMethod);
-                        }
-                        if(bm2 != null)
-                        {
-                            pos.POS_PrintPicture(bm2, nPrintWidth, 1, nCompressMethod);
-                        }
-                    }
-
-                    if(nPrintContent >= 3)
-                    {
-                        if(bmBlackWhite != null)
-                        {
-                            pos.POS_PrintPicture(bmBlackWhite, nPrintWidth, 1, nCompressMethod);
-                        }
-                        if(bmIu != null)
-                        {
-                            pos.POS_PrintPicture(bmIu, nPrintWidth, 0, nCompressMethod);
-                        }
-                        if(bmYellowmen != null)
-                        {
-                            pos.POS_PrintPicture(bmYellowmen, nPrintWidth, 0, nCompressMethod);
-                        }
-                    }
-                }
+//                for(int i = 0; i < nCount; ++i)
+//                {
+//                    if(!pos.GetIO().IsOpened())
+//                        break;
+//
+//                    Log.d("nPrintWidth", String.valueOf(nPrintWidth));
+//                    Log.d("nPrintContent", String.valueOf(nPrintContent));
+//
+//                    if(1 >= 1)
+//                    {
+//                        pos.POS_FeedLine();
+//                        pos.POS_S_Align(1);
+//                        pos.POS_S_TextOut("REC" + String.format("%03d", i) + "\r\nCaysn Printer\r\n测试页\r\n\r\n", 0, 1, 1, 0, 0x100);
+//                        pos.POS_S_TextOut("扫二维码下载苹果APP\r\n", 0, 0, 0, 0, 0x100);
+//                        pos.POS_S_SetQRcode("https://appsto.re/cn/2KF_bb.i", 8, 0, 3);
+//                        pos.POS_FeedLine();
+//                        pos.POS_S_SetBarcode("20160618", 0, 72, 3, 60, 0, 2);
+//                        pos.POS_FeedLine();
+//
+//                        //Bitmap t = Utilidades.toBitmap(getString());
+//
+//                        //pos.POS_PrintPicture(bm1, nPrintWidth, 1, nCompressMethod);
+//
+//                    }
+//
+//                    if(nPrintContent >= 2)
+//                    {
+//                        if(bm1 != null)
+//                        {
+//                            pos.POS_PrintPicture(bm1, nPrintWidth, 1, nCompressMethod);
+//                        }
+//                        if(bm2 != null)
+//                        {
+//                            pos.POS_PrintPicture(bm2, nPrintWidth, 1, nCompressMethod);
+//                        }
+//                    }
+//
+//                    if(nPrintContent >= 3)
+//                    {
+//                        if(bmBlackWhite != null)
+//                        {
+//                            pos.POS_PrintPicture(bmBlackWhite, nPrintWidth, 1, nCompressMethod);
+//                        }
+//                        if(bmIu != null)
+//                        {
+//                            pos.POS_PrintPicture(bmIu, nPrintWidth, 0, nCompressMethod);
+//                        }
+//                        if(bmYellowmen != null)
+//                        {
+//                            pos.POS_PrintPicture(bmYellowmen, nPrintWidth, 0, nCompressMethod);
+//                        }
+//                    }
+//                }
 
                 if(bBeeper)
                     pos.POS_Beep(1, 5);
@@ -587,6 +601,7 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
                     btn.setEnabled(false);
                 }
                 Toast.makeText(mActivity, "Connected", Toast.LENGTH_SHORT).show();
+                Main2Activity.conectadoAImpresoraBluetooth = true;
                 if(AppStart.bAutoPrint)
                 {
                     btnPrint.performClick();
@@ -611,6 +626,7 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
                     Button btn = (Button)linearlayoutdevices.getChildAt(i);
                     btn.setEnabled(true);
                 }
+                Main2Activity.conectadoAImpresoraBluetooth = false;
                 Toast.makeText(mActivity, "Failed", Toast.LENGTH_SHORT).show();
             }
         });
@@ -627,6 +643,7 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
                 btnPrint.setEnabled(false);
                 btnSearch.setEnabled(true);
                 linearlayoutdevices.setEnabled(true);
+                Main2Activity.conectadoAImpresoraBluetooth = false;
                 for(int i = 0; i < linearlayoutdevices.getChildCount(); ++i)
                 {
                     Button btn = (Button)linearlayoutdevices.getChildAt(i);
@@ -639,9 +656,9 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
     /**
      * Leer imágenes de activos
      */
-    public Bitmap getImageFromAssetsFile(String fileName) {
+    public static Bitmap getImageFromAssetsFile(String fileName) {
         Bitmap image = null;
-        AssetManager am = getResources().getAssets();
+        AssetManager am = mActivity1.getResources().getAssets();
         try {
             InputStream is = am.open(fileName);
             image = BitmapFactory.decodeStream(is);
@@ -654,7 +671,7 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
 
     }
 
-    public Bitmap getTestImage1(int width, int height)
+    public static Bitmap getTestImage1(int width, int height)
     {
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
@@ -677,7 +694,7 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
         return bitmap;
     }
 
-    public Bitmap getTestImage2(int width, int height)
+    public static Bitmap getTestImage2(int width, int height)
     {
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);

@@ -59,6 +59,7 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
     private static DuplicarPrincipalInterface listener;
     public static ProgressBar progressBarToolbar;
     public static TextView_Icon txtBluetooth;
+    public static boolean conectadoAImpresoraBluetooth = false;
 
     private IntentFilter intentFilter = null;
     ExecutorService es = Executors.newScheduledThreadPool(30);

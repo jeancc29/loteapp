@@ -4,6 +4,7 @@ package com.example.jean2.creta;
 import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Environment;
@@ -52,6 +53,8 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.jar.JarException;
 
 
@@ -100,6 +103,8 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
     boolean estoyProbando = false;
 
     boolean jugada_monto_active = true;
+
+    ExecutorService es = Executors.newScheduledThreadPool(30);
 
     public PrincipalFragment() {
         // Required empty public constructor
@@ -793,7 +798,8 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                                // ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
                                 Toast.makeText(getContext(), response.getString("mensaje"), Toast.LENGTH_SHORT).show();
                                 if(ckbPrint.isChecked()){
-
+                                    Bitmap ticketBitmap = Utilidades.toBitmap(response.getString("img"));
+                                    es.submit(new BluetoothSearchDialog.TaskPrint(ticketBitmap));
                                 }
                                 else if(ckbSms.isChecked()){
                                     Toast.makeText(getContext(), "dentro ckbss", Toast.LENGTH_SHORT).show();
