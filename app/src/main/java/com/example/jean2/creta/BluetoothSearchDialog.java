@@ -83,6 +83,7 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
         mPos.Set(mBt);
         mBt.SetCallBack(this);
 
+
         builder.setView(view)
                 .setTitle("Duplicar ticket")
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -103,6 +104,7 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
 
 
         initBroadcast();
+        btnSearch.performClick();
         return builder.create();
     }
 
@@ -130,6 +132,8 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
         uninitBroadcast();
         //btnDisconnect.performClick();
     }
+
+
 
     public void onClick(View arg0) {
         // TODO Auto-generated method stub
@@ -245,6 +249,10 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
     private void uninitBroadcast() {
         if (broadcastReceiver != null)
             getActivity().unregisterReceiver(broadcastReceiver);
+    }
+
+    public static boolean isPrinterConnected(){
+        return mPos.GetIO().IsOpened();
     }
 
     private void makeTest(){
@@ -486,6 +494,15 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
                 Bitmap bmBlackWhite = getImageFromAssetsFile("blackwhite.png");
                 Bitmap bmIu = getImageFromAssetsFile("iu.jpeg");
                 Bitmap bmYellowmen = getImageFromAssetsFile("yellowmen.png");
+
+//                pos.POS_FeedLine();
+//                        pos.POS_S_Align(1);
+//                        pos.POS_S_TextOut("REC" + String.format("%03d", 12) + "\r\nCaysn Printer\r\n测试页\r\n\r\n", 0, 1, 1, 0, 0x100);
+//                        pos.POS_S_TextOut("扫二维码下载苹果APP\r\n", 0, 0, 0, 0, 0x100);
+//                        pos.POS_S_SetQRcode("https://appsto.re/cn/2KF_bb.i", 8, 0, 3);
+//                        pos.POS_FeedLine();
+//                        pos.POS_S_SetBarcode("20160618", 0, 72, 3, 60, 0, 2);
+//                        pos.POS_FeedLine();
 
                 pos.POS_PrintPicture(this.ticketImg, nPrintWidth, 1, nCompressMethod);
                 if(!pos.GetIO().IsOpened())

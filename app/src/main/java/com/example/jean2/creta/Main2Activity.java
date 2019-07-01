@@ -458,7 +458,7 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
         intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
         intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         registerReceiver(broadcastReceiver, intentFilter);
-        mostrarDispositivosBluetooth();
+
     }
 
     private void uninitBroadcast() {

@@ -9,6 +9,16 @@
     android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
     app:title="Loteria" >
 
+    <com.example.jean2.creta.TextView_Icon
+        android:id="@+id/txtBluetooth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/icon_bluetooth"
+        android:textSize="30dp"
+        android:textColor="#ffffff"
+        android:layout_marginRight="15dp"
+        android:layout_gravity="right"/>
+
     <ProgressBar
         android:id="@+id/toolbar_progress_bar"
         android:layout_width="wrap_content"
@@ -19,14 +29,6 @@
         android:visibility="gone"
         />
 
-    <com.example.jean2.creta.TextView_Icon
-        android:id="@+id/txtBluetooth"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/icon_bluetooth"
-        android:textSize="30dp"
-        android:textColor="@android:color/holo_red_dark"
-        android:layout_margin="3dp"
-        android:layout_gravity="right"/>
+
 
 </android.support.v7.widget.Toolbar>

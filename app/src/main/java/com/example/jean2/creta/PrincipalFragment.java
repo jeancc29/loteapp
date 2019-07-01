@@ -151,8 +151,37 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         txtDescuento = (TextView)view.findViewById(R.id.txtDescuento);
         ckbDescuento = (CheckBox_Icon)view.findViewById(R.id.ckbDescuento);
         ckbPrint = (CheckBox_Icon)view.findViewById(R.id.ckbPrint);
+        ckbPrint.setChecked(true);
         ckbSms = (CheckBox_Icon)view.findViewById(R.id.ckbSms);
         ckbWhatsapp = (CheckBox_Icon)view.findViewById(R.id.ckbWhatsapp);
+
+        ckbPrint.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if(b == true){
+                    ckbSms.setChecked(false);
+                    ckbWhatsapp.setChecked(false);
+                }
+            }
+        });
+        ckbSms.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if(b == true){
+                    ckbPrint.setChecked(false);
+                    ckbWhatsapp.setChecked(false);
+                }
+            }
+        });
+        ckbWhatsapp.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if(b == true){
+                    ckbSms.setChecked(false);
+                    ckbPrint.setChecked(false);
+                }
+            }
+        });
 
         txtBanca.setText(Utilidades.getBanca(getContext()));
         if(estoyProbando)
@@ -752,9 +781,17 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
     private void guardar(){
         String url = "http://loterias.ml/api/principal/guardar";
+
+
+        if(ckbPrint.isChecked()){
+            if(BluetoothSearchDialog.isPrinterConnected() == false){
+                Toast.makeText(mContext, "Debe conectarse a una impresora", Toast.LENGTH_SHORT).show();
+                Main2Activity.txtBluetooth.performClick();
+                return;
+            }
+        }
+
         Main2Activity.progressBarToolbar.setVisibility(View.VISIBLE);
-
-
         JSONObject jugada = new JSONObject();
         JSONObject datosObj = new JSONObject();
         int[] arregloLoterias = new int[1];
@@ -798,6 +835,9 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                                // ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
                                 Toast.makeText(getContext(), response.getString("mensaje"), Toast.LENGTH_SHORT).show();
                                 if(ckbPrint.isChecked()){
+//                                    if(BluetoothSearchDialog.isPrinterConnected() == false){
+//                                        Main2Activity.txtBluetooth.performClick();
+//                                    }
                                     Bitmap ticketBitmap = Utilidades.toBitmap(response.getString("img"));
                                     es.submit(new BluetoothSearchDialog.TaskPrint(ticketBitmap));
                                 }

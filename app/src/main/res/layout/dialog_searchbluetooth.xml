@@ -21,7 +21,9 @@
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/progressBarSearchStatus"
         android:layout_marginTop="10dp"
-        android:text="Conectar" />
+        android:text="Buscar"
+        android:background="@color/colorPrimary"
+        android:textColor="#ffffff"/>
 
     <ScrollView
         android:id="@+id/scrollView1"
@@ -46,7 +48,9 @@
         android:layout_above="@+id/buttonPrint"
         android:layout_alignParentLeft="true"
         android:layout_marginTop="10dp"
-        android:text="Disconnect" />
+        android:text="Disconnect"
+        android:background="#D1856D"
+        android:textColor="#ffffff"/>
 
     <Button
         android:id="@+id/buttonPrint"
@@ -55,6 +59,8 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_marginTop="10dp"
-        android:text="Print" />
+        android:text="Print"
+        android:visibility="invisible"
+        />
 
 </RelativeLayout>
