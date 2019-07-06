@@ -82,11 +82,18 @@ public class Utilidades {
         return Uri.parse(path);
     }
 
-    public static void sendSMS(Context context,  String base64Image, boolean sms){
+    public static String toSecuencia(String idTicket, String codigoBanca){
+        String pad = "000000000";
+        String ans = codigoBanca + "-"+ pad.substring(0, pad.length() - idTicket.length()) + idTicket;
+        return ans;
+    }
+
+    public static void sendSMS(Context context,  Bitmap base64Image, boolean sms){
         String pack = "com.whatsapp";
         String titleImage = "ticket";
-        Bitmap imageBitmap = toBitmap(base64Image);
-        Uri imageUri = toUri(context, imageBitmap, titleImage);
+//        Bitmap imageBitmap = toBitmap(base64Image);
+//        Uri imageUri = toUri(context, imageBitmap, titleImage);
+        Uri imageUri = toUri(context, base64Image, titleImage);
 
         if(sms){
             Intent mmsIntent = new Intent(Intent.ACTION_SEND);

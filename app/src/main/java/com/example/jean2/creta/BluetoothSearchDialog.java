@@ -31,6 +31,10 @@ import com.lvrenyang.io.BTPrinting;
 import com.lvrenyang.io.IOCallBack;
 import com.lvrenyang.io.Pos;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -77,7 +81,7 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
         btnDisconnect.setOnClickListener(this);
         btnPrint.setOnClickListener(this);
         btnSearch.setEnabled(true);
-        btnDisconnect.setEnabled(false);
+        btnDisconnect.setEnabled(true);
         btnPrint.setEnabled(false);
 
         mPos.Set(mBt);
@@ -168,8 +172,8 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
                 break;
 
             case R.id.buttonPrint:
-                btnPrint.setEnabled(false);
-                es.submit(new TaskPrint(mPos));
+                //btnPrint.setEnabled(false);
+                es.submit(new TaskPrint());
                 break;
         }
     }
@@ -450,16 +454,29 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
     {
         Pos pos = null;
         Bitmap ticketImg;
+        JSONObject response;
+        boolean original;
 
         public TaskPrint(Pos pos)
         {
             this.pos = pos;
+        }
+        public TaskPrint()
+        {
+            this.pos = mPos;
         }
 
         public TaskPrint(Bitmap ticketImg)
         {
             this.pos = mPos;
             this.ticketImg = ticketImg;
+        }
+
+        public TaskPrint(JSONObject response, boolean original)
+        {
+            this.pos = mPos;
+            this.response = response;
+            this.original = original;
         }
 
         @Override
@@ -504,9 +521,107 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
 //                        pos.POS_S_SetBarcode("20160618", 0, 72, 3, 60, 0, 2);
 //                        pos.POS_FeedLine();
 
-                pos.POS_PrintPicture(this.ticketImg, nPrintWidth, 1, nCompressMethod);
-                if(!pos.GetIO().IsOpened())
+                        pos.POS_FeedLine();
+//                        pos.POS_S_Align(1);
+//                        pos.POS_S_TextOut("BANCA 1\n", 0, 1, 1, 0, 0x00);
+//                        pos.POS_S_TextOut("** ORIGINAL **\n", 0, 1, 1, 0, 0x00);
+//                        pos.POS_S_TextOut("2019/07/05 4:42 PM\n", 0, 0, 1, 0, 0x00);
+//                        pos.POS_S_TextOut("Ticket: 000000050\n", 0, 0, 1, 0, 0x00);
+//                        pos.POS_S_TextOut("Fecha: 2019/07/05 4:42 PM\n", 0, 0, 1, 0, 0x00);
+//                        pos.POS_S_TextOut("1401831804\n", 1, 1, 1, 0, 0x00);
+//                        pos.POS_S_TextOut("---------------\n", 1, 1, 1, 0, 0x00);
+//                        pos.POS_S_TextOut("NACIONAL: 2\n", 1, 1, 1, 0, 0x00);
+//                        pos.POS_S_TextOut("---------------\n", 1, 1, 1, 0, 0x00);
+//                        pos.POS_FeedLine();
+//                        pos.POS_S_TextOut("JUGADA  MONTO  JUGADA  MONTO\n", 1, 0, 1, 0, 0x00);
+//                        pos.POS_S_TextOut("03-20   12.00 09-98-03 9.00", 1, 0, 1, 0, 0x00);
+//                        pos.POS_FeedLine();
+//                        pos.POS_FeedLine();
+                        //pos.POS_S_SetQRcode("https://appsto.re/cn/2KF_bb.i", 8, 0, 3);
+//                        pos.POS_FeedLine();
+
+
+
+                //pos.POS_PrintPicture(this.ticketImg, nPrintWidth, 1, nCompressMethod);
+                //if(!pos.GetIO().IsOpened())
 //                        break;
+
+                try {
+                    JSONObject venta = response.getJSONObject("venta");
+                    JSONArray jsonArrayLoterias = venta.getJSONArray("loterias");
+                    JSONArray jsonArrayJugadas = venta.getJSONArray("jugadas");
+
+                    if(jsonArrayLoterias.length() == 0)
+                        return false;
+                    if(jsonArrayJugadas.length() == 0)
+                        return false;
+
+
+                    pos.POS_S_Align(1);
+                    pos.POS_S_TextOut(venta.getJSONObject("banca").getString("descripcion")+"\n", 0, 1, 1, 0, 0x00);
+                    if(this.original)
+                        pos.POS_S_TextOut("** ORIGINAL **\n", 0, 1, 1, 0, 0x00);
+                    else
+                        pos.POS_S_TextOut("** COPIA **\n", 0, 1, 1, 0, 0x00);
+
+                    pos.POS_S_TextOut(venta.getString("fecha")+"\n", 0, 0, 1, 0, 0x00);
+                    pos.POS_S_TextOut("Ticket:"  +Utilidades.toSecuencia(venta.getString("idTicket"), venta.getString("codigo"))+ "\n", 0, 0, 1, 0, 0x00);
+                    pos.POS_S_TextOut("Fecha: " + venta.getString("fecha")+"\n", 0, 0, 1, 0, 0x00);
+                    pos.POS_S_TextOut(venta.getString("codigoBarra")+"\n", 1, 1, 1, 0, 0x00);
+                    for(int i=0; i < jsonArrayLoterias.length(); i++){
+                        if(!pos.GetIO().IsOpened())
+                            break;
+                        JSONObject loteria = jsonArrayLoterias.getJSONObject(i);
+                        boolean esPrimeraJugadaAInsertar = true;
+                        for (int contadorCicleJugadas =0; contadorCicleJugadas < jsonArrayJugadas.length(); contadorCicleJugadas++){
+                            if(!pos.GetIO().IsOpened())
+                                break;
+                            JSONObject jugada = jsonArrayJugadas.getJSONObject(contadorCicleJugadas);
+                            if(contadorCicleJugadas == 0){
+                                pos.POS_S_TextOut("---------------\n", 1, 1, 1, 0, 0x00);
+                                pos.POS_S_TextOut(loteria.getString("descripcion") + "\n", 1, 0, 1, 0, 0x00);
+                                pos.POS_S_TextOut("---------------\n", 1, 1, 1, 0, 0x00);
+                            }
+                            if(jugada.getString("idLoteria").equals(loteria.getString("id"))){
+                                pos.POS_S_Align(0);
+                                if(esPrimeraJugadaAInsertar){
+                                    pos.POS_S_TextOut("JUGADA  MONTO  JUGADA  MONTO\n", 1, 0, 1, 0, 0x00);
+                                    esPrimeraJugadaAInsertar = false;
+                                }
+                                if(((contadorCicleJugadas + 1) % 2) == 0){
+                                    Log.d("cjPar", String.valueOf(contadorCicleJugadas));
+                                    pos.POS_S_TextOut("               " + jugada.getString("jugada"), 1, 0, 1, 0, 0x00);
+                                    pos.POS_S_TextOut("                        " + jugada.getDouble("monto") + "\n", 1, 0, 1, 0, 0x00);
+                                }else{
+                                    String saltoLinea = "";
+                                    if((contadorCicleJugadas + 1) == jsonArrayJugadas.length())
+                                        saltoLinea = "\n";
+                                    pos.POS_S_TextOut(jugada.getString("jugada"), 0, 0, 1, 0, 0x00);
+                                    pos.POS_S_TextOut("        " + jugada.getDouble("monto") + saltoLinea, 0, 0, 1, 0, 0x00);
+                                }
+
+//                                pos.POS_S_TextOut("culo23", 0, 0, 1, 0, 0x00);
+                                //pos.POS_S_TextOut(" - total: " + getLoteriaTotal(loteria.getInt("id"), jsonArrayJugadas) + "-\n", 1, 0, 1, 0, 0x00);
+
+                            }
+                        }
+                        pos.POS_S_Align(1);
+                        if(jsonArrayLoterias.length() > 1)
+                            pos.POS_S_TextOut("\n total: " + getLoteriaTotal(loteria.getString("id"), jsonArrayJugadas) + "\n\n\n", 1, 0, 1, 0, 0x00);
+                    }
+
+                    if(venta.getInt("hayDescuento") == 1){
+                        pos.POS_S_TextOut("- subTotal: " + venta.getDouble("subTotal") + "-\n", 1, 0, 1, 0, 0x00);
+                        pos.POS_S_TextOut("- descuento: " + venta.getDouble("descuentoMonto") + "-\n", 1, 0, 1, 0, 0x00);
+                    }
+                    pos.POS_S_TextOut("\n - TOTAL: " + venta.getDouble("total") + "-\n", 1, 1, 1, 0, 0x00);
+
+
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+
+
 
 //                for(int i = 0; i < nCount; ++i)
 //                {
@@ -581,6 +696,23 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
             }
 
             return bPrintResult;
+        }
+
+        double getLoteriaTotal(String id, JSONArray jugadas){
+            double total = 0;
+            try {
+                for (int i =0; i < jugadas.length(); i++){
+                    JSONObject jugada = jugadas.getJSONObject(i);
+
+                    if(jugada.getString("idLoteria").equals(id)){
+                        total += jugada.getDouble("monto");
+                    }
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+
+            return total;
         }
     }
 

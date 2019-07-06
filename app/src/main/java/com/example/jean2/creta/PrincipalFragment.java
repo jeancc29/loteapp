@@ -5,6 +5,8 @@ import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Environment;
@@ -18,6 +20,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -97,6 +100,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
     private static CheckBox_Icon ckbWhatsapp;
     public static JSONArray jugadas = new JSONArray();
     public static Jugadas jugadasClase = new Jugadas();
+    public static WebView webViewImg;
 
 
     String monto;
@@ -778,6 +782,32 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         calcularTotal();
     }
 
+    private static Bitmap screenshot(WebView webView, String img) {
+//        webView.loadUrl(img);
+        webView.setVisibility(View.VISIBLE);
+        webView.loadData(img, "text/html", "UTF-8");
+        webView.measure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED),View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+        webView.layout(0, 0, webView.getMeasuredWidth(),
+                webView.getMeasuredHeight());
+        webView.setDrawingCacheEnabled(true);
+        webView.buildDrawingCache();
+
+        webView.getSettings().setLoadWithOverviewMode(true);
+        webView.getSettings().setUseWideViewPort(true);
+
+        Bitmap bitmap = Bitmap.createBitmap(webView.getMeasuredWidth(),
+                webView.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+
+        webView.setVisibility(View.INVISIBLE);
+
+        Canvas canvas = new Canvas(bitmap);
+        Paint paint = new Paint();
+        int iHeight = bitmap.getHeight();
+        canvas.drawBitmap(bitmap, 0, iHeight, paint);
+        webView.draw(canvas);
+        return bitmap;
+    }
+
 
     private void guardar(){
         String url = "http://loterias.ml/api/principal/guardar";
@@ -832,21 +862,28 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                                 jsonParse();
                                 borderChange(true);
                                 limpiar();
+                               // Bitmap img = screenshot(webViewImg, response.getString("img"));
+                                //Log.d("webImg", String.valueOf(screenshot(webViewImg, response.getString("img"))));
                                // ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
                                 Toast.makeText(getContext(), response.getString("mensaje"), Toast.LENGTH_SHORT).show();
                                 if(ckbPrint.isChecked()){
 //                                    if(BluetoothSearchDialog.isPrinterConnected() == false){
 //                                        Main2Activity.txtBluetooth.performClick();
 //                                    }
-                                    Bitmap ticketBitmap = Utilidades.toBitmap(response.getString("img"));
-                                    es.submit(new BluetoothSearchDialog.TaskPrint(ticketBitmap));
+
+//                                    Bitmap ticketBitmap = Utilidades.toBitmap(response.getString("img"));
+                                    es.submit(new BluetoothSearchDialog.TaskPrint(response, true));
+
+//                                    JSONObject venta = response.getJSONObject("venta");
+//                                    Log.d("printVenta", venta.getJSONArray("jugadas").toString());
                                 }
                                 else if(ckbSms.isChecked()){
                                     Toast.makeText(getContext(), "dentro ckbss", Toast.LENGTH_SHORT).show();
-                                    Utilidades.sendSMS(getContext(), response.getString("img"), true);
+//                                    Utilidades.sendSMS(getContext(), response.getString("img"), true);
                                 }
                                 else if(ckbWhatsapp.isChecked()){
-                                    Utilidades.sendSMS(getContext(), response.getString("img"), false);
+
+                                    //Utilidades.sendSMS(getContext(), response.getString("img"), false);
                                 }
 
                             }
