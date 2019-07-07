@@ -615,7 +615,7 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
                         pos.POS_S_TextOut("- descuento: " + venta.getDouble("descuentoMonto") + "-\n", 1, 0, 1, 0, 0x00);
                     }
                     pos.POS_S_TextOut("\n - TOTAL: " + venta.getDouble("total") + "-\n", 1, 1, 1, 0, 0x00);
-
+                    pos.POS_S_SetQRcode(venta.getString("codigoQr"), 8, 0, 3);
 
                 }catch (Exception e){
                     e.printStackTrace();

@@ -1,5 +1,6 @@
 package com.example.jean2.creta;
 
+import android.app.Activity;
 import android.app.FragmentTransaction;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -9,6 +10,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
@@ -17,11 +19,13 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -55,10 +59,11 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
     private Toolbar toolbar;
     private ViewPager viewPager;
     private ViewPagerAdapter adapter;
-    private TabLayout tabLayout;
+    private static TabLayout tabLayout;
     private static DuplicarPrincipalInterface listener;
     public static ProgressBar progressBarToolbar;
     public static TextView_Icon txtBluetooth;
+    public static TextView_Icon txtCamara;
     public static boolean conectadoAImpresoraBluetooth = false;
 
     private IntentFilter intentFilter = null;
@@ -88,6 +93,9 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
     boolean jugada_monto_active = true;
     PrincipalFragment principalFragment;
 
+    public static Activity mActivity;
+    public static Context mContext;
+
     String monto;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,18 +108,43 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
        // mQueue = Volley.newRequestQueue(this);
 //        listener = (DuplicarPrincipalInterface) this;
 
+        mActivity = this;
+        mContext = Main2Activity.this;
         toolbar = findViewById(R.id.toolBar);
         setSupportActionBar(toolbar);
         //toolbar.setTitle("");
         //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         progressBarToolbar = (ProgressBar)findViewById(R.id.toolbar_progress_bar);
         txtBluetooth = (TextView_Icon)findViewById(R.id.txtBluetooth);
+        txtCamara = (TextView_Icon)findViewById(R.id.txtCamara);
         txtBluetooth.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 BluetoothSearchDialog duplicarDialog = new BluetoothSearchDialog();
                 duplicarDialog.show(Main2Activity.this.getSupportFragmentManager(), "Duplicar dialog");
 //                mostrarDispositivosBluetooth();
+            }
+        });
+        txtCamara.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                 PopupMenu popupMenu = new PopupMenu(Main2Activity.this, txtCamara);
+                popupMenu.getMenuInflater().inflate(R.menu.popup_duplicar_pagar_menu, popupMenu.getMenu());
+
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        Toast.makeText(Main2Activity.this, menuItem.getTitle(), Toast.LENGTH_SHORT).show();
+
+                        if(menuItem.getTitle().equals("Duplicar")){
+                            Intent intent = new Intent(Main2Activity.this, ScanQRActivity.class);
+                            startActivity(intent);
+                        }
+                        return true;
+                    }
+                });
+                popupMenu.show();
             }
         });
 
@@ -177,7 +210,7 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
 
     @Override
     public void setCodigoBarra(String codigoBarra) {
-        duplicarTicket(codigoBarra);
+        duplicarTicket(codigoBarra, false);
     }
 
     @Override
@@ -185,17 +218,23 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
         pagarTicket(codigoBarra);
     }
 
-    private void duplicarTicket(String codigoBarra){
+    public static void duplicarTicket(String codigoBarraQR, boolean esQR){
         String url = "http://loterias.ml/api/principal/duplicar";
 
         JSONObject loteria = new JSONObject();
         JSONObject datosObj = new JSONObject();
 
         try {
-            loteria.put("codigoBarra", codigoBarra);
+            if(esQR){
+                loteria.put("codigoBarra", "");
+                loteria.put("codigoQr", codigoBarraQR);
+            }else{
+                loteria.put("codigoBarra", codigoBarraQR);
+                loteria.put("codigoQr", "");
+            }
             loteria.put("razon", "Cancelado desde movil");
-            loteria.put("idUsuario", Utilidades.getIdUsuario(Main2Activity.this));
-            loteria.put("idBanca", Utilidades.getIdBanca(Main2Activity.this));
+            loteria.put("idUsuario", Utilidades.getIdUsuario(mActivity));
+            loteria.put("idBanca", Utilidades.getIdBanca(mActivity));
 
             datosObj.put("datos", loteria);
 
@@ -224,18 +263,18 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
 //                                        .getFragments()
 //                                        .get(1).getClass().getSimpleName().toString());
                                 PrincipalFragment favoritesFragment;
-                                if(getSupportFragmentManager().getFragments().get(0).getClass().getSimpleName().toString().equals("PrincipalFragment"))
-                                     favoritesFragment = (PrincipalFragment) getSupportFragmentManager().getFragments().get(0);
-                                else if(getSupportFragmentManager().getFragments().get(1).getClass().getSimpleName().toString().equals("PrincipalFragment"))
-                                    favoritesFragment = (PrincipalFragment) getSupportFragmentManager().getFragments().get(1);
+                                if(((FragmentActivity)mActivity).getSupportFragmentManager().getFragments().get(0).getClass().getSimpleName().toString().equals("PrincipalFragment"))
+                                     favoritesFragment = (PrincipalFragment) ((FragmentActivity)mActivity).getSupportFragmentManager().getFragments().get(0);
+                                else if(((FragmentActivity)mActivity).getSupportFragmentManager().getFragments().get(1).getClass().getSimpleName().toString().equals("PrincipalFragment"))
+                                    favoritesFragment = (PrincipalFragment) ((FragmentActivity)mActivity).getSupportFragmentManager().getFragments().get(1);
                                 else
-                                    favoritesFragment = (PrincipalFragment) getSupportFragmentManager().getFragments().get(2);
+                                    favoritesFragment = (PrincipalFragment) ((FragmentActivity)mActivity).getSupportFragmentManager().getFragments().get(2);
 
                                 favoritesFragment.duplicar(jsonArray, jsonArrayLoterias);
                                 tabLayout.getTabAt(1).select();
                             }
                             else
-                                Toast.makeText(Main2Activity.this, response.getString("mensaje") + " e: " + errores, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(mContext, response.getString("mensaje") + " e: " + errores, Toast.LENGTH_SHORT).show();
 
                         } catch (JSONException e) {
                             Log.d("Error: ", e.toString());
@@ -250,19 +289,19 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
                 Log.d("responseerror: ", String.valueOf(error));
                 error.printStackTrace();
                 if(error instanceof NetworkError){
-                    Toast.makeText(Main2Activity.this, "Verifique coneccion e intente de nuevo", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, "Verifique coneccion e intente de nuevo", Toast.LENGTH_SHORT).show();
                 }
                 else if(error instanceof ServerError){
-                    Toast.makeText(Main2Activity.this, "No se puede encontrar el servidor", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, "No se puede encontrar el servidor", Toast.LENGTH_SHORT).show();
                 }
                 else if(error instanceof TimeoutError){
-                    Toast.makeText(Main2Activity.this, "Conexion lenta, verifique conexion e intente de nuevo", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, "Conexion lenta, verifique conexion e intente de nuevo", Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
         //mQueue.add(request);
-        MySingleton.getInstance(Main2Activity.this).addToRequestQueue(request);
+        MySingleton.getInstance(mContext).addToRequestQueue(request);
     }
 
 

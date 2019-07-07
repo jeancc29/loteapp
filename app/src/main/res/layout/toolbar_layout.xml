@@ -17,7 +17,22 @@
         android:textSize="30dp"
         android:textColor="#ffffff"
         android:layout_marginRight="15dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
         android:layout_gravity="right"/>
+
+    <com.example.jean2.creta.TextView_Icon
+        android:id="@+id/txtCamara"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/icon_camara"
+        android:textSize="30dp"
+        android:textColor="#ffffff"
+        android:layout_marginRight="15dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:layout_gravity="right"/>
+
 
     <ProgressBar
         android:id="@+id/toolbar_progress_bar"
@@ -25,6 +40,8 @@
         android:layout_height="wrap_content"
         android:indeterminateTint="#ffffff"
         android:indeterminateTintMode="src_in"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
         android:layout_gravity="right"
         android:visibility="gone"
         />

@@ -27,6 +27,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <supports-screens
         android:anyDensity="true"
@@ -45,7 +46,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".WebViewTicket"></activity>
+        <activity android:name=".ScanQRActivity"></activity>
+        <activity android:name=".WebViewTicket" />
         <activity
             android:name=".VentasActivity"
             android:parentActivityName=".Main2Activity" />

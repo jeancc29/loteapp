@@ -41,6 +41,7 @@
     <string name="icon_sms">&#xf3b2;</string>
     <string name="icon_delete">&#xf37f;</string>
     <string name="icon_bluetooth">&#xf116;</string>
+    <string name="icon_camara">&#xf2d3;</string>
 
 
     <string-array name="tickets">
