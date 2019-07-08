@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
@@ -42,6 +43,8 @@ import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.izettle.html2bitmap.Html2Bitmap;
+import com.izettle.html2bitmap.content.WebViewContent;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -59,6 +62,11 @@ import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.jar.JarException;
+
+import androidmads.library.qrgenearator.QRGContents;
+import androidmads.library.qrgenearator.QRGEncoder;
+
+import static com.example.jean2.creta.Utilidades.combinarBitmap;
 
 
 /**
@@ -852,7 +860,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, datosObj,
                 new Response.Listener<JSONObject>() {
                     @Override
-                    public void onResponse(JSONObject response) {
+                    public void onResponse(final JSONObject response) {
 
                         try {
                             Log.d("Error: ", response.toString());
@@ -878,11 +886,91 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 //                                    Log.d("printVenta", venta.getJSONArray("jugadas").toString());
                                 }
                                 else if(ckbSms.isChecked()){
-                                    Toast.makeText(getContext(), "dentro ckbss", Toast.LENGTH_SHORT).show();
-//                                    Utilidades.sendSMS(getContext(), response.getString("img"), true);
+                                    new AsyncTask<Void, Void, Bitmap>() {
+                                        @Override
+                                        protected Bitmap doInBackground(Void... voids) {
+                                            Bitmap bitmap;
+                                            try {
+                                                bitmap = new Html2Bitmap.Builder().setContext(mContext).setContent(WebViewContent.html(response.getString("img"))).setBitmapWidth(400).build().getBitmap();
+                                            }catch (Exception e){
+                                                e.printStackTrace();
+                                                Log.v("ErrorHtmlWsapp", e.toString());
+                                                bitmap = null;
+                                            }
+
+                                            return bitmap;
+
+                                        }
+
+                                        @Override
+                                        protected void onPostExecute(Bitmap bitmap) {
+                                            if (bitmap != null) {
+                                                String codigoQr;
+                                                try{
+                                                    JSONObject venta = response.getJSONObject("venta");
+                                                    codigoQr = venta.getString("codigoQr");
+                                                }catch (Exception e){
+                                                    e.printStackTrace();
+                                                    Log.v("ErrorWhatsappImg", e.toString());
+                                                    codigoQr = "";
+                                                }
+                                                QRGEncoder qrgEncoder = new QRGEncoder(codigoQr, null, QRGContents.Type.TEXT, 150);
+                                                try {
+                                                    Bitmap bitmapQR = qrgEncoder.encodeAsBitmap();
+                                                    bitmapQR = combinarBitmap(bitmap, bitmapQR);
+                                                    Utilidades.sendSMS(getContext(), bitmapQR, true);
+                                                }catch (Exception e){
+                                                    e.printStackTrace();
+                                                    Log.v("ErrorQr", e.toString());
+                                                }
+
+                                            }
+                                        }
+                                    }.execute();
                                 }
                                 else if(ckbWhatsapp.isChecked()){
 
+                                    new AsyncTask<Void, Void, Bitmap>() {
+                                        @Override
+                                        protected Bitmap doInBackground(Void... voids) {
+                                            Bitmap bitmap;
+                                            try {
+                                                bitmap = new Html2Bitmap.Builder().setContext(mContext).setContent(WebViewContent.html(response.getString("img"))).setBitmapWidth(400).build().getBitmap();
+                                            }catch (Exception e){
+                                                e.printStackTrace();
+                                                Log.v("ErrorHtmlWsapp", e.toString());
+                                                bitmap = null;
+                                            }
+
+                                            return bitmap;
+
+                                        }
+
+                                        @Override
+                                        protected void onPostExecute(Bitmap bitmap) {
+                                            if (bitmap != null) {
+                                                String codigoQr;
+                                                try{
+                                                    JSONObject venta = response.getJSONObject("venta");
+                                                    codigoQr = venta.getString("codigoQr");
+                                                }catch (Exception e){
+                                                    e.printStackTrace();
+                                                    Log.v("ErrorWhatsappImg", e.toString());
+                                                    codigoQr = "";
+                                                }
+                                                QRGEncoder qrgEncoder = new QRGEncoder(codigoQr, null, QRGContents.Type.TEXT, 150);
+                                                try {
+                                                    Bitmap bitmapQR = qrgEncoder.encodeAsBitmap();
+                                                    bitmapQR = combinarBitmap(bitmap, bitmapQR);
+                                                    Utilidades.sendSMS(getContext(), bitmapQR, false);
+                                                }catch (Exception e){
+                                                    e.printStackTrace();
+                                                    Log.v("ErrorQr", e.toString());
+                                                }
+
+                                            }
+                                        }
+                                    }.execute();
                                     //Utilidades.sendSMS(getContext(), response.getString("img"), false);
                                 }
 

@@ -33,4 +33,6 @@ dependencies {
     implementation 'com.itextpdf:itextg:5.5.10'
     implementation 'com.android.volley:volley:1.1.1'
     implementation 'me.dm7.barcodescanner:zxing:1.9'
+    implementation 'com.izettle:html2bitmap:1.9'
+    implementation 'androidmads.library.qrgenearator:QRGenearator:1.0.3'
 }

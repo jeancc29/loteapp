@@ -138,7 +138,15 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
                         Toast.makeText(Main2Activity.this, menuItem.getTitle(), Toast.LENGTH_SHORT).show();
 
                         if(menuItem.getTitle().equals("Duplicar")){
+
                             Intent intent = new Intent(Main2Activity.this, ScanQRActivity.class);
+                            intent.putExtra("esDuplicar", true);
+                            startActivity(intent);
+                        }
+                        if(menuItem.getTitle().equals("Pagar")){
+
+                            Intent intent = new Intent(Main2Activity.this, ScanQRActivity.class);
+                            intent.putExtra("esDuplicar", false);
                             startActivity(intent);
                         }
                         return true;
@@ -215,7 +223,7 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
 
     @Override
     public void setCodigoBarraPagar(String codigoBarra) {
-        pagarTicket(codigoBarra);
+        pagarTicket(codigoBarra, false);
     }
 
     public static void duplicarTicket(String codigoBarraQR, boolean esQR){
@@ -306,19 +314,27 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
 
 
 
-    private void pagarTicket(String codigoBarra){
+    public static void pagarTicket(String codigoBarraQR, boolean esQR){
         String url = "http://loterias.ml/api/principal/pagar";
 
         JSONObject loteria = new JSONObject();
         JSONObject datosObj = new JSONObject();
 
         try {
-            loteria.put("codigoBarra", codigoBarra);
+            if(esQR){
+                loteria.put("codigoBarra", "");
+                loteria.put("codigoQr", codigoBarraQR);
+            }else{
+                loteria.put("codigoBarra", codigoBarraQR);
+                loteria.put("codigoQr", "");
+            }
             loteria.put("razon", "Cancelado desde movil");
-            loteria.put("idUsuario", Utilidades.getIdUsuario(Main2Activity.this));
-            loteria.put("idBanca", Utilidades.getIdBanca(Main2Activity.this));
+            loteria.put("idUsuario", Utilidades.getIdUsuario(mActivity));
+            loteria.put("idBanca", Utilidades.getIdBanca(mActivity));
 
             datosObj.put("datos", loteria);
+
+
 
         } catch (JSONException e) {
             // TODO Auto-generated catch block
@@ -334,10 +350,10 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
                         try {
                             String errores = response.getString("errores");
                             if(errores.equals("0")){
-                                Toast.makeText(Main2Activity.this, response.getString("mensaje") + " e: " + errores, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(mActivity, response.getString("mensaje") + " e: " + errores, Toast.LENGTH_SHORT).show();
                             }
                             else
-                                Toast.makeText(Main2Activity.this, response.getString("mensaje") + " e: " + errores, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(mActivity, response.getString("mensaje") + " e: " + errores, Toast.LENGTH_SHORT).show();
 
                         } catch (JSONException e) {
                             Log.d("Error: ", e.toString());
@@ -352,19 +368,19 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
                 Log.d("responseerror: ", String.valueOf(error));
                 error.printStackTrace();
                 if(error instanceof NetworkError){
-                    Toast.makeText(Main2Activity.this, "Verifique coneccion e intente de nuevo", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mActivity, "Verifique coneccion e intente de nuevo", Toast.LENGTH_SHORT).show();
                 }
                 else if(error instanceof ServerError){
-                    Toast.makeText(Main2Activity.this, "No se puede encontrar el servidor", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mActivity, "No se puede encontrar el servidor", Toast.LENGTH_SHORT).show();
                 }
                 else if(error instanceof TimeoutError){
-                    Toast.makeText(Main2Activity.this, "Conexion lenta, verifique conexion e intente de nuevo", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mActivity, "Conexion lenta, verifique conexion e intente de nuevo", Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
 //        mQueue.add(request);
-        MySingleton.getInstance(Main2Activity.this).addToRequestQueue(request);
+        MySingleton.getInstance(mActivity).addToRequestQueue(request);
     }
 
     //Para poder llamar al metodo escribir desde xml que esta en el fragment

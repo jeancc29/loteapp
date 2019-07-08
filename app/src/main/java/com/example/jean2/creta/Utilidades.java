@@ -7,6 +7,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Base64;
@@ -80,6 +81,14 @@ public class Utilidades {
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
         String path = MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, "Title", null);
         return Uri.parse(path);
+    }
+
+    public static Bitmap combinarBitmap(Bitmap bitmap1, Bitmap bitmap2){
+        Bitmap bmOverlay = Bitmap.createBitmap(bitmap1.getWidth(), bitmap1.getHeight(), bitmap1.getConfig());
+        Canvas canvas = new Canvas(bmOverlay);
+        canvas.drawBitmap(bitmap1, 0f, 0f, null);
+        canvas.drawBitmap(bitmap2, 125f, bitmap1.getHeight() - 150, null);
+        return bmOverlay;
     }
 
     public static String toSecuencia(String idTicket, String codigoBanca){

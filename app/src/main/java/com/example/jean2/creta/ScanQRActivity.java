@@ -10,11 +10,13 @@ import me.dm7.barcodescanner.zxing.ZXingScannerView;
 public class ScanQRActivity extends AppCompatActivity implements ZXingScannerView.ResultHandler{
 
     private ZXingScannerView mScannerView;
+    boolean esDuplicar = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 //        setContentView(R.layout.activity_scan_qr);
+        esDuplicar = getIntent().getExtras().getBoolean("esDuplicar");
         mScannerView = new ZXingScannerView(this);   // Programmatically initialize the scanner view
         setContentView(mScannerView);                // Set the scanner view as the content view
     }
@@ -38,7 +40,10 @@ public class ScanQRActivity extends AppCompatActivity implements ZXingScannerVie
         // Log.v("tag", rawResult.getText()); // Prints scan results
         // Log.v("tag", rawResult.getBarcodeFormat().toString()); // Prints the scan format (qrcode, pdf417 etc.)
 
-        Main2Activity.duplicarTicket(rawResult.getText(), true);
+        if(esDuplicar)
+            Main2Activity.duplicarTicket(rawResult.getText(), true);
+        else
+            Main2Activity.pagarTicket(rawResult.getText(), true);
         onBackPressed();
 
         // If you would like to resume scanning, call this method below:
