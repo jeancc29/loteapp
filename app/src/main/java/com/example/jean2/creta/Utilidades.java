@@ -26,6 +26,8 @@ public class Utilidades {
         editor.putBoolean("recordar", recordar);
         try {
             editor.putInt("idUsuario", jsonObjectUsuario.getInt("idUsuario"));
+            editor.putString("usuario", jsonObjectUsuario.getString("usuario"));
+            editor.putString("password", jsonObjectUsuario.getString("password"));
             editor.putString("banca", jsonObjectUsuario.getString("banca"));
             editor.putInt("idBanca", jsonObjectUsuario.getInt("idBanca"));
         }catch (Exception e){
@@ -56,6 +58,18 @@ public class Utilidades {
         SharedPreferences preferences = context.getSharedPreferences("usuario", Context.MODE_PRIVATE);
 
         return preferences.getInt("idUsuario", 0);
+    }
+
+    public static String getUsuario(Context context){
+        SharedPreferences preferences = context.getSharedPreferences("usuario", Context.MODE_PRIVATE);
+
+        return preferences.getString("usuario", "");
+    }
+
+    public static String getPassword(Context context){
+        SharedPreferences preferences = context.getSharedPreferences("usuario", Context.MODE_PRIVATE);
+
+        return preferences.getString("password", "");
     }
 
     public static int getIdBanca(Context context){

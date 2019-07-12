@@ -611,14 +611,22 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
                     }
 
                     if(venta.getInt("hayDescuento") == 1){
-                        pos.POS_S_TextOut("- subTotal: " + venta.getDouble("subTotal") + "-\n", 1, 0, 1, 0, 0x00);
-                        pos.POS_S_TextOut("- descuento: " + venta.getDouble("descuentoMonto") + "-\n", 1, 0, 1, 0, 0x00);
+                        pos.POS_S_TextOut("subTotal: " + venta.getDouble("subTotal") + "\n", 1, 0, 1, 0, 0x00);
+                        pos.POS_S_TextOut("descuento: " + venta.getDouble("descuentoMonto") + "\n", 1, 0, 1, 0, 0x00);
                     }
-                    pos.POS_S_TextOut("\n - TOTAL: " + venta.getDouble("total") + " -\n", 1, 0, 1, 0, 0x00);
+                    pos.POS_S_TextOut("- TOTAL: " + venta.getDouble("total") + " -\n", 1, 0, 1, 0, 0x00);
+
+                    if(!venta.getJSONObject("banca").getString("piepagina1").equals("null"))
+                        pos.POS_S_TextOut(venta.getJSONObject("banca").getString("piepagina1") + "\n", 1, 0, 1, 0, 0x00);
+                    if(!venta.getJSONObject("banca").getString("piepagina2").equals("null"))
+                        pos.POS_S_TextOut(venta.getJSONObject("banca").getString("piepagina2") + "\n", 1, 0, 1, 0, 0x00);
+                    if(!venta.getJSONObject("banca").getString("piepagina3").equals("null"))
+                        pos.POS_S_TextOut(venta.getJSONObject("banca").getString("piepagina3") + "\n", 1, 0, 1, 0, 0x00);
+                    if(!venta.getJSONObject("banca").getString("piepagina4").equals("null"))
+                        pos.POS_S_TextOut(venta.getJSONObject("banca").getString("piepagina4") + "\n", 1, 0, 1, 0, 0x00);
                     pos.POS_S_SetQRcode(venta.getString("codigoQr"), 8, 0, 3);
-                    pos.POS_FeedLine();
-                    pos.POS_FeedLine();
-                    pos.POS_FeedLine();
+                    pos.POS_S_TextOut("\n\n", 1, 0, 1, 0, 0x00);
+
 
                 }catch (Exception e){
                     e.printStackTrace();

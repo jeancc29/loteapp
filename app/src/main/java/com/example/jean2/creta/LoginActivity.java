@@ -104,6 +104,8 @@ public class LoginActivity extends AppCompatActivity {
                                 //creamos un json usuario
                                 JSONObject usuario = new JSONObject();
                                 usuario.put("idUsuario", response.getInt("idUsuario"));
+                                usuario.put("usuario", txtUsuario.getText());
+                                usuario.put("password", txtPassword.getText());
                                 usuario.put("banca", response.getString("banca"));
                                 usuario.put("idBanca", response.getString("idBanca"));
                                 Utilidades.guardarUsuario(LoginActivity.this, checkBoxRecordar.isChecked(), usuario);
@@ -111,6 +113,7 @@ public class LoginActivity extends AppCompatActivity {
                                 Intent intent = new Intent(LoginActivity.this, Main2Activity.class);
                                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                 startActivity(intent);
+                                finish();
                             }
                             else
                                 Toast.makeText(LoginActivity.this, response.getString("mensaje") + " e: " + errores, Toast.LENGTH_SHORT).show();

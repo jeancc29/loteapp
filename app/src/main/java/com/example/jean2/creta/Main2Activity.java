@@ -101,7 +101,7 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
-        initBroadcast();
+
 
         principalFragment = new PrincipalFragment();
 
@@ -439,87 +439,87 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
         mDialog.show();
     }
 
-
-    private void initBroadcast() {
-        Log.d("initBroad", "heyy");
-        broadcastReceiver = new BroadcastReceiver() {
-
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                // TODO Auto-generated method stub
-                String action = intent.getAction();
-                BluetoothDevice device = intent
-                        .getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-
-                if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                    if (device == null)
-                        return;
-                    final String address = device.getAddress();
-                    String name = device.getName();
-                    if (name == null)
-                        name = "BT";
-                    else if (name.equals(address))
-                        name = "BT";
-                    Button button = new Button(context);
-                    button.setText(name + ": " + address);
-
-                    String nombre = name + ": " + address;
-
-//                    for(int i = 0; i < linearlayoutdevices.getChildCount(); ++i)
-//                    {
-//                        Button btn = (Button)linearlayoutdevices.getChildAt(i);
-//                        if(btn.getText().equals(button.getText()))
-//                        {
-//                            return;
+//
+//    private void initBroadcast() {
+//        Log.d("initBroad", "heyy");
+//        broadcastReceiver = new BroadcastReceiver() {
+//
+//            @Override
+//            public void onReceive(Context context, Intent intent) {
+//                // TODO Auto-generated method stub
+//                String action = intent.getAction();
+//                BluetoothDevice device = intent
+//                        .getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+//
+//                if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+//                    if (device == null)
+//                        return;
+//                    final String address = device.getAddress();
+//                    String name = device.getName();
+//                    if (name == null)
+//                        name = "BT";
+//                    else if (name.equals(address))
+//                        name = "BT";
+//                    Button button = new Button(context);
+//                    button.setText(name + ": " + address);
+//
+//                    String nombre = name + ": " + address;
+//
+////                    for(int i = 0; i < linearlayoutdevices.getChildCount(); ++i)
+////                    {
+////                        Button btn = (Button)linearlayoutdevices.getChildAt(i);
+////                        if(btn.getText().equals(button.getText()))
+////                        {
+////                            return;
+////                        }
+////                    }
+//
+//                    Log.d("initBroad", nombre);
+//                    button.setGravity(android.view.Gravity.CENTER_VERTICAL
+//                            | Gravity.LEFT);
+//                    button.setOnClickListener(new View.OnClickListener() {
+//
+//                        public void onClick(View arg0) {
+//                            // TODO Auto-generated method stub
+//                            Toast.makeText(Main2Activity.this, "Connecting...", Toast.LENGTH_SHORT).show();
+//
+//                            linearlayoutdevices.setEnabled(false);
+//                            for(int i = 0; i < linearlayoutdevices.getChildCount(); ++i)
+//                            {
+//                                Button btn = (Button)linearlayoutdevices.getChildAt(i);
+//                                btn.setEnabled(false);
+//                            }
+//
+//                            es.submit(new Main2Activity.TaskOpen(mBt,address, Main2Activity.this));
+//                            //es.submit(new TaskTest(mPos, mBt, address, mActivity));
 //                        }
-//                    }
+//                    });
+//                    button.getBackground().setAlpha(100);
+//                    dispostivosLista.add(nombre);
+//                    //linearlayoutdevices.addView(button);
+//                } else if (BluetoothAdapter.ACTION_DISCOVERY_STARTED
+//                        .equals(action)) {
+//                   // progressBarSearchStatus.setIndeterminate(true);
+//                } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED
+//                        .equals(action)) {
+//                    //progressBarSearchStatus.setIndeterminate(false);
+//                }
+//
+//            }
+//
+//        };
+//        intentFilter = new IntentFilter();
+//        intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
+//        intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
+//        intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+//        registerReceiver(broadcastReceiver, intentFilter);
+//
+//    }
 
-                    Log.d("initBroad", nombre);
-                    button.setGravity(android.view.Gravity.CENTER_VERTICAL
-                            | Gravity.LEFT);
-                    button.setOnClickListener(new View.OnClickListener() {
-
-                        public void onClick(View arg0) {
-                            // TODO Auto-generated method stub
-                            Toast.makeText(Main2Activity.this, "Connecting...", Toast.LENGTH_SHORT).show();
-
-                            linearlayoutdevices.setEnabled(false);
-                            for(int i = 0; i < linearlayoutdevices.getChildCount(); ++i)
-                            {
-                                Button btn = (Button)linearlayoutdevices.getChildAt(i);
-                                btn.setEnabled(false);
-                            }
-
-                            es.submit(new Main2Activity.TaskOpen(mBt,address, Main2Activity.this));
-                            //es.submit(new TaskTest(mPos, mBt, address, mActivity));
-                        }
-                    });
-                    button.getBackground().setAlpha(100);
-                    dispostivosLista.add(nombre);
-                    //linearlayoutdevices.addView(button);
-                } else if (BluetoothAdapter.ACTION_DISCOVERY_STARTED
-                        .equals(action)) {
-                   // progressBarSearchStatus.setIndeterminate(true);
-                } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED
-                        .equals(action)) {
-                    //progressBarSearchStatus.setIndeterminate(false);
-                }
-
-            }
-
-        };
-        intentFilter = new IntentFilter();
-        intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
-        intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
-        intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-        registerReceiver(broadcastReceiver, intentFilter);
-
-    }
-
-    private void uninitBroadcast() {
-        if (broadcastReceiver != null)
-            unregisterReceiver(broadcastReceiver);
-    }
+//    private void uninitBroadcast() {
+//        if (broadcastReceiver != null)
+//            unregisterReceiver(broadcastReceiver);
+//    }
 
     @Override
     public void OnOpen() {
