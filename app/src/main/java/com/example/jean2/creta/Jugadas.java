@@ -113,25 +113,8 @@ public class Jugadas {
         boolean correcta = true;
         if(jugada.length() > 1 && jugada.length() <= 6){
 
-            if(jugada.length() == 3) {
-                //Si la jugada tiene 3 digitos y el ultimo digito
-                if(jugada.indexOf('.') != -1){
-                    jugada = jugada.substring(0, jugada.indexOf('.') - 1);
-                }else{
-                    correcta = false;
-                }
-            }
-            if(jugada.length() == 5) {
-                //Si la jugada tiene 3 digitos y el ultimo digito
-                if(jugada.indexOf('+') != -1){
-                    jugada = jugada.substring(0, jugada.indexOf('.') - 1);
-                }else{
-                    correcta = false;
-                }
-            }
 
-            if(!isInteger(jugada))
-                correcta = false;
+
 
 
         }
@@ -140,6 +123,8 @@ public class Jugadas {
 
         return correcta;
     }
+
+
 
     public static boolean isInteger(String cadena) {
 

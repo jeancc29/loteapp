@@ -115,7 +115,7 @@ public class JugadasFragment extends Fragment implements Updateable{
                     /* add views to the row */
                 tableRow.setId(idRow);
                     tableRow.addView(createTv(jugada.getString("descripcion"), false, mContext));
-                    tableRow.addView(createTv(jugada.getString("jugada"), false, mContext));
+                    tableRow.addView(createTv(Utilidades.agregarGuion(jugada.getString("jugada")), false, mContext));
                     tableRow.addView(createTv(jugada.getString("monto"), false, mContext));
 
                     /* create cell element - button */

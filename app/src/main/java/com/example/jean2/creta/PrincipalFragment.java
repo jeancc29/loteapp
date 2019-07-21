@@ -436,7 +436,9 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                                 //Si la loteria es igual a la loteria que tiene la jugada entonces se duplicara la jugada
                                 if(((JSONObject) jugadas.get(c)).getString("idLoteria").equals(idLoteriasMap.get(mUserItems.get(i)))){
                                     JSONObject jugadaObject = new JSONObject();
-                                    jugadaObject.put("jugada", ((JSONObject) jugadas.get(c)).getString("jugada"));
+                                    String jugada = ((JSONObject) jugadas.get(c)).getString("jugada");
+                                    jugadaObject.put("jugada", Utilidades.agregarGuionPorSorteo(jugada, ((JSONObject) jugadas.get(c)).getString("sorteo")));
+
                                     jugadaObject.put("descripcion", listItems[mUserItems.get(i)]);
                                     jugadaObject.put("idLoteria", idLoteriasMap.get(mUserItems.get(i)));
                                     jugadaObject.put("monto", (int)Float.parseFloat(((JSONObject) jugadas.get(c)).getString("monto").toString()));
@@ -451,6 +453,8 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                                 JSONObject jugadaObject = (JSONObject)jugadas.get(c);
                                 jugadaObject.put("descripcion", listItems[mUserItems.get(i)]);
                                 jugadaObject.put("idLoteria", idLoteriasMap.get(mUserItems.get(i)));
+                                String jugada = ((JSONObject) jugadas.get(c)).getString("jugada");
+                                jugadaObject.put("jugada", Utilidades.agregarGuionPorSorteo(jugada, ((JSONObject) jugadas.get(c)).getString("sorteo")));
                                 jugadaObject.put("monto", (int)Float.parseFloat(jugadaObject.getString("monto").toString()));
                                 Log.d("PrincipalFragment", "Duplicar jugada: " + jugadaObject.getString("descripcion") + " " +jugadaObject.getString("jugada"));
                                 jugadasClase.add(jugadaObject);
@@ -576,23 +580,29 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                 break;
             case (R.id.btnMas):
                 boolean existe_loteria_newyork = false;
-                if(String.valueOf(txtJugada.getText()).length() == 4){
-                    //Buscamos en el arreglo de las loterias seleccionadas para ver si la loteria de new york esta seleccionada
-                    for (int i = 0; i < mUserItems.size(); i++) {
-                        if (listItems[mUserItems.get(i)] == "New York") {
-                            existe_loteria_newyork = true;
-                            break;
-                        }
-                    }
-
-                    if(existe_loteria_newyork)
-                        caracteres = "+";
+                if(!jugada_monto_active) return;
+                if(String.valueOf(txtJugada.getText()).length() == 3 || String.valueOf(txtJugada.getText()).length() == 4){
+                    caracteres = "+";
+                    caracteres = txtJugada.getText() + caracteres;
+                    txtJugada.setText(caracteres);
+                    getMontoDisponible();
+                    return;
                 }
 
                 break;
             case (R.id.btnMenos):
                 //print();
-                guardar();
+                if(String.valueOf(txtJugada.getText()).length() == 4){
+                    caracteres = "-";
+                    caracteres = txtJugada.getText() + caracteres;
+                    txtJugada.setText(caracteres);
+                    getMontoDisponible();
+                    return;
+                }else if(String.valueOf(txtJugada.getText()).length() == 0){
+                    guardar();
+                    return;
+                }
+
                 break;
             case (R.id.btnSlash):
                 //Cambiar de loteria
@@ -765,29 +775,29 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
             return;
         }
 
-            StringBuilder validarJugadaSeaNumerica = new StringBuilder(jugada);
-            if(jugada.length() == 3 || jugada.length() == 5){
-                //Si la jugada tiene 3 digitos y el ultimo digito
-                if(jugada.charAt(jugada.length() - 1) == '.' && jugada.length() == 3)
-                {
-                    validarJugadaSeaNumerica.setLength(jugada.length() - 1);
-                    Log.d("validar jug sea num.: ", validarJugadaSeaNumerica.toString());
-                }
-                else if(jugada.charAt(jugada.length() - 1) == '+' && jugada.length() == 5)
-                {
-                    validarJugadaSeaNumerica.setLength(jugada.length() - 1);
-                    Log.d("validar jug sea num+: ", validarJugadaSeaNumerica.toString());
-                }
-                else{
-                    Toast.makeText(getActivity(), "La jugada debe tener 2, 4 o 6 digitos", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-            }
+//            StringBuilder validarJugadaSeaNumerica = new StringBuilder(jugada);
+//            if(jugada.length() == 3 || jugada.length() == 5){
+//                //Si la jugada tiene 3 digitos y el ultimo digito
+//                if(jugada.charAt(jugada.length() - 1) == '.' && jugada.length() == 3)
+//                {
+//                    validarJugadaSeaNumerica.setLength(jugada.length() - 1);
+//                    Log.d("validar jug sea num.: ", validarJugadaSeaNumerica.toString());
+//                }
+//                else if(jugada.charAt(jugada.length() - 1) == '+' && jugada.length() == 5)
+//                {
+//                    validarJugadaSeaNumerica.setLength(jugada.length() - 1);
+//                    Log.d("validar jug sea num+: ", validarJugadaSeaNumerica.toString());
+//                }
+//                else{
+//                    Toast.makeText(getActivity(), "La jugada debe tener 2, 4 o 6 digitos", Toast.LENGTH_SHORT).show();
+//                    return;
+//                }
+//            }
 
-            if(!isInteger(validarJugadaSeaNumerica.toString())){
-                Toast.makeText(getActivity(), "La jugada debe ser correcta", Toast.LENGTH_SHORT).show();
-                return;
-            }
+//            if(!isInteger(validarJugadaSeaNumerica.toString())){
+//                Toast.makeText(getActivity(), "La jugada debe ser correcta", Toast.LENGTH_SHORT).show();
+//                return;
+//            }
 
 
 
@@ -797,7 +807,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
         try {
             loteria.put("idLoteria", idLoteriasMap.get(mUserItems.get(0)));
-            loteria.put("jugada", validarJugadaSeaNumerica.toString());
+            loteria.put("jugada", jugada);
             loteria.put("idBanca", Utilidades.getIdBanca(mContext));
 
             datosObj.put("datos", loteria);
@@ -1365,8 +1375,8 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                 try {
                     boolean existe = false, existeInvertida = false;
                     existe = jugadasClase.siJugadaExisteActualizar(jugadasClase.jugadaQuitarPunto(jugada), idLoteriasMap.get(mUserItems.get(0)), monto);
-                    if(jugada.length() == 3)
-                        existeInvertida = jugadasClase.siJugadaExisteActualizar(jugadasClase.jugadaInvertir(jugadasClase.jugadaQuitarPunto(jugada)), idLoteriasMap.get(mUserItems.get(0)), monto);
+//                    if(jugada.length() == 3)
+//                        existeInvertida = jugadasClase.siJugadaExisteActualizar(jugadasClase.jugadaInvertir(jugadasClase.jugadaQuitarPunto(jugada)), idLoteriasMap.get(mUserItems.get(0)), monto);
 
 
 
@@ -1375,7 +1385,9 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                         jugadaObject = new JSONObject();
                         jugadaObject.put("idLoteria", idLoteriasMap.get(mUserItems.get(0)));
                         jugadaObject.put("descripcion", listItems[mUserItems.get(0)]);
-                        jugadaObject.put("jugada", jugadasClase.jugadaQuitarPunto(jugada));
+                        jugadaObject.put("jugada", jugada);
+                        jugadaObject.put("sorteo", "no");
+
                         jugadaObject.put("tam", txtJugada.getText().length());
                         jugadaObject.put("monto", txtMontojugar.getText());
                         jugadaObject.put("idBanca", Utilidades.getIdBanca(mContext));
@@ -1384,22 +1396,23 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
                     }
 
-                    if(jugada.length() == 3 && existeInvertida == false) {
-
-                        //Invertimos la jugada
-                        String jugadaInvertida = jugadasClase.jugadaInvertir(jugadasClase.jugadaQuitarPunto(jugada));
-
-
-
-                        JSONObject jugadaObject2 = new JSONObject();
-                        jugadaObject2.put("idLoteria", idLoteriasMap.get(mUserItems.get(0)));
-                        jugadaObject2.put("descripcion", listItems[mUserItems.get(0)]);
-                        jugadaObject2.put("jugada", jugadaInvertida);
-                        jugadaObject2.put("tam", txtJugada.getText().length());
-                        jugadaObject2.put("monto", txtMontojugar.getText());
-                        jugadaObject2.put("idBanca", Utilidades.getIdBanca(mContext));
-                        jugadasClase.add(jugadaObject2);
-                    }
+                    //jugada.length() == 3 && existeInvertida == false
+//                    if(jugada.length() == 3 && existeInvertida == false) {
+//
+//                        //Invertimos la jugada
+//                        String jugadaInvertida = jugadasClase.jugadaInvertir(jugadasClase.jugadaQuitarPunto(jugada));
+//
+//
+//
+//                        JSONObject jugadaObject2 = new JSONObject();
+//                        jugadaObject2.put("idLoteria", idLoteriasMap.get(mUserItems.get(0)));
+//                        jugadaObject2.put("descripcion", listItems[mUserItems.get(0)]);
+//                        jugadaObject2.put("jugada", jugadaInvertida);
+//                        jugadaObject2.put("tam", txtJugada.getText().length());
+//                        jugadaObject2.put("monto", txtMontojugar.getText());
+//                        jugadaObject2.put("idBanca", Utilidades.getIdBanca(mContext));
+//                        jugadasClase.add(jugadaObject2);
+//                    }
 
                     txtJugada.setText("");
                     txtMontodisponible.setText("");
@@ -1412,15 +1425,16 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                         boolean existe = false, existeInvertida = false;
 
                         existe = jugadasClase.siJugadaExisteActualizar(jugadasClase.jugadaQuitarPunto(jugada), idLoteriasMap.get(mUserItems.get(contadorLoteria)), monto);
-                        if(jugada.length() == 3)
-                            existeInvertida = jugadasClase.siJugadaExisteActualizar(jugadasClase.jugadaInvertir(jugadasClase.jugadaQuitarPunto(jugada)), idLoteriasMap.get(mUserItems.get(contadorLoteria)), monto);
+//                        if(jugada.length() == 3)
+//                            existeInvertida = jugadasClase.siJugadaExisteActualizar(jugadasClase.jugadaInvertir(jugadasClase.jugadaQuitarPunto(jugada)), idLoteriasMap.get(mUserItems.get(contadorLoteria)), monto);
 
                         if(!existe){
 
                             jugadaObject = new JSONObject();
                             jugadaObject.put("idLoteria", idLoteriasMap.get(mUserItems.get(contadorLoteria)));
                             jugadaObject.put("descripcion", listItems[contadorLoteria]);
-                            jugadaObject.put("jugada", jugadasClase.jugadaQuitarPunto(jugada));
+                            jugadaObject.put("jugada", jugada);
+                            jugadaObject.put("sorteo", "no");
                             jugadaObject.put("tam", txtJugada.getText().length());
                             jugadaObject.put("monto", txtMontojugar.getText());
                             jugadaObject.put("idBanca", Utilidades.getIdBanca(mContext));
@@ -1429,21 +1443,21 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                             //Toast.makeText(getContext(), "lot:"+listItems[contadorLoteria] + " id:" + idLoteriasMap.get(contadorLoteria), Toast.LENGTH_SHORT).show();
                         }
 
-                        if(jugada.length() == 3 && existeInvertida == false) {
-                            //Invertimos la jugada
-                            String jugadaInvertida = jugadasClase.jugadaInvertir(jugadasClase.jugadaQuitarPunto(jugada));
-
-                            Log.d("jugadainvertida:", jugadaInvertida);
-
-                            JSONObject jugadaObject2 = new JSONObject();
-                            jugadaObject2.put("idLoteria", idLoteriasMap.get(mUserItems.get(contadorLoteria)));
-                            jugadaObject2.put("descripcion", listItems[contadorLoteria]);
-                            jugadaObject2.put("jugada", jugadaInvertida);
-                            jugadaObject2.put("tam", txtJugada.getText().length());
-                            jugadaObject2.put("monto", txtMontojugar.getText());
-                            jugadaObject2.put("idBanca", Utilidades.getIdBanca(mContext));
-                            jugadasClase.add(jugadaObject2);
-                        }
+//                        if(jugada.length() == 3) {
+//                            //Invertimos la jugada
+//                            String jugadaInvertida = jugadasClase.jugadaInvertir(jugadasClase.jugadaQuitarPunto(jugada));
+//
+//                            Log.d("jugadainvertida:", jugadaInvertida);
+//
+//                            JSONObject jugadaObject2 = new JSONObject();
+//                            jugadaObject2.put("idLoteria", idLoteriasMap.get(mUserItems.get(contadorLoteria)));
+//                            jugadaObject2.put("descripcion", listItems[contadorLoteria]);
+//                            jugadaObject2.put("jugada", jugadaInvertida);
+//                            jugadaObject2.put("tam", txtJugada.getText().length());
+//                            jugadaObject2.put("monto", txtMontojugar.getText());
+//                            jugadaObject2.put("idBanca", Utilidades.getIdBanca(mContext));
+//                            jugadasClase.add(jugadaObject2);
+//                        }
                         txtJugada.setText("");
                         txtMontodisponible.setText("");
                     }catch (Exception e){

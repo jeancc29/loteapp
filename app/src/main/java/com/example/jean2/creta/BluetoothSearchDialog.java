@@ -590,13 +590,13 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
                                 }
                                 if(((contadorCicleJugadas + 1) % 2) == 0){
                                     Log.d("cjPar", String.valueOf(contadorCicleJugadas));
-                                    pos.POS_S_TextOut("               " + jugada.getString("jugada"), 1, 0, 1, 0, 0x00);
+                                    pos.POS_S_TextOut("               " + Utilidades.agregarGuion(Utilidades.agregarGuionPorSorteo(jugada.getString("jugada"), jugada.getString("sorteo"))), 1, 0, 1, 0, 0x00);
                                     pos.POS_S_TextOut("                        " + jugada.getDouble("monto") + "\n", 1, 0, 1, 0, 0x00);
                                 }else{
                                     String saltoLinea = "";
                                     if((contadorCicleJugadas + 1) == jsonArrayJugadas.length())
                                         saltoLinea = "\n";
-                                    pos.POS_S_TextOut(jugada.getString("jugada"), 0, 0, 1, 0, 0x00);
+                                    pos.POS_S_TextOut(Utilidades.agregarGuion(Utilidades.agregarGuionPorSorteo(jugada.getString("jugada"), jugada.getString("sorteo"))), 0, 0, 1, 0, 0x00);
                                     pos.POS_S_TextOut("        " + jugada.getDouble("monto") + saltoLinea, 0, 0, 1, 0, 0x00);
                                 }
 

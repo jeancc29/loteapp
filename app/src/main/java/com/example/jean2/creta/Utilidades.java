@@ -162,4 +162,69 @@ public class Utilidades {
 
         }
     }
+
+    public static String agregarGuion(String jugada){
+        String cadena = jugada;
+        //Si se ha enviado un sorteo diferente de nulo entonces se debe agregar a la cadena el signo (+ o -) correspondiente a cada sorteo
+        //Y luego mas abajo se determinara que sorteo es gracias al signo agregado
+//        if(sorteo.equals("no") == false){
+//            if(sorteo.equals("Pick 3 Box")){
+//                jugada +='+';
+//            }
+//            else if(sorteo.equals("Pick 4 Straight")){
+//                jugada +='-';
+//            }
+//            else if(sorteo.equals("Pick 4 Box")){
+//                jugada +='+';
+//            }
+//        }
+
+        Log.v("UtilidadesGuion1", cadena);
+
+        if(jugada.length() == 3){
+            cadena +='S';
+        }
+        else if(jugada.length() == 4){
+            Log.v("UtilidadesGuionpr", jugada.substring(0, 3));
+            if(jugada.charAt(jugada.length() - 1) == '+'){
+                cadena = jugada.substring(0, 3) + 'B';
+            }
+            else{
+                cadena = jugada.substring(0, 2) + '-' +jugada.substring(2, 2);
+            }
+        }
+        else if(jugada.length() == 5){
+            if(jugada.charAt(jugada.length() - 1) == '+'){
+                cadena = jugada.substring(0, 4) + 'B';
+            }
+            else if(jugada.charAt(jugada.length() - 1) == '-'){
+                cadena = jugada.substring(0, 4) + 'S';
+            }
+        }
+        else if(jugada.length() == 6){
+            cadena = jugada.substring(0, 2) + '-' +jugada.substring(2, 2) + '-' +jugada.substring(4, 2);
+        }
+
+        Log.v("UtilidadesGuio2", cadena);
+        return cadena;
+    }
+
+    public static String agregarGuionPorSorteo(String jugada, String sorteo){
+        String cadena = jugada;
+
+         if(sorteo.equals("Pick 3 Box")){
+            cadena +='+';
+        }
+        else if(sorteo.equals("Pick 4 Straight")){
+            cadena +='-';
+        }
+        else if(sorteo.equals("Pick 4 Box")){
+            cadena +='+';
+        }
+
+
+
+
+        return cadena;
+    }
 }
