@@ -47,6 +47,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <service android:name=".Servicios.VerificarAccesoAlSistemaService" android:enabled="true"/>
+        <service android:name=".Servicios.JPrinterConnectService" android:enabled="true"/>
+
         <activity android:name=".ScanQRActivity"></activity>
         <activity android:name=".WebViewTicket" />
         <activity

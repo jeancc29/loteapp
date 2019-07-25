@@ -190,7 +190,7 @@ public class Utilidades {
                 cadena = jugada.substring(0, 3) + 'B';
             }
             else{
-                cadena = jugada.substring(0, 2) + '-' +jugada.substring(2, 2);
+                cadena = jugada.substring(0, 2) + '-' +jugada.substring(2, 4);
             }
         }
         else if(jugada.length() == 5){
@@ -202,7 +202,7 @@ public class Utilidades {
             }
         }
         else if(jugada.length() == 6){
-            cadena = jugada.substring(0, 2) + '-' +jugada.substring(2, 2) + '-' +jugada.substring(4, 2);
+            cadena = jugada.substring(0, 2) + '-' +jugada.substring(2, 4) + '-' +jugada.substring(4, 6);
         }
 
         Log.v("UtilidadesGuio2", cadena);

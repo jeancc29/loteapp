@@ -12,7 +12,7 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.annotation.Nullable;
+
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -48,6 +48,7 @@ import com.example.jean2.creta.Servicios.VerificarAccesoAlSistemaService;
 import com.izettle.html2bitmap.Html2Bitmap;
 import com.izettle.html2bitmap.content.WebViewContent;
 
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -508,12 +509,18 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
     public void onClick(View v){
         String jugada = "";
 
+
+
         String p = "hola";
         String p2 = p.substring(1, 2).toString();
 //        Log.d("Reemplazar:", p2);
 //        Toast.makeText(getContext(), "p: " + p2, Toast.LENGTH_SHORT).show();
-        if(jugada_monto_active)
+        if(jugada_monto_active){
+            if(String.valueOf(txtJugada.getText()).length() > 6 && v.getId() != R.id.btnBackspace && v.getId() != R.id.btnEnter){
+                return;
+            }
             jugada = String.valueOf(txtJugada.getText());
+        }
 
         String caracteres = "";
         switch (v.getId()) {
@@ -752,7 +759,6 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
     private void getMontoDisponible(){
         String url = "http://loterias.ml/api/principal/montodisponible";
-        Main2Activity.progressBarToolbar.setVisibility(View.VISIBLE);
         monto = "0";
         Log.d("Arreglo loteria size: ", String.valueOf(mUserItems.size()));
         String jugada = String.valueOf(txtJugada.getText());
@@ -774,6 +780,8 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
             txtMontodisponible.setText("20");
             return;
         }
+
+        Main2Activity.progressBarToolbar.setVisibility(View.VISIBLE);
 
 //            StringBuilder validarJugadaSeaNumerica = new StringBuilder(jugada);
 //            if(jugada.length() == 3 || jugada.length() == 5){

@@ -17,6 +17,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.util.Log;
 import android.view.Gravity;
@@ -27,6 +28,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.example.jean2.creta.Servicios.JPrinterConnectService;
 import com.lvrenyang.io.BTPrinting;
 import com.lvrenyang.io.IOCallBack;
 import com.lvrenyang.io.Pos;
@@ -47,21 +49,28 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
     Context mContext;
     BluetoothAdapter adaptador;
     private static final int REQUEST_ENABLE_BT = 0;
-    private LinearLayout linearlayoutdevices;
+    private static LinearLayout linearlayoutdevices;
     private ProgressBar progressBarSearchStatus;
 
     private BroadcastReceiver broadcastReceiver = null;
     private IntentFilter intentFilter = null;
 
-    Button btnSearch,btnDisconnect,btnPrint;
+    Button btnSearch,btnDisconnect,btnPrint, btnConnected;
     Context mActivity;
 
     ExecutorService es = Executors.newScheduledThreadPool(30);
-    static Pos mPos = new Pos();
-    BTPrinting mBt = new BTPrinting();
+
+    static JPrinterBluetoothSingleton jPrinterBluetoothSingleton = JPrinterBluetoothSingleton.getInstance();
+//    BTPrinting mBt = new BTPrinting();
+//        static Pos mPos = new Pos();
+        static Pos mPos = jPrinterBluetoothSingleton.getmPos();
+        BTPrinting mBt = jPrinterBluetoothSingleton.getmBt();
+
+
     public static Activity mActivity1;
 
     private static String TAG = "SearchBTActivity";
+    Handler handler;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -74,6 +83,7 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
         progressBarSearchStatus = (ProgressBar) view.findViewById(R.id.progressBarSearchStatus);
         linearlayoutdevices = (LinearLayout) view.findViewById(R.id.linearlayoutdevices);
 
+        handler = new Handler();
         btnSearch = (Button) view.findViewById(R.id.buttonSearch);
         btnDisconnect = (Button) view.findViewById(R.id.buttonDisconnect);
         btnPrint = (Button) view.findViewById(R.id.buttonPrint);
@@ -84,8 +94,19 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
         btnDisconnect.setEnabled(true);
         btnPrint.setEnabled(false);
 
-        mPos.Set(mBt);
-        mBt.SetCallBack(this);
+
+
+
+
+
+//        mPos.Set(mBt);
+//        mBt.SetCallBack(this);
+
+        //Probar: En vez de utilizar runOnUiThreath usar handler en este archivo para ver si funciona
+        //Probar: Copiar todos los datos de SearchBTActivity al archivo JPrinterConnectService
+
+
+
 
 
         builder.setView(view)
@@ -106,10 +127,74 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
 
 
 
+//        initBroadcast();
 
-        initBroadcast();
-        btnSearch.performClick();
+        if(jPrinterBluetoothSingleton.isConnected()){
+
+            Log.d(TAG, "onCreateDialog: " +String.valueOf(jPrinterBluetoothSingleton.getName()));
+            mostrarBotonConectado();
+
+        }else{
+
+            btnSearch.performClick();
+        }
+
+
         return builder.create();
+    }
+
+    @Override
+    public void onResume() {
+        es.isShutdown();
+        super.onResume();
+    }
+
+    public void mostrarBotonConectado(){
+        btnSearch.setEnabled(false);
+        Button button = new Button(mContext);
+        button.setText(jPrinterBluetoothSingleton.getName() + ": " + jPrinterBluetoothSingleton.getAddress());
+
+        final String nombre = jPrinterBluetoothSingleton.getName();
+
+        for(int i = 0; i < linearlayoutdevices.getChildCount(); ++i)
+        {
+            Button btn = (Button)linearlayoutdevices.getChildAt(i);
+            if(btn.getText().equals(button.getText()))
+            {
+                return;
+            }
+        }
+
+        button.setGravity(android.view.Gravity.CENTER_VERTICAL
+                | Gravity.LEFT);
+//        button.setOnClickListener(new View.OnClickListener() {
+//
+//            public void onClick(View arg0) {
+//                // TODO Auto-generated method stub
+//                Toast.makeText(getActivity(), "Connecting...", Toast.LENGTH_SHORT).show();
+//                Log.d("pruebaBluetooth", String.valueOf((getActivity() == null)));
+//                btnSearch.setEnabled(false);
+//                linearlayoutdevices.setEnabled(false);
+//                for(int i = 0; i < linearlayoutdevices.getChildCount(); ++i)
+//                {
+//                    Button btn = (Button)linearlayoutdevices.getChildAt(i);
+//                    btn.setEnabled(false);
+//                }
+//                btnDisconnect.setEnabled(true);
+//                btnPrint.setEnabled(true);
+//                es.submit(new TaskOpen(mBt,jPrinterBluetoothSingleton.getAddress(), nombre, getActivity()));
+//                //es.submit(new TaskTest(mPos, mBt, address, mActivity));
+//            }
+//        });
+        button.setEnabled(false);
+        button.getBackground().setAlpha(100);
+        linearlayoutdevices.addView(button);
+    }
+
+    @Override
+    public void onPause() {
+        //uninitBroadcast();
+        super.onPause();
     }
 
     @Override
@@ -133,7 +218,13 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
     @Override
     public void onDestroy() {
         super.onDestroy();
-        uninitBroadcast();
+        try {
+            uninitBroadcast();
+        }catch (Exception e){
+            e.printStackTrace();
+
+        }
+       
         //btnDisconnect.performClick();
     }
 
@@ -143,32 +234,41 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
         // TODO Auto-generated method stub
         switch (arg0.getId()) {
             case R.id.buttonSearch: {
-                BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-                if (null == adapter) {
-                    return;
-
-                }
-
-                if (!adapter.isEnabled()) {
-                    if (adapter.enable()) {
-                        while (!adapter.isEnabled())
-                            ;
-                        Log.v(TAG, "Enable BluetoothAdapter");
-                    } else {
+                initBroadcast();
+                if(jPrinterBluetoothSingleton.isConnected() == false){
+                    BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+                    if (null == adapter) {
                         return;
 
                     }
-                }
 
-                adapter.cancelDiscovery();
-                linearlayoutdevices.removeAllViews();
-                adapter.startDiscovery();
+
+                    if (!adapter.isEnabled()) {
+                        if (adapter.enable()) {
+                            while (!adapter.isEnabled())
+                                ;
+                            Log.v(TAG, "Enable BluetoothAdapter");
+                        } else {
+                            return;
+
+                        }
+                    }
+
+                    adapter.cancelDiscovery();
+                    linearlayoutdevices.removeAllViews();
+                    adapter.startDiscovery();
+                }
                 //miBT();
                 break;
             }
 
             case R.id.buttonDisconnect:
-                es.submit(new TaskClose(mBt));
+                //es.submit(new TaskOpen(mBt,jPrinterBluetoothSingleton.getAddress(), jPrinterBluetoothSingleton.getName(), getActivity()));
+
+                mContext.stopService(new Intent(getActivity(), JPrinterConnectService.class));
+                btnSearch.setEnabled(true);
+                jPrinterBluetoothSingleton.Disconnect();
+//                es.submit(new TaskClose(mBt));
                 break;
 
             case R.id.buttonPrint:
@@ -189,6 +289,7 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
                         .getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
                 if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                    Log.d("Bluetoothsearch:",String.valueOf(device == null) );
                     if (device == null)
                         return;
                     final String address = device.getAddress();
@@ -199,6 +300,10 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
                         name = "BT";
                     Button button = new Button(context);
                     button.setText(name + ": " + address);
+
+                    final String nombre = name;
+
+                    Log.d("DentroBroadcast", "klk");
 
                     for(int i = 0; i < linearlayoutdevices.getChildCount(); ++i)
                     {
@@ -215,7 +320,7 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
 
                         public void onClick(View arg0) {
                             // TODO Auto-generated method stub
-                            Toast.makeText(getActivity(), "Connecting...", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(mContext, "Connecting...", Toast.LENGTH_SHORT).show();
                             Log.d("pruebaBluetooth", String.valueOf((getActivity() == null)));
                             btnSearch.setEnabled(false);
                             linearlayoutdevices.setEnabled(false);
@@ -226,7 +331,14 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
                             }
                             btnDisconnect.setEnabled(true);
                             btnPrint.setEnabled(true);
-                            es.submit(new TaskOpen(mBt,address, getActivity()));
+
+                            Intent serviceIntent = new Intent(getActivity(), JPrinterConnectService.class);
+                            serviceIntent.putExtra("address", address);
+                            serviceIntent.putExtra("name", nombre);
+                            mContext.startService(serviceIntent);
+
+//                            es.submit(new TaskOpen(mBt,address, nombre, getActivity()));
+//                            jPrinterBluetoothSingleton.mBtOpen(mContext);
                             //es.submit(new TaskTest(mPos, mBt, address, mActivity));
                         }
                     });
@@ -259,135 +371,15 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
         return mPos.GetIO().IsOpened();
     }
 
-    private void makeTest(){
-
-        //Obtengo todos los dispositivos sincronizados y hago una prueba de impresion
-        Set<BluetoothDevice> pairedDevices;
-        pairedDevices = adaptador.getBondedDevices();
-        ArrayList<String> arrayList = new ArrayList<>();
-        String dv = "";
-        if(pairedDevices.size() > 0){
-            for(BluetoothDevice device : pairedDevices){
-
-                // dv += device.getName() + " - " + device.getAddress();
-                // dv += "\n";
-
-                try {
-                    es.submit(new TaskOpen(mBt,device.getAddress(), getActivity()));
-                }catch (Exception e){
-                    Log.e("ErrorImpresion", e.toString());
-                }
-//				es.submit(new TaskPrint(mPos));
-                //es.submit(new TaskTest(mBt,device.getAddress(), mActivity));
-                //es.submit(new TaskTest(mPos, mBt, device.getAddress(), mActivity));
-
-            }
-        }
-
-    }
-
-    private void makeTest2(){
-
-        //Obtengo todos los dispositivos sincronizados y hago una prueba de impresion
-        Set<BluetoothDevice> pairedDevices;
-        pairedDevices = adaptador.getBondedDevices();
-        ArrayList<String> arrayList = new ArrayList<>();
-        String dv = "";
-        if(pairedDevices.size() > 0){
-            for(BluetoothDevice device : pairedDevices){
-
-                // dv += device.getName() + " - " + device.getAddress();
-                // dv += "\n";
-//                es.submit(new TaskOpen(mBt,device.getAddress(), mActivity));
-//				es.submit(new TaskPrint(mPos));
-                //es.submit(new TaskTest(mBt,device.getAddress(), mActivity));
-                try {
-                    es.submit(new  TaskTest(mPos, mBt, device.getAddress(), getActivity()));
-                }catch (Exception e){
-                    Log.e("ErrorImpresion", e.toString());
-                }
-
-            }
-        }
-
-    }
-
-
-    private void makeTest3(){
-
-        //Obtengo todos los dispositivos sincronizados y hago una prueba de impresion
-        Set<BluetoothDevice> pairedDevices;
-        pairedDevices = adaptador.getBondedDevices();
-        ArrayList<String> arrayList = new ArrayList<>();
-        String dv = "";
-        if(pairedDevices.size() > 0){
-            for(BluetoothDevice device : pairedDevices){
-
-                // dv += device.getName() + " - " + device.getAddress();
-                // dv += "\n";
-//                es.submit(new TaskOpen(mBt,device.getAddress(), mActivity));
-//				es.submit(new TaskPrint(mPos));
-                //es.submit(new TaskTest(mBt,device.getAddress(), mActivity));
-                try {
-                    es.submit(new TaskPrint(mPos));
-                }catch (Exception e){
-                    Log.e("ErrorImpresion", e.toString());
-                }
-
-            }
-        }
-
-    }
 
 
 
 
-    private void miBT(){
-        adaptador = BluetoothAdapter.getDefaultAdapter();
-        if(adaptador == null){
-            Toast.makeText(mContext, "No existe adaptador", Toast.LENGTH_SHORT).show();
-        }
-
-        if(!adaptador.isEnabled()){
-            Intent enableBTIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBTIntent, REQUEST_ENABLE_BT);
-        }
-
-        makeTest();
-    }
-
-    public void miBT2(View v){
-        adaptador = BluetoothAdapter.getDefaultAdapter();
-        if(adaptador == null){
-            Toast.makeText(mContext, "No existe adaptador", Toast.LENGTH_SHORT).show();
-        }
-
-        if(!adaptador.isEnabled()){
-            Intent enableBTIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBTIntent, REQUEST_ENABLE_BT);
-        }
-
-        makeTest2();
-    }
-
-    public void miBT3(View v){
-        adaptador = BluetoothAdapter.getDefaultAdapter();
-        if(adaptador == null){
-            Toast.makeText(mContext, "No existe adaptador", Toast.LENGTH_SHORT).show();
-        }
-
-        if(!adaptador.isEnabled()){
-            Intent enableBTIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBTIntent, REQUEST_ENABLE_BT);
-        }
-
-        makeTest3();
-    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode,  Intent data){
         if(resultCode == Activity.RESULT_OK){
-            miBT();
+           // miBT();
         }
     }
 
@@ -433,19 +425,27 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
     {
         BTPrinting bt = null;
         String address = null;
+        String name = null;
         Context context = null;
 
-        public TaskOpen(BTPrinting bt, String address, Context context)
+        public TaskOpen(BTPrinting bt, String address, String name, Context context)
         {
             this.bt = bt;
             this.address = address;
+            this.name = name;
             this.context = context;
         }
 
         @Override
         public void run() {
             // TODO Auto-generated method stub
-            bt.Open(address,context);
+            jPrinterBluetoothSingleton.setName(name);
+            jPrinterBluetoothSingleton.setAddress(address);
+            Log.d("PruebaOpen", String.valueOf(jPrinterBluetoothSingleton.getmBt().IsOpened()));
+            //Toast.makeText(context, "Abierta: " + jPrinterBluetoothSingleton.getmBt().IsOpened(), Toast.LENGTH_LONG).show();
+            if(jPrinterBluetoothSingleton.getmBt().IsOpened() == false)
+                jPrinterBluetoothSingleton.mBtOpen(context);
+//            bt.Open(address,context);
         }
     }
 
@@ -585,19 +585,19 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
                             if(jugada.getString("idLoteria").equals(loteria.getString("id"))){
                                 pos.POS_S_Align(0);
                                 if(esPrimeraJugadaAInsertar){
-                                    pos.POS_S_TextOut("JUGADA  MONTO  JUGADA  MONTO\n", 1, 0, 1, 0, 0x00);
+                                    pos.POS_S_TextOut("JUGADA   MONTO  JUGADA   MONTO\n", 1, 0, 1, 0, 0x00);
                                     esPrimeraJugadaAInsertar = false;
                                 }
                                 if(((contadorCicleJugadas + 1) % 2) == 0){
                                     Log.d("cjPar", String.valueOf(contadorCicleJugadas));
-                                    pos.POS_S_TextOut("               " + Utilidades.agregarGuion(Utilidades.agregarGuionPorSorteo(jugada.getString("jugada"), jugada.getString("sorteo"))), 1, 0, 1, 0, 0x00);
-                                    pos.POS_S_TextOut("                        " + jugada.getDouble("monto") + "\n", 1, 0, 1, 0, 0x00);
+                                    pos.POS_S_TextOut("                " + Utilidades.agregarGuion(Utilidades.agregarGuionPorSorteo(jugada.getString("jugada"), jugada.getString("sorteo"))), 1, 0, 1, 0, 0x00);
+                                    pos.POS_S_TextOut("                         " + jugada.getDouble("monto") + "\n", 1, 0, 1, 0, 0x00);
                                 }else{
                                     String saltoLinea = "";
                                     if((contadorCicleJugadas + 1) == jsonArrayJugadas.length())
                                         saltoLinea = "\n";
                                     pos.POS_S_TextOut(Utilidades.agregarGuion(Utilidades.agregarGuionPorSorteo(jugada.getString("jugada"), jugada.getString("sorteo"))), 0, 0, 1, 0, 0x00);
-                                    pos.POS_S_TextOut("        " + jugada.getDouble("monto") + saltoLinea, 0, 0, 1, 0, 0x00);
+                                    pos.POS_S_TextOut("         " + jugada.getDouble("monto") + saltoLinea, 0, 0, 1, 0, 0x00);
                                 }
 
 //                                pos.POS_S_TextOut("culo23", 0, 0, 1, 0, 0x00);
@@ -739,6 +739,8 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
         @Override
         public void run() {
             // TODO Auto-generated method stub
+//            if(jPrinterBluetoothSingleton.getmBt().IsOpened())
+//                jPrinterBluetoothSingleton.mBtClose();
             bt.Close();
         }
 
@@ -761,7 +763,7 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
                     btn.setEnabled(false);
                 }
                 Toast.makeText(mActivity, "Connected", Toast.LENGTH_SHORT).show();
-                Main2Activity.conectadoAImpresoraBluetooth = true;
+                jPrinterBluetoothSingleton.setConnected(true);
                 if(AppStart.bAutoPrint)
                 {
                     btnPrint.performClick();
@@ -799,16 +801,18 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
 
             @Override
             public void run() {
+
                 btnDisconnect.setEnabled(false);
                 btnPrint.setEnabled(false);
                 btnSearch.setEnabled(true);
                 linearlayoutdevices.setEnabled(true);
-                Main2Activity.conectadoAImpresoraBluetooth = false;
-                for(int i = 0; i < linearlayoutdevices.getChildCount(); ++i)
-                {
-                    Button btn = (Button)linearlayoutdevices.getChildAt(i);
-                    btn.setEnabled(true);
-                }
+//                for(int i = 0; i < linearlayoutdevices.getChildCount(); ++i)
+//                {
+//                    Button btn = (Button)linearlayoutdevices.getChildAt(i);
+//                    btn.setEnabled(true);
+//                }
+                btnSearch.setEnabled(true);
+                btnSearch.performClick();
             }
         });
     }
