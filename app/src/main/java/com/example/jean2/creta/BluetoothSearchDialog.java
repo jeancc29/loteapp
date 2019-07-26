@@ -373,6 +373,44 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
 
 
 
+    public static int contarJugadasDeLoteria(String idLoteria, JSONArray jsonArrayJugadas) {
+        int contadorJugadas = 0;
+        for (int contadorCicleJugadas = 0; contadorCicleJugadas < jsonArrayJugadas.length(); contadorCicleJugadas++) {
+            try {
+                JSONObject jugada = jsonArrayJugadas.getJSONObject(contadorCicleJugadas);
+
+                if (jugada.getString("idLoteria").equals(idLoteria))
+                    contadorJugadas++;
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                return 0;
+            }
+
+        }
+
+        return contadorJugadas;
+    }
+
+    public static JSONArray jugadasPertenecientesALoteria(String idLoteria, JSONArray jsonArrayJugadas) {
+        int contadorJugadas = 0;
+        JSONArray jsonArrayJugadasRetornar = new JSONArray();
+        for (int contadorCicleJugadas = 0; contadorCicleJugadas < jsonArrayJugadas.length(); contadorCicleJugadas++) {
+            try {
+                JSONObject jugada = jsonArrayJugadas.getJSONObject(contadorCicleJugadas);
+
+                if (jugada.getString("idLoteria").equals(idLoteria))
+                    jsonArrayJugadasRetornar.put(jugada);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                return jsonArrayJugadasRetornar;
+            }
+
+        }
+
+        return jsonArrayJugadasRetornar;
+    }
 
 
 
@@ -573,10 +611,11 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
                             break;
                         JSONObject loteria = jsonArrayLoterias.getJSONObject(i);
                         boolean esPrimeraJugadaAInsertar = true;
-                        for (int contadorCicleJugadas =0; contadorCicleJugadas < jsonArrayJugadas.length(); contadorCicleJugadas++){
+                        JSONArray jugadas = jugadasPertenecientesALoteria(loteria.getString("id"), jsonArrayJugadas);
+                        for (int contadorCicleJugadas =0; contadorCicleJugadas < jugadas.length(); contadorCicleJugadas++){
                             if(!pos.GetIO().IsOpened())
                                 break;
-                            JSONObject jugada = jsonArrayJugadas.getJSONObject(contadorCicleJugadas);
+                            JSONObject jugada = jugadas.getJSONObject(contadorCicleJugadas);
                             if(contadorCicleJugadas == 0){
                                 pos.POS_S_TextOut("---------------\n", 1, 1, 1, 0, 0x00);
                                 pos.POS_S_TextOut(loteria.getString("descripcion") + "\n", 1, 0, 1, 0, 0x00);
@@ -594,20 +633,20 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
                                     pos.POS_S_TextOut("                         " + jugada.getDouble("monto") + "\n", 1, 0, 1, 0, 0x00);
                                 }else{
                                     String saltoLinea = "";
-                                    if((contadorCicleJugadas + 1) == jsonArrayJugadas.length())
+                                    if((contadorCicleJugadas + 1) == jugadas.length())
                                         saltoLinea = "\n";
                                     pos.POS_S_TextOut(Utilidades.agregarGuion(Utilidades.agregarGuionPorSorteo(jugada.getString("jugada"), jugada.getString("sorteo"))), 0, 0, 1, 0, 0x00);
                                     pos.POS_S_TextOut("         " + jugada.getDouble("monto") + saltoLinea, 0, 0, 1, 0, 0x00);
                                 }
 
 //                                pos.POS_S_TextOut("culo23", 0, 0, 1, 0, 0x00);
-                                //pos.POS_S_TextOut(" - total: " + getLoteriaTotal(loteria.getInt("id"), jsonArrayJugadas) + "-\n", 1, 0, 1, 0, 0x00);
+                                //pos.POS_S_TextOut(" - total: " + getLoteriaTotal(loteria.getInt("id"), jugadas) + "-\n", 1, 0, 1, 0, 0x00);
 
                             }
                         }
                         pos.POS_S_Align(1);
                         if(jsonArrayLoterias.length() > 1)
-                            pos.POS_S_TextOut("\n total: " + getLoteriaTotal(loteria.getString("id"), jsonArrayJugadas) + "\n\n\n", 1, 0, 1, 0, 0x00);
+                            pos.POS_S_TextOut("\n total: " + getLoteriaTotal(loteria.getString("id"), jugadas) + "\n\n\n", 1, 0, 1, 0, 0x00);
                     }
 
                     if(venta.getInt("hayDescuento") == 1){
