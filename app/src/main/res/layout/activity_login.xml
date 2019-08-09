@@ -18,12 +18,12 @@
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="match_parent"
-        android:layout_height="238dp"
+        android:layout_height="158dp"
         app:srcCompat="@drawable/userprofile"
         tools:layout_editor_absoluteX="88dp"
         tools:layout_editor_absoluteY="16dp"
-        android:layout_marginTop="40dp"
-        android:layout_marginBottom="40dp"/>
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="10dp"/>
 
     <!--<TextView-->
         <!--android:id="@+id/textView"-->

@@ -283,9 +283,9 @@ public class JugadasFragment extends Fragment implements Updateable{
         tv.setText(text);
 
         if(es_header)
-            tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 26);
-        else
             tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
+        else
+            tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
 
         return tv;
     }

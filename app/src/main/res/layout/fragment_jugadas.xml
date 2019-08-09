@@ -6,6 +6,7 @@
     tools:context=".JugadasFragment"
     android:orientation="vertical"
     android:id="@+id/jugadas_fragment"
+    android:background="@color/WHITE"
     >
 
     <LinearLayout

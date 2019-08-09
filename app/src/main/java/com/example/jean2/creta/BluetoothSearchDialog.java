@@ -649,11 +649,13 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
                             pos.POS_S_TextOut("\n total: " + getLoteriaTotal(loteria.getString("id"), jugadas) + "\n\n\n", 1, 0, 1, 0, 0x00);
                     }
 
+                    double total = venta.getDouble("total");
                     if(venta.getInt("hayDescuento") == 1){
+                        total -= venta.getDouble("descuentoMonto");
                         pos.POS_S_TextOut("subTotal: " + venta.getDouble("subTotal") + "\n", 1, 0, 1, 0, 0x00);
                         pos.POS_S_TextOut("descuento: " + venta.getDouble("descuentoMonto") + "\n", 1, 0, 1, 0, 0x00);
                     }
-                    pos.POS_S_TextOut("- TOTAL: " + venta.getDouble("total") + " -\n", 1, 0, 1, 0, 0x00);
+                    pos.POS_S_TextOut("- TOTAL: " + total + " -\n", 1, 0, 1, 0, 0x00);
 
                     if(!venta.getJSONObject("banca").getString("piepagina1").equals("null"))
                         pos.POS_S_TextOut(venta.getJSONObject("banca").getString("piepagina1") + "\n", 1, 0, 1, 0, 0x00);

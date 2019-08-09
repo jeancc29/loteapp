@@ -20,4 +20,10 @@
     <color name="colorPurple">#A130FF</color>
     <color name="colorPurpleT">#64a130ff</color>
     <color name="colorWhite">#ffffff</color>
+
+
+    <color name="WHITE">#FFF</color>
+    <color name="GRAY200">#EEEEEE</color>
+    <color name="RED400">#EF5350</color>
+
 </resources>

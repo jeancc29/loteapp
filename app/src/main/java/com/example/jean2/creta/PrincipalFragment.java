@@ -5,11 +5,13 @@ import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 
@@ -28,6 +30,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -114,6 +117,9 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
     public static Jugadas jugadasClase = new Jugadas();
     public static WebView webViewImg;
 
+    final private int REQUEST_CODE_ASK_PERMISSION = 111;
+
+
 
     String monto;
     boolean estoyProbando = false;
@@ -142,6 +148,21 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
     }
 
+    private void comprobarPermisos(){
+        int permisosCamara = ActivityCompat.checkSelfPermission(mContext, Manifest.permission.CAMERA);
+        int permisosStorage = ActivityCompat.checkSelfPermission(mContext, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        int permisosSms = ActivityCompat.checkSelfPermission(mContext, Manifest.permission.SEND_SMS);
+        int permisosLocation = ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION);
+
+
+        if(permisosStorage != PackageManager.PERMISSION_GRANTED || permisosCamara != PackageManager.PERMISSION_GRANTED || permisosSms != PackageManager.PERMISSION_GRANTED || permisosLocation != PackageManager.PERMISSION_GRANTED){
+            //if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA, Manifest.permission.SEND_SMS, Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE_ASK_PERMISSION);
+            //}
+        }
+
+    }
+
 
 
     @Override
@@ -149,6 +170,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                              Bundle savedInstanceState) {
 
         iniciarServicio();
+        comprobarPermisos();
         iconManager = new IconManager();
 
 
@@ -236,7 +258,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         Button btnMas = (Button)view.findViewById(R.id.btnMas);
         Button btnMenos = (Button)view.findViewById(R.id.btnMenos);
         Button btnEnter = (Button)view.findViewById(R.id.btnEnter);
-        Button btnBackspace = (Button)view.findViewById(R.id.btnBackspace);
+        ImageView btnBackspace = (ImageView) view.findViewById(R.id.btnBackspace);
         Button btnSlash = (Button)view.findViewById(R.id.btnSlash);
         Button btnPunto = (Button)view.findViewById(R.id.btnPunto);
 //        Button btnD = (Button)view.findViewById(R.id.btnD);
@@ -344,17 +366,25 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         super.onAttach(context);
     }
 
-    public void seleccionarLoteriasMultiSelect(JSONArray loteriasASeleccionar){
+    public void seleccionarLoteriasMultiSelect(JSONArray loteriasASeleccionar, boolean seleccionarPrimeraLoteria ){
         try {
-            for (int i=0; i< loteriasASeleccionar.length(); i++){
-                JSONObject item = (JSONObject)loteriasASeleccionar.get(i);
-                for(int c=0; c < listItems.length; c++){
-                    if(item.getString("descripcion").toString().equals(listItems[c])){
-                        checkedItems[c] = true;
-                        mUserItems.add(c);
+            if(seleccionarPrimeraLoteria){
+                checkedItems[0] = true;
+                mUserItems.add(0);
+                String loteria = listItems[mUserItems.get(0)];
+                txtSelected.setText(loteria);
+            }else{
+                for (int i=0; i< loteriasASeleccionar.length(); i++){
+                    JSONObject item = (JSONObject)loteriasASeleccionar.get(i);
+                    for(int c=0; c < listItems.length; c++){
+                        if(item.getString("descripcion").toString().equals(listItems[c])){
+                            checkedItems[c] = true;
+                            mUserItems.add(c);
+                        }
                     }
                 }
             }
+
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -389,7 +419,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 //        }catch (Exception e){
 //            e.printStackTrace();
 //        }
-        seleccionarLoteriasMultiSelect(loterias);
+        seleccionarLoteriasMultiSelect(loterias, false);
 
         AlertDialog.Builder mBuilder = new AlertDialog.Builder(getActivity());
         mBuilder.setTitle("Seleccionar loteria");
@@ -505,6 +535,9 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
     }
 
+
+    //seleccionar loteria de index 0
+
     @Override
     public void onClick(View v){
         String jugada = "";
@@ -516,7 +549,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 //        Log.d("Reemplazar:", p2);
 //        Toast.makeText(getContext(), "p: " + p2, Toast.LENGTH_SHORT).show();
         if(jugada_monto_active){
-            if(String.valueOf(txtJugada.getText()).length() > 6 && v.getId() != R.id.btnBackspace && v.getId() != R.id.btnEnter){
+            if(String.valueOf(txtJugada.getText()).length() >= 6 && v.getId() != R.id.btnBackspace && v.getId() != R.id.btnEnter){
                 return;
             }
             jugada = String.valueOf(txtJugada.getText());
@@ -619,6 +652,14 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                 if(jugada_monto_active) getMontoDisponible(); else jugadaAdd();
                 break;
             case (R.id.btnPunto):
+                if(jugada_monto_active){
+
+                }else{
+                    int indexOf = String.valueOf(txtMontojugar.getText()).indexOf(".");
+                    if(indexOf != -1){
+
+                    }
+                }
                 if(String.valueOf(txtJugada.getText()).length() == 2){
                     caracteres = ".";
                 }
@@ -932,8 +973,8 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
             jugada.put("idBanca", Utilidades.getIdBanca(mContext));
             jugada.put("descuentoMonto", montoDescuento);
             jugada.put("hayDescuento", (ckbDescuento.isChecked()) ? 1 : 0);
-            jugada.put("total", montoTotal - montoDescuento);
-            jugada.put("subTotal", montoTotal);
+            jugada.put("total", montoTotal);
+            jugada.put("subTotal", 0);
             jugada.put("loterias", arregloLoterias);
             jugada.put("jugadas", jugadasClase.getJsonArrayJugadas());
 
@@ -1176,7 +1217,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                 //spinnerMap.put(i,dataobj.getString("id"));
                 codigoBarraMap.put(i,dataobj.getString("id"));
                 ventasSpinner[i] = dataobj.getString("codigoBarra");
-                ventasIdTicketSecuenciaSpinner[i] = toSecuencia(dataobj.getString("idTicket"), dataobj.getString("subTotal"));
+                ventasIdTicketSecuenciaSpinner[i] = toSecuencia(dataobj.getString("idTicket"), dataobj.getString("total"));
 
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -1200,6 +1241,8 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         ArrayAdapter<String> adapter =new ArrayAdapter<String>(getActivity(),android.R.layout.simple_spinner_item, ventasIdTicketSecuenciaItems);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerTicket.setAdapter(adapter);
+
+        seleccionarLoteriasMultiSelect(null, true);
     }
 
     public void fillSpinnerWithoutInternetTest(){
@@ -1476,6 +1519,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
 
         //Log.d("jugadas:", jugadas.toString());
+        txtMontojugar.setText("");
         calcularTotal();
         getJugadas();
         borderChange(true);

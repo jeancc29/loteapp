@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".PrincipalFragment"
     android:orientation="vertical"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/fragmentPrincipal">
+    android:id="@+id/fragmentPrincipal"
+    android:background="@color/WHITE">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -29,10 +30,10 @@
                 android:layout_height="wrap_content"
                 android:text="POS1"/>
             <!--<TextView-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:gravity="right"-->
-                <!--android:text="POS1"/>-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:gravity="right"-->
+            <!--android:text="POS1"/>-->
 
             <TextClock
                 android:layout_width="match_parent"
@@ -55,9 +56,9 @@
 
                 android:gravity="center"
                 android:textColor="@color/colorPrimary"
-                android:textSize="18sp"
+                android:textSize="13sp"
                 android:textStyle="italic"
-                android:padding="15dp"
+                android:padding="13dp"
                 android:background="@drawable/textview_border"
                 android:hint="Seleccionar loterias"
                 />
@@ -85,9 +86,9 @@
                 android:layout_weight="1"
                 android:background="@drawable/textview_border"
                 android:textColor="@color/oper_text_color"
-                android:textSize="24sp"
-                android:paddingTop="15dp"
-                android:paddingBottom="15dp"
+                android:textSize="19sp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
                 android:hint="Jugada"
                 android:gravity="center"
                 android:textStyle="bold"/>
@@ -100,9 +101,9 @@
                 android:background="@drawable/textview_border"
                 android:text="0"
                 android:textColor="@android:color/darker_gray"
-                android:textSize="24sp"
-                android:paddingTop="15dp"
-                android:paddingBottom="15dp"
+                android:textSize="19sp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
                 android:gravity="center"
                 />
 
@@ -121,9 +122,9 @@
                 android:background="@drawable/textview_border"
                 android:text=""
                 android:textColor="@android:color/black"
-                android:textSize="24sp"
-                android:paddingTop="15dp"
-                android:paddingBottom="15dp"
+                android:textSize="19sp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
                 android:gravity="center"
                 android:hint="Monto"
                 android:textStyle="bold"/>
@@ -146,9 +147,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Tot: $0.00"
-
-                android:layout_marginRight="12dp"
-                android:layout_marginLeft="7dp"
+                android:textSize="12sp"
+                android:layout_marginRight="4dp"
+                android:layout_marginLeft="2dp"
                 />
 
             <TextView
@@ -156,339 +157,213 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Des: $0.00"
+                android:textSize="12sp"
 
-                android:layout_marginRight="3dp"
-                android:layout_marginLeft="7dp"
                 />
 
             <!--android:layout_marginTop="-8dp"-->
+            <!--android:layout_marginRight="2dp"-->
+            <!--android:layout_marginLeft="3dp"-->
             <com.example.jean2.creta.CheckBox_Icon
                 android:id="@+id/ckbDescuento"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Desc."
+                android:text="Des"
                 android:textSize="10dp"
 
-                android:layout_marginRight="2dp"
-                android:layout_marginLeft="3dp"/>
+
+                />
 
             <com.example.jean2.creta.CheckBox_Icon
                 android:id="@+id/ckbPrint"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/icon_print"
-                android:textSize="30dp"
-                android:layout_marginRight="1dp"
-                android:layout_marginLeft="1dp"/>
+                android:textSize="25dp"
+                />
             <com.example.jean2.creta.CheckBox_Icon
                 android:id="@+id/ckbSms"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/icon_sms"
-                android:textSize="30dp"
+                android:textSize="25dp"
                 android:textColor="@android:color/holo_blue_dark"
-                android:layout_marginRight="1dp"
-                android:layout_marginLeft="1dp"/>
+                />
             <com.example.jean2.creta.CheckBox_Icon
                 android:id="@+id/ckbWhatsapp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/icon_whatsapp"
-                android:textSize="30dp"
+                android:textSize="25dp"
                 android:textColor="@android:color/holo_green_dark"
-                android:layout_marginRight="1dp"
-                android:layout_marginLeft="1dp"/>
+                />
             <!--<com.example.jean2.creta.CheckBox_Icon-->
-                <!--android:id="@+id/ckbSms"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="match_parent"-->
-                <!--android:text="@string/icon_sms"-->
-                <!--android:textSize="40dp"/>-->
+            <!--android:id="@+id/ckbSms"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:text="@string/icon_sms"-->
+            <!--android:textSize="40dp"/>-->
             <!--<com.example.jean2.creta.CheckBox_Icon-->
-                <!--android:id="@+id/ckbWhatsapp"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="match_parent"-->
-                <!--android:text="@string/icon_whatsapp"-->
-                <!--android:textSize="40dp"/>-->
+            <!--android:id="@+id/ckbWhatsapp"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:text="@string/icon_whatsapp"-->
+            <!--android:textSize="40dp"/>-->
         </LinearLayout>
 
         <!--<include layout="@layout/formulario_jugada_layout"/>-->
 
-        <GridLayout
+        <LinearLayout
+            android:id="@+id/buttonPanel"
+            android:layout_below="@+id/result"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentBottom="true"
 
-            android:columnCount="4"
-            android:orientation="horizontal"
-            android:rowCount="4">
+            android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+                <Button
+                    android:id="@+id/btnPunto"
+                    style="@style/ActionButtonStyle"
+                    android:text="."/>
+                <Button
+                    android:id="@+id/btnD"
+                    style="@style/ActionButtonStyle"
+                    android:text="D"/>
+                <Button
+                    android:id="@+id/btnQ"
+                    style="@style/ActionButtonStyle"
+                    android:text="Q"/>
+                <!--<Button-->
+                    <!--android:id="@+id/delete"-->
+                    <!--style="@style/ActionButtonStyle"-->
+                    <!--android:drawableLeft="@drawable/ic_backspace_black_24dp"-->
+                    <!--android:maxLines="1"/>-->
 
+                <ImageView
+                    android:id="@+id/btnBackspace"
+                    style="@style/ActionButtonStyleBackspace"
+                    android:src="@drawable/ic_backspace_black_18dp"
+                     />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+                <Button
+                    android:id="@+id/btn7"
+                    style="@style/NumberButtonStyle"
+                    android:text="7"/>
+                <Button
+                    android:id="@+id/btn8"
+                    style="@style/NumberButtonStyle"
+                    android:text="8"/>
+                <Button
+                    android:id="@+id/btn9"
+                    style="@style/NumberButtonStyle"
+                    android:text="9"/>
+                <Button
+                    android:id="@+id/btnSlash"
+                    style="@style/ActionButtonStyle"
+                    android:text="/"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+                <Button
+                    android:id="@+id/btn4"
+                    style="@style/NumberButtonStyle"
+                    android:text="4"/>
+                <Button
+                    android:id="@+id/btn5"
+                    style="@style/NumberButtonStyle"
+                    android:text="5"/>
+                <Button
+                    android:id="@+id/btn6"
+                    style="@style/NumberButtonStyle"
+                    android:text="6"/>
+                <Button
+                    android:id="@+id/btnMenos"
+                    style="@style/ActionButtonStyle"
+                    android:text="-"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+                <Button
+                    android:id="@+id/btn1"
+                    style="@style/NumberButtonStyle"
+                    android:text="1"/>
+                <Button
+                    android:id="@+id/btn2"
+                    style="@style/NumberButtonStyle"
+                    android:text="2"/>
+                <Button
+                    android:id="@+id/btn3"
+                    style="@style/NumberButtonStyle"
+                    android:text="3"/>
+                <Button
+                    android:id="@+id/btnMas"
+                    style="@style/ActionButtonStyle"
+                    android:text="+"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+                <Button
+                    android:id="@+id/btn0"
+                    style="@style/NumberButtonStyle"
+                    android:text="0"/>
+                <Button
+                    android:id="@+id/btnEnter"
+                    style="@style/ActionButtonStyle"
+                    android:text="ENTER"/>
 
-            <!--<Button-->
-            <!--android:id="@+id/a"-->
-            <!--android:text="hola"-->
-            <!--android:layout_column="0"-->
-            <!--android:layout_row="0"-->
-            <!--android:layout_columnSpan="3"-->
-            <!--android:layout_columnWeight="1"/>-->
-            <!--<Button-->
-            <!--android:id="@+id/b"-->
-            <!--android:text="hola"-->
-            <!--android:layout_column="3"-->
-            <!--android:layout_row="0"-->
-            <!--/>-->
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="2">
 
+                <com.example.jean2.creta.TextView_Icon
+                    android:id="@+id/txtPrint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/icon_print"
+                    android:textSize="40dp"
+                    android:textColor="@android:color/holo_blue_dark"
+                    android:layout_margin="8dp"/>
+                <com.example.jean2.creta.TextView_Icon
+                    android:id="@+id/txtDelete"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/icon_delete"
+                    android:textSize="40dp"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:layout_margin="8dp"/>
 
-            <Button
-                android:id="@+id/btnPunto"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/oper_button"
-                android:text="."
-                android:textColor="@color/oper_text_color"
-                android:textSize="24sp"
-                android:padding="10dp"
-                />
-
-            <Button
-                android:id="@+id/btnD"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/oper_button"
-                android:text="D"
-                android:textColor="@color/oper_text_color"
-                android:textSize="24sp"
-                android:padding="10dp"
-                />
-
-            <Button
-                android:id="@+id/btnQ"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/oper_button"
-                android:text="Q"
-                android:textColor="@color/oper_text_color"
-                android:textSize="24sp"
-                android:padding="10dp"
-                />
-
-            <Button
-                android:id="@+id/btnBackspace"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="fill"
-                android:layout_weight="1"
-                android:background="@drawable/oper_button"
-                android:text="BACKSPACE"
-                android:textColor="@color/oper_text_color"
-                android:textSize="20sp"
-                android:padding="10dp"
-                />
-
-
-
-
-            <!-- segunda fila -->
-            <Button
-                android:id="@+id/btn7"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-
-                android:background="@drawable/numbers_button"
-                android:text="7"
-                android:textSize="24sp"
-                android:padding="10dp"
-                />
-
-            <Button
-                android:id="@+id/btn8"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-
-                android:background="@drawable/numbers_button"
-                android:text="8"
-                android:textSize="24sp"
-                android:padding="10dp"
-                />
-
-            <Button
-                android:id="@+id/btn9"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/numbers_button"
-                android:text="9"
-                android:textSize="24sp"
-                android:padding="10dp"
-                />
-
-            <Button
-                android:id="@+id/btnSlash"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="fill"
-                android:layout_weight="1"
-                android:background="@drawable/oper_button"
-                android:text="/"
-                android:textColor="@color/oper_text_color"
-                android:textSize="24sp"
-                android:padding="10dp"
-                />
-
-
-
-
-
-            <!-- TERCERA FILA -->
-            <Button
-                android:id="@+id/btn4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/numbers_button"
-                android:text="4"
-                android:textSize="24sp"
-                android:padding="10dp"
-                />
-
-            <Button
-                android:id="@+id/btn5"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/numbers_button"
-                android:text="5"
-                android:textSize="24sp"
-                android:padding="10dp"
-                />
-
-            <Button
-                android:id="@+id/btn6"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/numbers_button"
-                android:text="6"
-                android:textSize="24sp"
-                android:padding="10dp"
-                />
-
-            <Button
-                android:id="@+id/btnMenos"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="fill"
-                android:layout_weight="1"
-                android:background="@drawable/oper_button"
-                android:text="-"
-                android:textColor="@color/oper_text_color"
-                android:textSize="24sp"
-                android:padding="10dp"
-                />
+                <Spinner
+                    android:id="@+id/spinnerTickets"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
 
 
-            <!-- CUERTA FILA -->
-
-            <Button
-                android:id="@+id/btn1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/numbers_button"
-                android:text="1"
-                android:textSize="24sp"
-                android:padding="10dp"
-                />
-
-            <Button
-                android:id="@+id/btn2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/numbers_button"
-                android:text="2"
-                android:textSize="24sp"
-                android:padding="10dp"
-                />
-
-            <Button
-                android:id="@+id/btn3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/numbers_button"
-                android:text="3"
-                android:textSize="24sp"
-                android:padding="10dp"
-                />
-
-            <Button
-                android:id="@+id/btnMas"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="fill"
-                android:layout_weight="1"
-                android:background="@drawable/oper_button"
-                android:text="+"
-                android:textColor="@color/oper_text_color"
-                android:textSize="24sp"
-                android:padding="10dp"
-                />
+                    />
+                <!--android:layout_gravity="fill"-->
+            </LinearLayout>
+        </LinearLayout>
 
 
-
-            <!-- CUERTA FILA -->
-            <Button
-                android:id="@+id/btn0"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/numbers_button"
-                android:text="0"
-                android:textSize="24sp"
-                android:layout_columnSpan="2"
-                android:layout_gravity="fill"
-                android:padding="10dp"
-
-                />
-
-            <Button
-                android:id="@+id/btnEnter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/oper_button"
-                android:textColor="@color/oper_text_color"
-                android:text="ENTER"
-                android:textSize="24sp"
-                android:layout_columnSpan="2"
-                android:layout_gravity="fill"
-                android:padding="10dp"
-                />
-
-
-            <com.example.jean2.creta.TextView_Icon
-                android:id="@+id/txtPrint"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/icon_print"
-                android:textSize="70dp"
-                android:textColor="@android:color/holo_blue_dark"
-                android:layout_margin="8dp"/>
-            <com.example.jean2.creta.TextView_Icon
-                android:id="@+id/txtDelete"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/icon_delete"
-                android:textSize="70dp"
-                android:textColor="@android:color/holo_red_dark"
-                android:layout_margin="8dp"/>
-
-            <Spinner
-                android:id="@+id/spinnerTickets"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_columnSpan="2"
-                android:layout_gravity="fill"
-                />
-
-        </GridLayout>
     </LinearLayout>
 
 
 
 
-</FrameLayout>
+</RelativeLayout>

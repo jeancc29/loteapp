@@ -1,7 +1,11 @@
 package com.example.jean2.creta;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.support.design.widget.TextInputEditText;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -35,6 +39,7 @@ public class LoginActivity extends AppCompatActivity {
     CheckBox checkBoxRecordar;
     ProgressBar progressBar;
     public static int idUsuario = 0;
+    final private int REQUEST_CODE_ASK_PERMISSION = 111;
 
     //private RequestQueue mQueue;
 
@@ -42,6 +47,7 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
         comprobarSesionGuardada();
 
         toolbar = findViewById(R.id.toolBarLogin);
@@ -73,6 +79,17 @@ public class LoginActivity extends AppCompatActivity {
     }
 
 
+    private void comprobarPermisos(){
+        int permisosCamara = ActivityCompat.checkSelfPermission(LoginActivity.this, Manifest.permission.CAMERA);
+        int permisosStorage = ActivityCompat.checkSelfPermission(LoginActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if(permisosStorage != PackageManager.PERMISSION_GRANTED || permisosCamara != PackageManager.PERMISSION_GRANTED){
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA}, REQUEST_CODE_ASK_PERMISSION);
+            }
+        }
+
+    }
     private void jsonParse(String usuario, String password){
         String url = "http://loterias.ml/api/acceder";
 

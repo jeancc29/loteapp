@@ -158,6 +158,7 @@ public class VentasActivity extends AppCompatActivity {
                 getVentas();
             }
         });
+        btnBuscar.performClick();
     }
 
 
@@ -205,6 +206,26 @@ public class VentasActivity extends AppCompatActivity {
                             txtNeto.setText(response.getString("neto"));
                             txtFinal.setText(response.getString("neto"));
                             txtBalance.setText(response.getString("balanceActual"));
+
+
+                            if(response.getDouble("premios") > response.getDouble("ventas")){
+                                txtPremios.setBackgroundColor(Color.parseColor("#ffcccc"));
+                            }else{
+                                txtPremios.setBackgroundColor(Color.parseColor("#eae9e9"));
+                            }
+
+                            if(response.getDouble("neto") < 0){
+                                txtNeto.setBackgroundColor(Color.parseColor("#ffcccc"));
+                            }else{
+                                txtNeto.setBackgroundColor(Color.parseColor("#ffffff"));
+                            }
+
+                            if(response.getDouble("balanceActual") < 0){
+                                txtBalance.setBackgroundColor(Color.parseColor("#ffcccc"));
+                            }else{
+                                txtBalance.setBackgroundColor(Color.parseColor("#eae9e9"));
+                            }
+
 
                             updateTableTotalesPorLoteria(response.getJSONArray("loterias"));
                             updateTableNumerosGanadores(response.getJSONArray("loterias"));
@@ -278,6 +299,13 @@ public class VentasActivity extends AppCompatActivity {
                 TableRow tableRow = new TableRow(mContext);
                 tableRow.setLayoutParams(tableRowParams);
 
+                if(i == 0) {
+                    tableRow.setBackgroundColor(Color.parseColor("#eae9e9"));
+                }
+                else if((i % 2) == 0){
+                    tableRow.setBackgroundColor(Color.parseColor("#eae9e9"));
+                }
+
                 tableRow.setId(idRow);
 
 
@@ -345,6 +373,14 @@ public class VentasActivity extends AppCompatActivity {
                 /* create a table row */
                 TableRow tableRow = new TableRow(mContext);
                 tableRow.setLayoutParams(tableRowParams);
+
+
+                if(i == 0) {
+                    tableRow.setBackgroundColor(Color.parseColor("#eae9e9"));
+                }
+                else if((i % 2) == 0){
+                    tableRow.setBackgroundColor(Color.parseColor("#eae9e9"));
+                }
 
                 tableRow.setId(idRow);
 
@@ -416,6 +452,8 @@ public class VentasActivity extends AppCompatActivity {
             tableRow1.addView(createTv("Numero de ticket", true, mContext, true));
             tableRow1.addView(createTv("A pagar", true, mContext, true));
 
+
+
             tableTicketsGanadores.addView(tableRow1);
 
             return;
@@ -434,6 +472,12 @@ public class VentasActivity extends AppCompatActivity {
                 TableRow tableRow = new TableRow(mContext);
                 tableRow.setLayoutParams(tableRowParams);
 
+                if(i == 0) {
+                    tableRow.setBackgroundColor(Color.parseColor("#eae9e9"));
+                }
+                else if((i % 2) == 0){
+                    tableRow.setBackgroundColor(Color.parseColor("#eae9e9"));
+                }
                 tableRow.setId(idRow);
 
 

@@ -72,6 +72,16 @@ public class MonitoreoActivity extends AppCompatActivity {
         progressBar = (ProgressBar)findViewById(R.id.progressBarPrincipal);
 
 
+        Calendar calendarIncial = Calendar.getInstance();
+        int yearActual = calendarIncial.get(Calendar.YEAR);
+        int monthActual = calendarIncial.get(Calendar.MONTH) + 1;
+        int dayActual = calendarIncial.get(Calendar.DAY_OF_MONTH);
+
+
+        txtFechaMonitoreo.setText(String.valueOf(yearActual) + "-" + String.valueOf(monthActual) + "-" + String.valueOf(dayActual));
+
+        getMonitoreo();
+
         txtFechaMonitoreo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -171,6 +181,13 @@ public class MonitoreoActivity extends AppCompatActivity {
                 TableRow tableRow = new TableRow(mContext);
                 tableRow.setLayoutParams(tableRowParams);
 
+                if(i == 0) {
+                    tableRow.setBackgroundColor(Color.parseColor("#eae9e9"));
+                }
+                else if((i % 2) == 0){
+                    tableRow.setBackgroundColor(Color.parseColor("#eae9e9"));
+                }
+
                 tableRow.setId(idRow);
 
 
@@ -182,15 +199,15 @@ public class MonitoreoActivity extends AppCompatActivity {
                     tableRow1.setId(idRow);
                     tableRow1.setLayoutParams(tableRowParams);
                     idRow ++;
-                    tableRow1.addView(createTv("Numero/Imprimir", true, mContext, true));
-                    tableRow1.addView(createTv("Monto", true, mContext, true));
+                    tableRow1.addView(createTv("Numero/Imprim.", true, mContext, true));
+                    tableRow1.addView(createTv("Mont", true, mContext, true));
                     tableRow1.addView(createTv("Cancelar", true, mContext, true));
                     tableLayout.addView(tableRow1);
                 }
                 /* add views to the row */
                 tableRow.setId(idRow);
                 tableRow.addView(createTv(toSecuencia(dato.getString("idTicket"), dato.getString("codigo")), false, mContext, true));
-                tableRow.addView(createTv(dato.getString("subTotal"), false, mContext, false));
+                tableRow.addView(createTv(dato.getString("total"), false, mContext, false));
 
                 /* create cell element - button */
                 Button btn = new Button(mContext);
