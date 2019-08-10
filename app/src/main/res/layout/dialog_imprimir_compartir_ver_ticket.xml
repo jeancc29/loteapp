@@ -14,7 +14,7 @@
             android:id="@+id/ticket"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="15dp"/>
+            android:textSize="20dp"/>
     </LinearLayout>
 
     <LinearLayout

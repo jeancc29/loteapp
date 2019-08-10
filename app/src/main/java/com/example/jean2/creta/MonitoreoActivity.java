@@ -491,4 +491,9 @@ public class MonitoreoActivity extends AppCompatActivity {
 
     }
 
+    public static void VerTicket(){
+        VerTicketDialog verTicketDialog = new VerTicketDialog();
+        verTicketDialog.show(mActivity.getSupportFragmentManager(), "Ver ticket");
+    }
+
 }

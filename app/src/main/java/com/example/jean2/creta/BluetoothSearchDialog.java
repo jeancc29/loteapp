@@ -671,7 +671,7 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
                     pos.POS_S_TextOut("- TOTAL: " + total + " -\n", 1, 0, 1, 0, 0x00);
 
                     if(this.original == false && this.cancelado == true){
-                        pos.POS_S_TextOut("** CANCELADO **\n\n", 0, 1, 1, 0, 0x00);
+                        pos.POS_S_TextOut("** CANCELADO **\n\n\n", 0, 1, 1, 0, 0x00);
                     }
 
                     if(this.cancelado == false){

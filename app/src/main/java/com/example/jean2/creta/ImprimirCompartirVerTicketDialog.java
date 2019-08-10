@@ -36,6 +36,7 @@ public class ImprimirCompartirVerTicketDialog extends AppCompatDialogFragment {
     Context mContext;
     Button btnImprimir;
     Button btnCompartir;
+    Button btnVerTicket;
     ExecutorService es = Executors.newScheduledThreadPool(30);
 
     @Override
@@ -47,6 +48,7 @@ public class ImprimirCompartirVerTicketDialog extends AppCompatDialogFragment {
         txtTicket = (TextView)view.findViewById(R.id.ticket);
         btnImprimir = (Button) view.findViewById(R.id.btnImprimir);
         btnCompartir = (Button) view.findViewById(R.id.btnCompartir);
+        btnVerTicket = (Button) view.findViewById(R.id.btnVerTicket);
 
         String idTicketSecuencia = Utilidades.toSecuencia(obtenerAtributoJsonObjectTicket("idTicket"), obtenerAtributoJsonObjectTicket("codigo"));
         txtTicket.setText("Que desea hacer con el ticket " + idTicketSecuencia + " ?");
@@ -61,6 +63,12 @@ public class ImprimirCompartirVerTicketDialog extends AppCompatDialogFragment {
             @Override
             public void onClick(View view) {
                 CompartirTicket();
+            }
+        });
+        btnVerTicket.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                verTicket();
             }
         });
 
@@ -176,6 +184,10 @@ public class ImprimirCompartirVerTicketDialog extends AppCompatDialogFragment {
                 }
             }
         }.execute();
+    }
+
+    private void verTicket(){
+        MonitoreoActivity.VerTicket();
     }
 
 }

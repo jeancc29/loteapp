@@ -369,6 +369,9 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
     public void seleccionarLoteriasMultiSelect(JSONArray loteriasASeleccionar, boolean seleccionarPrimeraLoteria ){
         try {
             if(seleccionarPrimeraLoteria){
+                if(listItems.length == 0){
+                    return;
+                }
                 checkedItems[0] = true;
                 mUserItems.add(0);
                 String loteria = listItems[mUserItems.get(0)];

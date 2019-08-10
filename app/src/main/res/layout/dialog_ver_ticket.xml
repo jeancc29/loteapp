@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_alignParentBottom="true"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/ticket"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Leyenda"
+            android:textSize="20dp"
+            android:gravity="center"/>
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="10dp">
+        <TextView
+            android:id="@+id/btnCompartir"
+            style="@style/leyendaTextViewStyle"
+            android:text="Ganador"
+            android:background="@color/bgInfo"
+            android:gravity="center"/>
+        <TextView
+            android:id="@+id/btnVerTicket"
+            style="@style/leyendaTextViewStyle"
+            android:text="Perdedor"
+            android:background="@color/bgRosa"
+            android:gravity="center"/>
+        <TextView
+            android:id="@+id/btnImprimir"
+            style="@style/leyendaTextViewStyle"
+            android:text="Pendiente"
+            android:background="@color/bgGris"
+            android:gravity="center"/>
+
+
+
+    </LinearLayout>
+
+
+
+    <LinearLayout
+        android:id="@+id/linealLayoutJugadas"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+
+    </LinearLayout>
+
+    <!--<TableLayout-->
+        <!--android:id="@+id/tableJugadas"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginVertical="30dp"-->
+        <!--android:layout_marginHorizontal="10dp"-->
+        <!--android:collapseColumns=""-->
+        <!--&gt;-->
+
+        <!--<TableRow android:layout_height="wrap_content"-->
+            <!--android:layout_width="wrap_content">-->
+            <!--<TextView-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="Jugada"-->
+                <!--android:textStyle="bold"-->
+                <!--android:layout_weight="1"-->
+                <!--android:gravity="center"-->
+                <!--android:textSize="20dp"/>-->
+
+            <!--<TextView-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="Sorteo"-->
+                <!--android:textStyle="bold"-->
+                <!--android:layout_weight="1"-->
+                <!--android:gravity="center"-->
+                <!--android:textSize="20dp"/>-->
+
+            <!--<TextView-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="Importe"-->
+                <!--android:textStyle="bold"-->
+                <!--android:layout_weight="1"-->
+                <!--android:gravity="center"-->
+                <!--android:textSize="20dp"/>-->
+
+            <!--<TextView-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="Premio"-->
+                <!--android:textStyle="bold"-->
+                <!--android:layout_weight="1"-->
+                <!--android:gravity="center"-->
+                <!--android:textSize="20dp"/>-->
+
+
+
+
+        <!--</TableRow>-->
+
+        <!--<TableRow android:layout_height="wrap_content"-->
+            <!--android:layout_width="wrap_content">-->
+            <!--<TextView-->
+
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="-"-->
+
+                <!--android:layout_weight="1"-->
+                <!--android:gravity="center"-->
+                <!--android:textSize="20dp"-->
+                <!--/>-->
+
+            <!--<TextView-->
+
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="-"-->
+
+                <!--android:layout_weight="1"-->
+                <!--android:gravity="center"-->
+                <!--android:textSize="20dp"-->
+                <!--/>-->
+
+            <!--<TextView-->
+
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="0.00"-->
+
+                <!--android:layout_weight="1"-->
+                <!--android:gravity="center"-->
+                <!--android:textSize="20dp"-->
+                <!--/>-->
+
+            <!--<TextView-->
+
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="0.00"-->
+
+                <!--android:layout_weight="1"-->
+                <!--android:gravity="center"-->
+                <!--android:textSize="20dp"-->
+                <!--/>-->
+
+
+
+
+        <!--</TableRow>-->
+
+
+    <!--</TableLayout>-->
+
+
+</LinearLayout>
