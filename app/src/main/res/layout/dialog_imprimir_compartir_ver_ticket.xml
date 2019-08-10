@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_alignParentBottom="true"
+    android:orientation="vertical">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/ticket"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="15dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+        <Button
+            android:id="@+id/btnCompartir"
+            style="@style/buttonDialogStyle"
+            android:text="Compartir"/>
+        <Button
+            android:id="@+id/btnVerTicket"
+            style="@style/buttonDialogStyle"
+            android:text="Ver ticket"/>
+        <Button
+            android:id="@+id/btnImprimir"
+            style="@style/buttonDialogStyle"
+            android:text="Imprimir"/>
+
+
+
+    </LinearLayout>
+
+</LinearLayout>

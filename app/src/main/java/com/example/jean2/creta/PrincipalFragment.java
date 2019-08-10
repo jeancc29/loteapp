@@ -118,7 +118,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
     public static WebView webViewImg;
 
     final private int REQUEST_CODE_ASK_PERMISSION = 111;
-
+    private boolean cambioCursorDesdeElBotonEnter = false;
 
 
     String monto;
@@ -179,7 +179,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         //return inflater.inflate(R.layout.fragment_principal, container, false);
         view = inflater.inflate(R.layout.fragment_principal, container, false);
 
-        borderChange(true);
+        borderChange(true, false);
 
         //mQueue = Volley.newRequestQueue(getActivity());
 
@@ -561,10 +561,10 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                 aceptaCancelarTicket();
                 break;
                 case (R.id.txtJugada):
-                borderChange(true);
+                borderChange(true, false);
                 break;
             case (R.id.txtMontojugar):
-                borderChange(false);
+                borderChange(false, false);
                 break;
             case (R.id.btn0):
                 caracteres = "0";
@@ -687,12 +687,24 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                     return;
             }
 
-            caracteres = txtMontojugar.getText() + caracteres;
+            //Si cambio' al precionar el boton enter entonces eso quiere decir que es una nueva jugada
+            //asi que el monto que tiene el campo monto debe ser sustituido con el nuevo caracter introducido
+            //asi la experiencia del usuario es mucho mejor porque este no tendra que eliminar el monto precionando
+            //la tecla backspace a cada instante, sino que se eliminara automaticamente cuando la variable
+            //cambioCursorDesdeElBotonEnter sea verdadera, en caso contrario entonces simplemente se concatenara el nuevo valor
+            if(cambioCursorDesdeElBotonEnter){
+                caracteres = caracteres;
+                borderChange(false, false);
+            }else{
+                caracteres = txtMontojugar.getText() + caracteres;
+            }
+
             txtMontojugar.setText(caracteres);
         }
     }
 
-    private void borderChange(boolean jugada_monto_active){
+    private void borderChange(boolean jugada_monto_active, boolean desdeBotonEnter){
+        cambioCursorDesdeElBotonEnter = desdeBotonEnter;
 
         this.jugada_monto_active = jugada_monto_active;
         TextView txtPonerBorderActive, txtPonerBorderNormal;
@@ -813,7 +825,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         if(mUserItems.size() > 1){
             txtMontodisponible.setText("x");
             Main2Activity.progressBarToolbar.setVisibility(View.GONE);
-            borderChange(false);
+            borderChange(false, true);
             return;
         }
 
@@ -875,7 +887,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                         Main2Activity.progressBarToolbar.setVisibility(View.GONE);
                         try {
                             txtMontodisponible.setText(response.getString("monto"));
-                            borderChange(false);
+                            borderChange(false, true);
                         } catch (JSONException e) {
                             Log.d("Error: ", e.toString());
                             e.printStackTrace();
@@ -1001,7 +1013,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                             Main2Activity.progressBarToolbar.setVisibility(View.GONE);
                             if(errores.equals("0")){
                                 jsonParse();
-                                borderChange(true);
+                                borderChange(true, false);
                                 limpiar();
                                // Bitmap img = screenshot(webViewImg, response.getString("img"));
                                 //Log.d("webImg", String.valueOf(screenshot(webViewImg, response.getString("img"))));
@@ -1519,10 +1531,10 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
 
         //Log.d("jugadas:", jugadas.toString());
-        txtMontojugar.setText("");
+//        txtMontojugar.setText("");
         calcularTotal();
         getJugadas();
-        borderChange(true);
+        borderChange(true, false);
 
     } //End jugadasAdd
 

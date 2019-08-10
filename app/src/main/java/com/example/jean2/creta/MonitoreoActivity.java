@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.support.v7.app.ActionBar;
@@ -41,9 +42,12 @@ import org.w3c.dom.Text;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MonitoreoActivity extends AppCompatActivity {
     Context mContext;
+    static MonitoreoActivity mActivity;
     TableLayout tableLayout;
     TextView txtFechaMonitoreo;
     private Toolbar toolbar;
@@ -53,6 +57,9 @@ public class MonitoreoActivity extends AppCompatActivity {
     private TextView mDisplayDate;
     private DatePickerDialog.OnDateSetListener mDateSetListener;
     private JSONArray tickets = new JSONArray();
+    public static JSONObject selectedTicket = new JSONObject();
+    ExecutorService es = Executors.newScheduledThreadPool(30);
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +73,7 @@ public class MonitoreoActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mContext = this;
+        mActivity = this;
         //mQueue = Volley.newRequestQueue(mContext);
         tableLayout = (TableLayout)findViewById(R.id.tableMonitoreo);
         txtFechaMonitoreo = (TextView) findViewById(R.id.txtFechaMonitoreo);
@@ -117,6 +125,13 @@ public class MonitoreoActivity extends AppCompatActivity {
     }
 
     public void aceptaCancelarTicket(final JSONObject ticket){
+        if(BluetoothSearchDialog.isPrinterConnected() == false){
+            Toast.makeText(mContext, "Debe conectarse a una impresora", Toast.LENGTH_SHORT).show();
+            mostrarFragmentDialogBluetoothSearch();
+//                mostrarDispositivosBluetooth();
+            return;
+        }
+
         DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -206,7 +221,30 @@ public class MonitoreoActivity extends AppCompatActivity {
                 }
                 /* add views to the row */
                 tableRow.setId(idRow);
-                tableRow.addView(createTv(toSecuencia(dato.getString("idTicket"), dato.getString("codigo")), false, mContext, true));
+
+                TextView txtTicket = createTv(toSecuencia(dato.getString("idTicket"), dato.getString("codigo")), false, mContext, true);
+                txtTicket.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        int id = ((View)view.getParent()).getId();
+
+
+//                        TableRow r = (TableRow)((Activity) mContext).findViewById(id);
+//                        TableLayout t = (TableLayout)((Activity) mContext).findViewById(R.id.tableJugadas);
+//                        t.removeView(r);
+//                        Log.d("Pariente:" , String.valueOf(id));
+
+                        //Buscar ticket retorna un json object
+                        selectedTicket = buscar(id - 1);
+                        ImprimirCompartirVerTicketDialog imprimirCompartirVerTicketDialog = new ImprimirCompartirVerTicketDialog();
+                        imprimirCompartirVerTicketDialog.show(getSupportFragmentManager(), "Accion a realizar");
+                    }
+                });
+
+
+                //tableRow.addView(createTv(toSecuencia(dato.getString("idTicket"), dato.getString("codigo")), false, mContext, true));
+                tableRow.addView(txtTicket);
                 tableRow.addView(createTv(dato.getString("total"), false, mContext, false));
 
                 /* create cell element - button */
@@ -387,7 +425,8 @@ public class MonitoreoActivity extends AppCompatActivity {
                         try {
                             String errores = response.getString("errores");
                             if(errores.equals("0")){
-                                getMonitoreo();
+
+                                ImprimirTicketCancelado();
                                 Toast.makeText(mContext, response.getString("mensaje"), Toast.LENGTH_SHORT).show();
                             }
                             else
@@ -420,6 +459,36 @@ public class MonitoreoActivity extends AppCompatActivity {
 
 //        mQueue.add(request);
         MySingleton.getInstance(mContext).addToRequestQueue(request);
+    }
+
+
+    public static void mostrarFragmentDialogBluetoothSearch(){
+        BluetoothSearchDialog duplicarDialog = new BluetoothSearchDialog();
+        duplicarDialog.show( mActivity.getSupportFragmentManager(), "Duplicar dialog");
+//                mostrarDispositivosBluetooth();
+    }
+
+
+    private void ImprimirTicketCancelado(){
+        if(BluetoothSearchDialog.isPrinterConnected() == false){
+            Toast.makeText(mContext, "Debe conectarse a una impresora", Toast.LENGTH_SHORT).show();
+            MonitoreoActivity.mostrarFragmentDialogBluetoothSearch();
+//                mostrarDispositivosBluetooth();
+            return;
+        }
+
+
+        try{
+            JSONObject venta = new JSONObject();
+            venta.put("venta", selectedTicket);
+            Log.d("MonitoreoCancelado", venta.toString());
+            es.submit(new BluetoothSearchDialog.TaskPrint(venta, 1));
+
+            getMonitoreo();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
     }
 
 }

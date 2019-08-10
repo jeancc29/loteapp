@@ -494,6 +494,7 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
         Bitmap ticketImg;
         JSONObject response;
         boolean original;
+        boolean cancelado;
 
         public TaskPrint(Pos pos)
         {
@@ -515,6 +516,14 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
             this.pos = mPos;
             this.response = response;
             this.original = original;
+        }
+
+        public TaskPrint(JSONObject response, int cancelado)
+        {
+            this.pos = mPos;
+            this.response = response;
+
+            this.cancelado = true;
         }
 
         @Override
@@ -597,15 +606,19 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
 
                     pos.POS_S_Align(1);
                     pos.POS_S_TextOut(venta.getJSONObject("banca").getString("descripcion")+"\n", 0, 1, 1, 0, 0x00);
-                    if(this.original)
+                    if(this.original == true && this.cancelado == false)
                         pos.POS_S_TextOut("** ORIGINAL **\n", 0, 1, 1, 0, 0x00);
-                    else
+                    else if(this.original == false && this.cancelado == false)
                         pos.POS_S_TextOut("** COPIA **\n", 0, 1, 1, 0, 0x00);
+                    else if(this.original == false && this.cancelado == true)
+                        pos.POS_S_TextOut("** CANCELADO **\n", 0, 1, 1, 0, 0x00);
 
                     pos.POS_S_TextOut(venta.getString("fecha")+"\n", 0, 0, 1, 0, 0x00);
                     pos.POS_S_TextOut("Ticket:"  +Utilidades.toSecuencia(venta.getString("idTicket"), venta.getString("codigo"))+ "\n", 0, 0, 1, 0, 0x00);
                     pos.POS_S_TextOut("Fecha: " + venta.getString("fecha")+"\n", 0, 0, 1, 0, 0x00);
-                    pos.POS_S_TextOut(venta.getString("codigoBarra")+"\n", 1, 1, 1, 0, 0x00);
+                    if(this.original == true && this.cancelado == false)
+                        pos.POS_S_TextOut(venta.getString("codigoBarra")+"\n", 1, 1, 1, 0, 0x00);
+
                     for(int i=0; i < jsonArrayLoterias.length(); i++){
                         if(!pos.GetIO().IsOpened())
                             break;
@@ -657,16 +670,23 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
                     }
                     pos.POS_S_TextOut("- TOTAL: " + total + " -\n", 1, 0, 1, 0, 0x00);
 
-                    if(!venta.getJSONObject("banca").getString("piepagina1").equals("null"))
-                        pos.POS_S_TextOut(venta.getJSONObject("banca").getString("piepagina1") + "\n", 1, 0, 1, 0, 0x00);
-                    if(!venta.getJSONObject("banca").getString("piepagina2").equals("null"))
-                        pos.POS_S_TextOut(venta.getJSONObject("banca").getString("piepagina2") + "\n", 1, 0, 1, 0, 0x00);
-                    if(!venta.getJSONObject("banca").getString("piepagina3").equals("null"))
-                        pos.POS_S_TextOut(venta.getJSONObject("banca").getString("piepagina3") + "\n", 1, 0, 1, 0, 0x00);
-                    if(!venta.getJSONObject("banca").getString("piepagina4").equals("null"))
-                        pos.POS_S_TextOut(venta.getJSONObject("banca").getString("piepagina4") + "\n", 1, 0, 1, 0, 0x00);
-                    pos.POS_S_SetQRcode(venta.getString("codigoQr"), 8, 0, 3);
-                    pos.POS_S_TextOut("\n\n", 1, 0, 1, 0, 0x00);
+                    if(this.original == false && this.cancelado == true){
+                        pos.POS_S_TextOut("** CANCELADO **\n\n", 0, 1, 1, 0, 0x00);
+                    }
+
+                    if(this.cancelado == false){
+                        if(!venta.getJSONObject("banca").getString("piepagina1").equals("null"))
+                            pos.POS_S_TextOut(venta.getJSONObject("banca").getString("piepagina1") + "\n", 1, 0, 1, 0, 0x00);
+                        if(!venta.getJSONObject("banca").getString("piepagina2").equals("null"))
+                            pos.POS_S_TextOut(venta.getJSONObject("banca").getString("piepagina2") + "\n", 1, 0, 1, 0, 0x00);
+                        if(!venta.getJSONObject("banca").getString("piepagina3").equals("null"))
+                            pos.POS_S_TextOut(venta.getJSONObject("banca").getString("piepagina3") + "\n", 1, 0, 1, 0, 0x00);
+                        if(!venta.getJSONObject("banca").getString("piepagina4").equals("null"))
+                            pos.POS_S_TextOut(venta.getJSONObject("banca").getString("piepagina4") + "\n", 1, 0, 1, 0, 0x00);
+                        pos.POS_S_SetQRcode(venta.getString("codigoQr"), 8, 0, 3);
+                        pos.POS_S_TextOut("\n\n", 1, 0, 1, 0, 0x00);
+
+                    }
 
 
                 }catch (Exception e){
