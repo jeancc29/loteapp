@@ -188,6 +188,7 @@ public class ImprimirCompartirVerTicketDialog extends AppCompatDialogFragment {
 
     private void verTicket(){
         MonitoreoActivity.VerTicket();
+        getDialog().dismiss();
     }
 
 }

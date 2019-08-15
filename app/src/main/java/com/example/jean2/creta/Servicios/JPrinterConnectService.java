@@ -80,7 +80,8 @@ public class JPrinterConnectService extends Service implements IOCallBack {
             jPrinterBluetoothSingleton.mBtOpen(JPrinterConnectService.this);
 //            bt.Open(address,context);
             Log.d("JPrinterConnectS", "name:" + address + " address:" + address);
-            mBt.Open(address, JPrinterConnectService.this);
+//            mBt.Open(address, JPrinterConnectService.this);
+            mBt.Listen(address, 1000, JPrinterConnectService.this);
         }
     }
 
@@ -92,7 +93,7 @@ public class JPrinterConnectService extends Service implements IOCallBack {
 
             @Override
             public void run() {
-                Toast.makeText(JPrinterConnectService.this, "Connected", Toast.LENGTH_SHORT).show();
+                Toast.makeText(JPrinterConnectService.this, "Conectado", Toast.LENGTH_SHORT).show();
                 jPrinterBluetoothSingleton.setConnected(true);
 
             }
@@ -142,7 +143,7 @@ public class JPrinterConnectService extends Service implements IOCallBack {
 
             @Override
             public void run() {
-                Toast.makeText(JPrinterConnectService.this, "Closed", Toast.LENGTH_SHORT).show();
+                Toast.makeText(JPrinterConnectService.this, "Desconectado", Toast.LENGTH_SHORT).show();
             }
         });
     }

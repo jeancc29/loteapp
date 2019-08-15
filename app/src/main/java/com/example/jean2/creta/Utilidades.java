@@ -227,4 +227,12 @@ public class Utilidades {
 
         return cadena;
     }
+
+    public static int toInt(String valor){
+        try {
+            return Integer.parseInt(valor);
+        } catch(NumberFormatException nfe) {
+            return 0;
+        }
+    }
 }

@@ -196,10 +196,14 @@ public class MonitoreoActivity extends AppCompatActivity {
                 TableRow tableRow = new TableRow(mContext);
                 tableRow.setLayoutParams(tableRowParams);
 
-                if(i == 0) {
-                    tableRow.setBackgroundColor(Color.parseColor("#eae9e9"));
-                }
-                else if((i % 2) == 0){
+//                if(i == 0) {
+//                    tableRow.setBackgroundColor(Color.parseColor("#eae9e9"));
+//                }
+//                else if((i % 2) == 0){
+//                    tableRow.setBackgroundColor(Color.parseColor("#eae9e9"));
+//                }
+
+                if((i % 2) != 0){
                     tableRow.setBackgroundColor(Color.parseColor("#eae9e9"));
                 }
 

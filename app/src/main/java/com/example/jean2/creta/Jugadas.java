@@ -84,7 +84,7 @@ public class Jugadas {
                 JSONObject item = (JSONObject)jsonArrayJugadas.get(i);
 
                 if(item.getString("jugada").toString().equals(jugada) && item.getString("idLoteria").toString().equals(idLoteria)){
-                    item.put("monto", Integer.parseInt(item.getString("monto")) + Integer.parseInt(monto));
+                    item.put("monto", Float.parseFloat(item.getString("monto")) + Float.parseFloat(monto));
                     existe = true;
                 }
 

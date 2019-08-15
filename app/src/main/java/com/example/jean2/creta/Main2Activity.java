@@ -93,8 +93,9 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
     boolean jugada_monto_active = true;
     PrincipalFragment principalFragment;
 
-    public static Activity mActivity;
     public static Context mContext;
+    static Main2Activity mActivity;
+    public static JSONObject duplicarDatos;
 
     String monto;
     @Override
@@ -278,8 +279,21 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
                                 else
                                     favoritesFragment = (PrincipalFragment) ((FragmentActivity)mActivity).getSupportFragmentManager().getFragments().get(2);
 
-                                favoritesFragment.duplicar(jsonArray, jsonArrayLoterias);
+                                //favoritesFragment.duplicar(jsonArray, jsonArrayLoterias);
                                 tabLayout.getTabAt(1).select();
+
+                                try{
+                                    duplicarDatos = new JSONObject();
+                                    duplicarDatos.put("jugadas", jsonArray);
+                                    duplicarDatos.put("loterias", jsonArrayLoterias);
+
+                                    DuplicarAvanzadoDialog duplicarAvanzadoDialog = new DuplicarAvanzadoDialog();
+                                    duplicarAvanzadoDialog.show(mActivity.getSupportFragmentManager(), "Duplicar");
+                                }catch (Exception e){
+                                    e.printStackTrace();
+                                    Toast.makeText(mContext, "Error a duplicar", Toast.LENGTH_SHORT).show();
+                                }
+
                             }
                             else
                                 Toast.makeText(mContext, response.getString("mensaje") + " e: " + errores, Toast.LENGTH_SHORT).show();

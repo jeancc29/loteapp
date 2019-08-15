@@ -266,8 +266,10 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
                 //es.submit(new TaskOpen(mBt,jPrinterBluetoothSingleton.getAddress(), jPrinterBluetoothSingleton.getName(), getActivity()));
 
                 mContext.stopService(new Intent(getActivity(), JPrinterConnectService.class));
-                btnSearch.setEnabled(true);
                 jPrinterBluetoothSingleton.Disconnect();
+                btnSearch.setEnabled(true);
+                btnSearch.performClick();
+
 //                es.submit(new TaskClose(mBt));
                 break;
 
@@ -320,7 +322,7 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
 
                         public void onClick(View arg0) {
                             // TODO Auto-generated method stub
-                            Toast.makeText(mContext, "Connecting...", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(mContext, "Conectando...", Toast.LENGTH_SHORT).show();
                             Log.d("pruebaBluetooth", String.valueOf((getActivity() == null)));
                             btnSearch.setEnabled(false);
                             linearlayoutdevices.setEnabled(false);
