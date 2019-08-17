@@ -133,12 +133,14 @@ public class MonitoreoActivity extends AppCompatActivity {
                 return;
             }
 
+
             DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     switch (which){
                         case DialogInterface.BUTTON_POSITIVE:
                             //Yes button clicked
+
                             cancelarTicket(ticket);
                             break;
 
@@ -190,6 +192,7 @@ public class MonitoreoActivity extends AppCompatActivity {
             try {
 
                 JSONObject dato = datos.getJSONObject(i);
+                Log.d("MonitoreoUPdate", dato.toString());
 
 
                 LinearLayout.LayoutParams tableRowParams = new LinearLayout.LayoutParams(
@@ -426,6 +429,14 @@ public class MonitoreoActivity extends AppCompatActivity {
 
         String jsonString = datosObj.toString();
 
+        final JSONObject venta = new JSONObject();
+
+        try {
+            venta.put("venta", jsonObject);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, datosObj,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -434,7 +445,7 @@ public class MonitoreoActivity extends AppCompatActivity {
                             String errores = response.getString("errores");
                             if(errores.equals("0")){
 
-                                ImprimirTicketCancelado();
+                                ImprimirTicketCancelado(venta);
                                 Toast.makeText(mContext, response.getString("mensaje"), Toast.LENGTH_SHORT).show();
                             }
                             else
@@ -477,7 +488,7 @@ public class MonitoreoActivity extends AppCompatActivity {
     }
 
 
-    private void ImprimirTicketCancelado(){
+    private void ImprimirTicketCancelado(JSONObject venta){
         if(BluetoothSearchDialog.isPrinterConnected() == false){
             Toast.makeText(mContext, "Debe conectarse a una impresora", Toast.LENGTH_SHORT).show();
             MonitoreoActivity.mostrarFragmentDialogBluetoothSearch();
@@ -487,8 +498,7 @@ public class MonitoreoActivity extends AppCompatActivity {
 
 
         try{
-            JSONObject venta = new JSONObject();
-            venta.put("venta", selectedTicket);
+
             Log.d("MonitoreoCancelado", venta.toString());
             es.submit(new BluetoothSearchDialog.TaskPrint(venta, 1));
 

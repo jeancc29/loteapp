@@ -381,13 +381,20 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
     public void seleccionarLoteriasMultiSelect(JSONArray loteriasASeleccionar, boolean seleccionarPrimeraLoteria ){
         try {
+            Log.d("SeleccionarLoteria1", "primero");
             if(seleccionarPrimeraLoteria){
                 if(listDescripcionLoterias.length == 0){
                     return;
                 }
+
+                Log.d("SeleccionarLoteria1", "segundo");
+
                 checkedItems[0] = true;
                 mUserItems.add(0);
-                String loteria = listDescripcionLoterias[mUserItems.get(0)];
+                String loteria = listDescripcionLoterias[0];
+
+
+                Log.d("SeleccionarLoteria1", "tercero: " + loteria);
                 txtSelected.setText(loteria);
             }else{
                 for (int i=0; i< loteriasASeleccionar.length(); i++){
@@ -403,6 +410,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
         }catch (Exception e){
             e.printStackTrace();
+            Log.d("errorSeleccionarLoteria", e.toString());
         }
     }
 
@@ -875,7 +883,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         String url = "http://loterias.ml/api/principal/montodisponible";
         monto = "0";
         Log.d("Arreglo loteria size: ", String.valueOf(mUserItems.size()));
-        String jugada = String.valueOf(txtJugada.getText());
+        final String jugada = String.valueOf(txtJugada.getText());
         if(jugada == "" || jugada == null || jugada.length() == 0 || jugada.length() == 1)
             return;
         if(mUserItems.size() == 0){
@@ -948,7 +956,11 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                     public void onResponse(JSONObject response) {
                         Main2Activity.progressBarToolbar.setVisibility(View.GONE);
                         try {
-                            txtMontodisponible.setText(response.getString("monto"));
+                            double montoDisponible = jugadasClase.siJugadaExisteRestarMontoDisponible(jugada, idLoteriasMap.get(mUserItems.get(0)), response.getDouble("monto"));
+                            if(montoDisponible < 0)
+                                montoDisponible = 0;
+
+                            txtMontodisponible.setText(String.valueOf(montoDisponible));
                             borderChange(false, true);
                         } catch (JSONException e) {
                             Log.d("Error: ", e.toString());
@@ -1072,10 +1084,11 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                     public void onResponse(final JSONObject response) {
 
                         try {
-                            Log.d("Error: ", response.toString());
+
                             String errores = response.getString("errores");
                             Main2Activity.progressBarToolbar.setVisibility(View.GONE);
                             if(errores.equals("0")){
+                                limpiar();
                                 idVenta = response.getString("idVenta");
                                 JSONArray jsonArray = response.getJSONArray("loterias");
                                 JSONArray jsonArrayBancas = response.getJSONArray("bancas");
@@ -1083,7 +1096,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                                 setDescuento(jsonArrayBancas);
                                 fillSpinner(jsonArray, jsonArrayVentas);
                                 borderChange(true, false);
-                                limpiar();
+
                                // Bitmap img = screenshot(webViewImg, response.getString("img"));
                                 //Log.d("webImg", String.valueOf(screenshot(webViewImg, response.getString("img"))));
                                // ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
@@ -1732,6 +1745,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                     case DialogInterface.BUTTON_POSITIVE:
                         //Yes button clicked
                          jugadasClase.siJugadaExisteActualizar(jugada, idLoteria, monto);
+                        calcularTotal();
                         break;
 
                     case DialogInterface.BUTTON_NEGATIVE:

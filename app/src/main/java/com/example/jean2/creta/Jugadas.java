@@ -97,6 +97,27 @@ public class Jugadas {
         return existe;
     }
 
+    public double siJugadaExisteRestarMontoDisponible(String jugada, String idLoteria, double montoDisponible){
+        boolean existe = false;
+        if(jugada.length() == 0)
+            return montoDisponible;
+
+        try {
+            for (int i=0; i < jsonArrayJugadas.length(); i++){
+                JSONObject item = (JSONObject)jsonArrayJugadas.get(i);
+
+                if(item.getString("jugada").toString().equals(jugada) && item.getString("idLoteria").toString().equals(idLoteria)){
+                    montoDisponible = montoDisponible - item.getDouble("monto");
+                }
+
+            }
+        }catch (JSONException e){
+            Log.e("jugadaExisteError:", e.toString());
+            return montoDisponible;
+        }
+
+        return montoDisponible;
+    }
     public String jugadaQuitarPunto(String jugada){
         if(jugada.length() != 3)
             return jugada;

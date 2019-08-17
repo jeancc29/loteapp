@@ -700,7 +700,7 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
                         if(!venta.getJSONObject("banca").getString("piepagina4").equals("null"))
                             pos.POS_S_TextOut(venta.getJSONObject("banca").getString("piepagina4") + "\n", 1, 0, 1, 0, 0x00);
                         pos.POS_S_SetQRcode(venta.getString("codigoQr"), 8, 0, 3);
-                        pos.POS_S_TextOut("\n\n", 1, 0, 1, 0, 0x00);
+                        pos.POS_S_TextOut("\n\n\n", 1, 0, 1, 0, 0x00);
 
                     }
 
