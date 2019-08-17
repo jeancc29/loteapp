@@ -43,7 +43,7 @@ public class ScanQRActivity extends AppCompatActivity implements ZXingScannerVie
         if(esDuplicar)
             Main2Activity.duplicarTicket(rawResult.getText(), true);
         else
-            Main2Activity.pagarTicket(rawResult.getText(), true);
+            Main2Activity.buscarTicketAPagar(rawResult.getText(), true);
         onBackPressed();
 
         // If you would like to resume scanning, call this method below:

@@ -24,7 +24,7 @@
 
     <color name="WHITE">#FFF</color>
     <color name="GRAY200">#EEEEEE</color>
-    <color name="RED400">#EF5350</color>
+    <color name="bgRed">#BD2724</color>
 
     <color name="bgInfo">#00bcd4</color>
     <color name="bgRosa">#ffcccc</color>

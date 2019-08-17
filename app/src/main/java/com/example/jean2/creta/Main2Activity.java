@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
@@ -67,7 +68,7 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
     public static boolean conectadoAImpresoraBluetooth = false;
 
     private IntentFilter intentFilter = null;
-    ExecutorService es = Executors.newScheduledThreadPool(30);
+    static ExecutorService es = Executors.newScheduledThreadPool(30);
     Pos mPos = new Pos();
     BTPrinting mBt = new BTPrinting();
     private LinearLayout linearlayoutdevices;
@@ -96,13 +97,15 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
     public static Context mContext;
     static Main2Activity mActivity;
     public static JSONObject duplicarDatos;
+    public static JSONObject pagarTicketDatos;
+
 
     String monto;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
-
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         principalFragment = new PrincipalFragment();
 
@@ -326,10 +329,137 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
         MySingleton.getInstance(mContext).addToRequestQueue(request);
     }
 
+    public static boolean tieneJugadasPendientes(){
+        boolean tienePendientes = false;
+        try {
+            JSONArray jugadas = pagarTicketDatos.getJSONArray("jugadas");
 
+
+            for (int c = 0; c < jugadas.length(); c++) {
+
+
+                JSONObject jugada = jugadas.getJSONObject(c);
+
+
+                if(jugada.getInt("status") == 0) {
+                    tienePendientes = true;
+                }
+
+
+
+
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            tienePendientes = true;
+        }
+
+        return tienePendientes;
+    }
+
+    private static String obtenerAtributoJsonObjectTicket(String atributo){
+        try{
+            return Main2Activity.pagarTicketDatos.getString(atributo);
+        }catch (Exception e){
+            e.printStackTrace();
+
+            return "";
+        }
+    }
 
     public static void pagarTicket(String codigoBarraQR, boolean esQR){
         String url = "http://loterias.ml/api/principal/pagar";
+        boolean tienePremioYtienePendiente = false;
+
+        double montoAPagar = Double.parseDouble(obtenerAtributoJsonObjectTicket("montoAPagar"));
+        if(montoAPagar > 0){
+            if(tieneJugadasPendientes()){
+                tienePremioYtienePendiente = true;
+                if(BluetoothSearchDialog.isPrinterConnected() == false){
+                    Toast.makeText(mContext, "Debe conectarse a una impresora", Toast.LENGTH_SHORT).show();
+                    mostrarFragmentDialogBluetoothSearch();
+//                mostrarDispositivosBluetooth();
+                    return;
+                }
+            }
+        }
+
+        final boolean tienePremioYtienePendienteFinal = tienePremioYtienePendiente;
+        JSONObject loteria = new JSONObject();
+        JSONObject datosObj = new JSONObject();
+
+        try {
+            if(esQR){
+                loteria.put("codigoBarra", "");
+                loteria.put("codigoQr", codigoBarraQR);
+            }else{
+                loteria.put("codigoBarra", codigoBarraQR);
+                loteria.put("codigoQr", "");
+            }
+            loteria.put("razon", "Cancelado desde movil");
+            loteria.put("idUsuario", Utilidades.getIdUsuario(mActivity));
+            loteria.put("idBanca", Utilidades.getIdBanca(mActivity));
+
+            datosObj.put("datos", loteria);
+
+
+
+        } catch (JSONException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        String jsonString = datosObj.toString();
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, datosObj,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            String errores = response.getString("errores");
+                            if(errores.equals("0")){
+                                if(tienePremioYtienePendienteFinal){
+                                    //Crear un listener el archivo BluetoothSearchDialog para que cuando se conecte a la impresora
+                                    //este retorne la conexion aqui y se pueda imprimir, tambien crear opcion para que solamente se impriman
+                                    //las jugadas pendientes
+                                    es.submit(new BluetoothSearchDialog.TaskPrint(response, 2));
+                                }
+                                Toast.makeText(mActivity, response.getString("mensaje") + " e: " + errores, Toast.LENGTH_SHORT).show();
+                            }
+                            else
+                                Toast.makeText(mActivity, response.getString("mensaje") + " e: " + errores, Toast.LENGTH_SHORT).show();
+
+                        } catch (JSONException e) {
+                            Log.d("Error: ", e.toString());
+                            e.printStackTrace();
+
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("responseerror: ", String.valueOf(error));
+                error.printStackTrace();
+                if(error instanceof NetworkError){
+                    Toast.makeText(mActivity, "Verifique coneccion e intente de nuevo", Toast.LENGTH_SHORT).show();
+                }
+                else if(error instanceof ServerError){
+                    Toast.makeText(mActivity, "No se puede encontrar el servidor", Toast.LENGTH_SHORT).show();
+                }
+                else if(error instanceof TimeoutError){
+                    Toast.makeText(mActivity, "Conexion lenta, verifique conexion e intente de nuevo", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+//        mQueue.add(request);
+        MySingleton.getInstance(mActivity).addToRequestQueue(request);
+    }
+
+
+    public static void buscarTicketAPagar(String codigoBarraQR, boolean esQR){
+        String url = "http://loterias.ml/api/principal/buscarTicketAPagar";
 
         JSONObject loteria = new JSONObject();
         JSONObject datosObj = new JSONObject();
@@ -364,7 +494,10 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
                         try {
                             String errores = response.getString("errores");
                             if(errores.equals("0")){
-                                Toast.makeText(mActivity, response.getString("mensaje") + " e: " + errores, Toast.LENGTH_SHORT).show();
+                                pagarTicketDatos = response.getJSONObject("venta");
+                                VerTicketPagarDialog verTicketPagarDialog = new VerTicketPagarDialog();
+                                verTicketPagarDialog.show(mActivity.getSupportFragmentManager(), "Duplicar dialog");
+                                //Toast.makeText(mActivity, response.getString("mensaje") + " e: " + errores, Toast.LENGTH_SHORT).show();
                             }
                             else
                                 Toast.makeText(mActivity, response.getString("mensaje") + " e: " + errores, Toast.LENGTH_SHORT).show();
@@ -406,6 +539,12 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
 
     public interface DuplicarPrincipalInterface{
         void setDuplicar(JSONArray jugadas);
+    }
+
+    public static void mostrarFragmentDialogBluetoothSearch(){
+        BluetoothSearchDialog duplicarDialog = new BluetoothSearchDialog();
+        duplicarDialog.show( mActivity.getSupportFragmentManager(), "Duplicar dialog");
+//                mostrarDispositivosBluetooth();
     }
 
 

@@ -41,15 +41,22 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_loterias"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/ic_loterias_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <service android:name=".Servicios.VerificarAccesoAlSistemaService" android:enabled="true"/>
-        <service android:name=".Servicios.JPrinterConnectService" android:enabled="true"/>
+        <activity android:name=".PendientesDePago"
+            android:parentActivityName=".Main2Activity"></activity>
 
-        <activity android:name=".ScanQRActivity"></activity>
+        <service
+            android:name=".Servicios.VerificarAccesoAlSistemaService"
+            android:enabled="true" />
+        <service
+            android:name=".Servicios.JPrinterConnectService"
+            android:enabled="true" />
+
+        <activity android:name=".ScanQRActivity" />
         <activity android:name=".WebViewTicket" />
         <activity
             android:name=".VentasActivity"

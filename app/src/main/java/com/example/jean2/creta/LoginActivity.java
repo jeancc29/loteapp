@@ -125,6 +125,7 @@ public class LoginActivity extends AppCompatActivity {
                                 usuario.put("password", txtPassword.getText());
                                 usuario.put("banca", response.getString("banca"));
                                 usuario.put("idBanca", response.getString("idBanca"));
+                                usuario.put("administrador", response.getBoolean("administrador"));
                                 Utilidades.guardarUsuario(LoginActivity.this, checkBoxRecordar.isChecked(), usuario);
                                 Toast.makeText(LoginActivity.this, "Datos correctos", Toast.LENGTH_SHORT).show();
                                 Intent intent = new Intent(LoginActivity.this, Main2Activity.class);

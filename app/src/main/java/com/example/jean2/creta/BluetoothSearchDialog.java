@@ -394,15 +394,21 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
         return contadorJugadas;
     }
 
-    public static JSONArray jugadasPertenecientesALoteria(String idLoteria, JSONArray jsonArrayJugadas) {
+    public static JSONArray jugadasPertenecientesALoteria(String idLoteria, JSONArray jsonArrayJugadas, boolean soloJugadasPendientes) {
         int contadorJugadas = 0;
         JSONArray jsonArrayJugadasRetornar = new JSONArray();
         for (int contadorCicleJugadas = 0; contadorCicleJugadas < jsonArrayJugadas.length(); contadorCicleJugadas++) {
             try {
                 JSONObject jugada = jsonArrayJugadas.getJSONObject(contadorCicleJugadas);
 
-                if (jugada.getString("idLoteria").equals(idLoteria))
-                    jsonArrayJugadasRetornar.put(jugada);
+                if(soloJugadasPendientes){
+                    if (jugada.getString("idLoteria").equals(idLoteria) && jugada.getString("status").equals("0"))
+                        jsonArrayJugadasRetornar.put(jugada);
+                }else{
+                    if (jugada.getString("idLoteria").equals(idLoteria))
+                        jsonArrayJugadasRetornar.put(jugada);
+                }
+
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -497,6 +503,7 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
         JSONObject response;
         boolean original;
         boolean cancelado;
+        boolean pagado;
 
         public TaskPrint(Pos pos)
         {
@@ -520,12 +527,17 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
             this.original = original;
         }
 
-        public TaskPrint(JSONObject response, int cancelado)
+        public TaskPrint(JSONObject response, int cancelado_o_pagado)
         {
             this.pos = mPos;
             this.response = response;
 
-            this.cancelado = true;
+            if(cancelado_o_pagado == 1)
+                this.cancelado = true;
+            else{
+                this.pagado = true;
+                this.original = true;
+            }
         }
 
         @Override
@@ -626,7 +638,9 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
                             break;
                         JSONObject loteria = jsonArrayLoterias.getJSONObject(i);
                         boolean esPrimeraJugadaAInsertar = true;
-                        JSONArray jugadas = jugadasPertenecientesALoteria(loteria.getString("id"), jsonArrayJugadas);
+                        JSONArray jugadas = jugadasPertenecientesALoteria(loteria.getString("id"), jsonArrayJugadas, pagado);
+                        if(jugadas.length() == 0)
+                            continue;
                         for (int contadorCicleJugadas =0; contadorCicleJugadas < jugadas.length(); contadorCicleJugadas++){
                             if(!pos.GetIO().IsOpened())
                                 break;
@@ -676,7 +690,7 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
                         pos.POS_S_TextOut("** CANCELADO **\n\n\n", 0, 1, 1, 0, 0x00);
                     }
 
-                    if(this.cancelado == false){
+                    if(this.cancelado == false && this.original == true){
                         if(!venta.getJSONObject("banca").getString("piepagina1").equals("null"))
                             pos.POS_S_TextOut(venta.getJSONObject("banca").getString("piepagina1") + "\n", 1, 0, 1, 0, 0x00);
                         if(!venta.getJSONObject("banca").getString("piepagina2").equals("null"))

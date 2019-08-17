@@ -125,32 +125,36 @@ public class MonitoreoActivity extends AppCompatActivity {
     }
 
     public void aceptaCancelarTicket(final JSONObject ticket){
-        if(BluetoothSearchDialog.isPrinterConnected() == false){
-            Toast.makeText(mContext, "Debe conectarse a una impresora", Toast.LENGTH_SHORT).show();
-            mostrarFragmentDialogBluetoothSearch();
+        try {
+            if(BluetoothSearchDialog.isPrinterConnected() == false){
+                Toast.makeText(mContext, "Debe conectarse a una impresora", Toast.LENGTH_SHORT).show();
+                mostrarFragmentDialogBluetoothSearch();
 //                mostrarDispositivosBluetooth();
-            return;
-        }
-
-        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which){
-                    case DialogInterface.BUTTON_POSITIVE:
-                        //Yes button clicked
-                        cancelarTicket(ticket);
-                        break;
-
-                    case DialogInterface.BUTTON_NEGATIVE:
-                        //No button clicked
-                        break;
-                }
+                return;
             }
-        };
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-        builder.setMessage("Are you sure?").setPositiveButton("Yes", dialogClickListener)
-                .setNegativeButton("No", dialogClickListener).show();
+            DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    switch (which){
+                        case DialogInterface.BUTTON_POSITIVE:
+                            //Yes button clicked
+                            cancelarTicket(ticket);
+                            break;
+
+                        case DialogInterface.BUTTON_NEGATIVE:
+                            //No button clicked
+                            break;
+                    }
+                }
+            };
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+            builder.setMessage("Seguro desea cancelar el ticket" + Utilidades.toSecuencia(ticket.getString("idTicket"), ticket.getString("codigo")) + " ?").setPositiveButton("Yes", dialogClickListener)
+                    .setNegativeButton("No", dialogClickListener).show();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public  void updateTable(JSONArray datos){

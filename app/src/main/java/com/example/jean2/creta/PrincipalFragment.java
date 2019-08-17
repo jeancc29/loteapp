@@ -5,6 +5,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -82,7 +83,7 @@ import static com.example.jean2.creta.Utilidades.combinarBitmap;
  */
 public class PrincipalFragment extends Fragment implements View.OnClickListener, Main2Activity.DuplicarPrincipalInterface {
     private String idVenta = null;
-    private int idBanca = 0;
+    public static int idBanca = 0;
 
     static Context mContext;
 
@@ -93,7 +94,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
     private TextView txtSelected;
     IconManager iconManager;
     CheckBox c;
-    Spinner spinnerTicket;
+    static Spinner spinnerTicket;
    // private RequestQueue mQueue;
 
     ProgressBar progressBar;
@@ -105,6 +106,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
     ArrayList<Integer> mUserItems = new ArrayList<>();
     public static HashMap<Integer,String> idLoteriasMap = new HashMap<Integer, String>();
     HashMap<Integer,String> codigoBarraMap = new HashMap<Integer, String>();
+    static JSONArray jsonArrayVentas;
 
 
     View view;
@@ -114,6 +116,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
     TextView txtMontodisponible;
     private static TextView txtTotal;
     private static TextView txtDescuento;
+    private static TextView txtPrint;
     private static CheckBox_Icon ckbDescuento;
     private static CheckBox_Icon ckbPrint;
     private static CheckBox_Icon ckbSms;
@@ -132,7 +135,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
     boolean jugada_monto_active = true;
 
 
-    ExecutorService es = Executors.newScheduledThreadPool(30);
+    static ExecutorService es = Executors.newScheduledThreadPool(30);
 
     public PrincipalFragment() {
         // Required empty public constructor
@@ -195,6 +198,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         spinnerTicket = (Spinner)view.findViewById(R.id.spinnerTickets);
         txtBanca = (TextView)view.findViewById(R.id.txtBanca);
         txtSelected = (TextView)view.findViewById(R.id.txtItemSelected);
+
         txtJugada = (TextView)view.findViewById(R.id.txtJugada);
         txtMontojugar = (TextView)view.findViewById(R.id.txtMontojugar);
         txtMontodisponible = (TextView)view.findViewById(R.id.txtMontodisponible);
@@ -250,6 +254,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         });
 
         TextView_Icon txtDelete = (TextView_Icon)view.findViewById(R.id.txtDelete);
+        TextView_Icon txtPrint = (TextView_Icon)view.findViewById(R.id.txtPrint);
         Button btn0 = (Button)view.findViewById(R.id.btn0);
         Button btn1 = (Button)view.findViewById(R.id.btn1);
         Button btn2 = (Button)view.findViewById(R.id.btn2);
@@ -266,6 +271,8 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         ImageView btnBackspace = (ImageView) view.findViewById(R.id.btnBackspace);
         Button btnSlash = (Button)view.findViewById(R.id.btnSlash);
         Button btnPunto = (Button)view.findViewById(R.id.btnPunto);
+
+
 //        Button btnD = (Button)view.findViewById(R.id.btnD);
 //        Button btnQ = (Button)view.findViewById(R.id.btnQ);
 
@@ -273,6 +280,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         txtJugada.setOnClickListener(this);
         txtMontojugar.setOnClickListener(this);
         txtDelete.setOnClickListener(this);
+        txtPrint.setOnClickListener(this);
         btn0.setOnClickListener(this);
         btn1.setOnClickListener(this);
         btn2.setOnClickListener(this);
@@ -597,6 +605,9 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
             case (R.id.txtDelete):
                 aceptaCancelarTicket();
                 break;
+            case (R.id.txtPrint):
+                print();
+                break;
                 case (R.id.txtJugada):
                 borderChange(true, false);
                 break;
@@ -817,6 +828,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         }
 
 
+        Log.d("PrincipalFragment", datosObj.toString());
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, datosObj,
                 new Response.Listener<JSONObject>() {
@@ -1259,8 +1271,9 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         }
     }
 
-    public void fillSpinner(JSONArray array, JSONArray jsonArrayVentas){
+    public void fillSpinner(JSONArray array, JSONArray jsonArrayVentas2){
         /********* Prepare value for spinner *************/
+        jsonArrayVentas = jsonArrayVentas2;
         String[] spinnerArray = new String[array.length()];
         String[] ventasSpinner = new String[jsonArrayVentas.length()];
         String[] ventasIdTicketSecuenciaSpinner = new String[jsonArrayVentas.length()];
@@ -1277,6 +1290,11 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                 e.printStackTrace();
             }
 
+        }
+
+        if(jsonArrayVentas.length() == 0){
+            ventasIdTicketSecuenciaSpinner = new String[1];
+            ventasIdTicketSecuenciaSpinner[0] = "No hay ventas";
         }
 
         for (int i = 0; i < jsonArrayVentas.length(); i++)
@@ -1303,13 +1321,36 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
 
         /********* Set value to spinner *************/
-        if(ventasIdTicketSecuenciaSpinner == null)
-            return;
-        ArrayAdapter<String> adapter =new ArrayAdapter<String>(getActivity(),android.R.layout.simple_spinner_item, ventasIdTicketSecuenciaItems);
+//        if(ventasIdTicketSecuenciaSpinner == null)
+//            return;
+        ArrayAdapter<String> adapter =new ArrayAdapter<String>(getActivity(),android.R.layout.simple_spinner_item, ventasIdTicketSecuenciaSpinner);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerTicket.setAdapter(adapter);
 
         seleccionarLoteriasMultiSelect(null, true);
+    }
+
+    static void print(){
+        if(spinnerTicket.getSelectedItem() == "No hay ventas")
+            return;
+
+
+        if(BluetoothSearchDialog.isPrinterConnected() == false){
+            Toast.makeText(mContext, "Debe conectarse a una impresora", Toast.LENGTH_SHORT).show();
+            Main2Activity.txtBluetooth.performClick();
+            return;
+        }
+       try{
+
+           JSONObject ticket  = jsonArrayVentas.getJSONObject((int)spinnerTicket.getSelectedItemId());
+           JSONObject venta = new JSONObject();
+           venta.put("venta", ticket);
+           es.submit(new BluetoothSearchDialog.TaskPrint(venta, false));
+           Toast.makeText(mContext, "idx:" + spinnerTicket.getSelectedItemId(), Toast.LENGTH_SHORT).show();
+
+       }catch (Exception e){
+           e.printStackTrace();
+       }
     }
 
     public void fillSpinnerWithoutInternetTest(){
@@ -1620,25 +1661,66 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
     }
 
     public void aceptaCancelarTicket(){
-        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which){
-                    case DialogInterface.BUTTON_POSITIVE:
-                        //Yes button clicked
-                        cancelarTicket();
-                        break;
+        if(spinnerTicket.getSelectedItem() == "No hay ventas")
+            return;
 
-                    case DialogInterface.BUTTON_NEGATIVE:
-                        //No button clicked
-                        break;
+        if(BluetoothSearchDialog.isPrinterConnected() == false){
+            Toast.makeText(mContext, "Debe conectarse a una impresora", Toast.LENGTH_SHORT).show();
+            Main2Activity.txtBluetooth.performClick();
+//                mostrarDispositivosBluetooth();
+            return;
+        }
+        try{
+
+
+            final JSONObject venta  = jsonArrayVentas.getJSONObject((int)spinnerTicket.getSelectedItemId());
+
+
+            DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    switch (which){
+                        case DialogInterface.BUTTON_POSITIVE:
+                            //Yes button clicked
+                            cancelarTicket(venta);
+                            break;
+
+                        case DialogInterface.BUTTON_NEGATIVE:
+                            //No button clicked
+                            break;
+                    }
                 }
-            }
-        };
+            };
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-        builder.setMessage("Esta seguro?").setPositiveButton("Si", dialogClickListener)
-                .setNegativeButton("No", dialogClickListener).show();
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+            builder.setMessage("Esta seguro de cancelar el ticket " + Utilidades.toSecuencia(venta.getString("idTicket"), venta.getString("codigo")) + " ?").setPositiveButton("Si", dialogClickListener)
+                    .setNegativeButton("No", dialogClickListener).show();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void ImprimirTicketCancelado(JSONObject venta){
+        if(BluetoothSearchDialog.isPrinterConnected() == false){
+            Toast.makeText(mContext, "Debe conectarse a una impresora", Toast.LENGTH_SHORT).show();
+            Main2Activity.txtBluetooth.performClick();
+//                mostrarDispositivosBluetooth();
+            return;
+        }
+
+
+        try{
+            JSONObject v = new JSONObject();
+            v.put("venta", venta);
+            Log.d("MonitoreoCancelado", v.toString());
+            es.submit(new BluetoothSearchDialog.TaskPrint(v, 1));
+
+
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
     }
 
 
@@ -1670,7 +1752,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
 
 
-    private void cancelarTicket(){
+    private void cancelarTicket(final JSONObject venta){
 
         String url = "http://loterias.ml/api/principal/cancelar";
 
@@ -1678,7 +1760,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         JSONObject datosObj = new JSONObject();
 
         try {
-            loteria.put("codigoBarra", ventasItems[spinnerTicket.getSelectedItemPosition()]);
+            loteria.put("codigoBarra", venta.getString("codigoBarra"));
             loteria.put("razon", "Cancelado desde movil");
             loteria.put("idUsuario", Utilidades.getIdUsuario(mContext));
             loteria.put("idBanca", Utilidades.getIdBanca(mContext));
@@ -1700,6 +1782,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                             String errores = response.getString("errores");
                             if(errores.equals("0")){
                                 jsonParse();
+                                ImprimirTicketCancelado(venta);
                                 Toast.makeText(mContext, response.getString("mensaje"), Toast.LENGTH_SHORT).show();
                             }
                             else

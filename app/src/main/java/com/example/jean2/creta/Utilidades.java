@@ -30,6 +30,7 @@ public class Utilidades {
             editor.putString("password", jsonObjectUsuario.getString("password"));
             editor.putString("banca", jsonObjectUsuario.getString("banca"));
             editor.putInt("idBanca", jsonObjectUsuario.getInt("idBanca"));
+            editor.putBoolean("administrador", jsonObjectUsuario.getBoolean("administrador"));
         }catch (Exception e){
             e.printStackTrace();
             return false;
@@ -58,6 +59,12 @@ public class Utilidades {
         SharedPreferences preferences = context.getSharedPreferences("usuario", Context.MODE_PRIVATE);
 
         return preferences.getInt("idUsuario", 0);
+    }
+
+    public static boolean getAdministrador(Context context){
+        SharedPreferences preferences = context.getSharedPreferences("usuario", Context.MODE_PRIVATE);
+
+        return preferences.getBoolean("administrador", false);
     }
 
     public static String getUsuario(Context context){

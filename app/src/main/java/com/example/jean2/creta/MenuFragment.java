@@ -36,6 +36,7 @@ public class MenuFragment extends Fragment implements DuplicarDialog.DuplicarDia
     Button btnPagar;
     Button btnDuplicar;
     Button btnSalir;
+    Button btnPendienteDePago;
     private FragmentActivity mContext;
     //private RequestQueue mQueue;
     public MenuFragment() {
@@ -84,6 +85,15 @@ public class MenuFragment extends Fragment implements DuplicarDialog.DuplicarDia
             public void onClick(View view) {
                 PagarTicketDialog pagarTicketDialog = new PagarTicketDialog();
                 pagarTicketDialog.show(mContext.getSupportFragmentManager(), "Pagar dialog");
+            }
+        });
+
+        btnPendienteDePago = (Button)view.findViewById(R.id.btnPendientesPago);
+        btnPendienteDePago.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getContext(), PendientesDePago.class);
+                startActivity(intent);
             }
         });
 
