@@ -134,6 +134,7 @@ public class ImprimirCompartirVerTicketDialog extends AppCompatDialogFragment {
             JSONObject venta = new JSONObject();
             venta.put("venta", MonitoreoActivity.selectedTicket);
             es.submit(new BluetoothSearchDialog.TaskPrint(venta, false));
+            getDialog().dismiss();
         }catch(Exception e){
             e.printStackTrace();
         }

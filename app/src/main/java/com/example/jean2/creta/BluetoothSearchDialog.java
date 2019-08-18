@@ -681,10 +681,14 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
                     double total = venta.getDouble("total");
                     if(venta.getInt("hayDescuento") == 1){
                         total -= venta.getDouble("descuentoMonto");
-                        pos.POS_S_TextOut("subTotal: " + venta.getDouble("subTotal") + "\n", 1, 0, 1, 0, 0x00);
+                        pos.POS_S_TextOut("subTotal: " + venta.getDouble("total") + "\n", 1, 0, 1, 0, 0x00);
                         pos.POS_S_TextOut("descuento: " + venta.getDouble("descuentoMonto") + "\n", 1, 0, 1, 0, 0x00);
                     }
-                    pos.POS_S_TextOut("- TOTAL: " + total + " -\n", 1, 0, 1, 0, 0x00);
+                    String saltoLineaTotal = "\n";
+                    if(this.original == false){
+                        saltoLineaTotal+="\n\n";
+                    }
+                    pos.POS_S_TextOut("- TOTAL: " + total + " -" + saltoLineaTotal, 1, 0, 1, 0, 0x00);
 
                     if(this.original == false && this.cancelado == true){
                         pos.POS_S_TextOut("** CANCELADO **\n\n\n", 0, 1, 1, 0, 0x00);
