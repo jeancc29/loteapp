@@ -119,13 +119,15 @@ public class Jugadas {
         return montoDisponible;
     }
     public String jugadaQuitarPunto(String jugada){
-        if(jugada.length() != 3)
-            return jugada;
+//        if(jugada.length() != 3)
+//            return jugada;
+//
+//        StringBuilder validarJugadaSeaNumerica = new StringBuilder(jugada);
+//        validarJugadaSeaNumerica.setLength(jugada.length() - 1);
+//
+//        return validarJugadaSeaNumerica.toString();
 
-        StringBuilder validarJugadaSeaNumerica = new StringBuilder(jugada);
-        validarJugadaSeaNumerica.setLength(jugada.length() - 1);
-
-        return validarJugadaSeaNumerica.toString();
+        return jugada;
     }
 
 
