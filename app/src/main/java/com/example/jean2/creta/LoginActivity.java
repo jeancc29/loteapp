@@ -9,6 +9,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.method.HideReturnsTransformationMethod;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -58,6 +60,7 @@ public class LoginActivity extends AppCompatActivity {
         Button btnAcceder = (Button)findViewById(R.id.btnAcceder);
         txtUsuario = (TextInputEditText)findViewById(R.id.txtUsuario);
         txtPassword = (TextInputEditText)findViewById(R.id.txtPassword);
+        txtPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
         checkBoxRecordar = (CheckBox) findViewById(R.id.ckbRecordar);
         progressBar = (ProgressBar)findViewById(R.id.progressBarLogin);
 
@@ -129,7 +132,7 @@ public class LoginActivity extends AppCompatActivity {
                                 Utilidades.guardarUsuario(LoginActivity.this, checkBoxRecordar.isChecked(), usuario);
                                 Toast.makeText(LoginActivity.this, "Datos correctos", Toast.LENGTH_SHORT).show();
                                 Intent intent = new Intent(LoginActivity.this, Main2Activity.class);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                 startActivity(intent);
                                 finish();
                             }

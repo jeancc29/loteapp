@@ -84,7 +84,8 @@
             android:hint="Password"
             android:maxLines="1"
             android:inputType="text"
-            android:imeOptions="actionDone"/>
+            android:imeOptions="actionDone"
+            />
     </android.support.design.widget.TextInputLayout>
 
     <CheckBox

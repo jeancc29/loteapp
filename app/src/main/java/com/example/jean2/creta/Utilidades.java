@@ -126,7 +126,7 @@ public class Utilidades {
         Uri imageUri = toUri(context, base64Image, titleImage);
 
         if(sms){
-            Intent mmsIntent = new Intent(Intent.ACTION_SEND);
+          Intent mmsIntent = new Intent(Intent.ACTION_SEND);
                     mmsIntent.putExtra("sms_body", "Please see the attached image");
            // mmsIntent.setType("vnd.android-dir/mms-sms");
                     mmsIntent.putExtra(Intent.EXTRA_STREAM, imageUri);

@@ -165,7 +165,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
         if(permisosStorage != PackageManager.PERMISSION_GRANTED || permisosCamara != PackageManager.PERMISSION_GRANTED || permisosSms != PackageManager.PERMISSION_GRANTED || permisosLocation != PackageManager.PERMISSION_GRANTED){
             //if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA, Manifest.permission.SEND_SMS, Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE_ASK_PERMISSION);
+            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA, Manifest.permission.SEND_SMS, Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE_ASK_PERMISSION);
             //}
         }
 
@@ -949,6 +949,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         }
 
         String jsonString = datosObj.toString();
+        borderChange(false, true);
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, datosObj,
                 new Response.Listener<JSONObject>() {
@@ -961,7 +962,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                                 montoDisponible = 0;
 
                             txtMontodisponible.setText(String.valueOf(montoDisponible));
-                            borderChange(false, true);
+
                         } catch (JSONException e) {
                             Log.d("Error: ", e.toString());
                             e.printStackTrace();
@@ -975,6 +976,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                 Log.d("responseerror: ", String.valueOf(error));
                 error.printStackTrace();
                 Main2Activity.progressBarToolbar.setVisibility(View.GONE);
+                borderChange(true, false);
                 if(error instanceof NetworkError){
                     Toast.makeText(mContext, "Verifique coneccion e intente de nuevo", Toast.LENGTH_SHORT).show();
                 }

@@ -80,12 +80,12 @@ public class VerificarAccesoAlSistemaService extends Service {
                                 Log.v("verificarSV", "Todo mal");
                                 Utilidades.eliminarUsuario(VerificarAccesoAlSistemaService.this);
                                 Intent dialogIntent = new Intent(VerificarAccesoAlSistemaService.this, LoginActivity.class);
-                                dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                dialogIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                 startActivity(dialogIntent);
                                 stopSelf();
                             }
                             else{
-                                Log.v("verificarSV", "Todo bien");
+                                Log.v("verificarSV", "Todo bien: " + errores);
                                 stopSelf();
                             }
 
@@ -100,6 +100,9 @@ public class VerificarAccesoAlSistemaService extends Service {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                Intent dialogIntent = new Intent(VerificarAccesoAlSistemaService.this, LoginActivity.class);
+                dialogIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
                 stopSelf();
                 error.printStackTrace();
                 Log.d("responseerror: ", String.valueOf(error));
