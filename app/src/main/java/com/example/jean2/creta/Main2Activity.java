@@ -10,6 +10,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
@@ -41,6 +42,8 @@ import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.jean2.creta.Servicios.ActualizarService;
+import com.example.jean2.creta.Servicios.VerificarAccesoAlSistemaService;
 import com.lvrenyang.io.BTPrinting;
 import com.lvrenyang.io.IOCallBack;
 import com.lvrenyang.io.Pos;
@@ -106,7 +109,8 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
+        iniciarServicio();
+        //Toast.makeText(Main2Activity.this, getVersionName(mContext), Toast.LENGTH_SHORT).show();
         principalFragment = new PrincipalFragment();
 
        // mQueue = Volley.newRequestQueue(this);
@@ -212,6 +216,17 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
         mPos.Set(mBt);
         mBt.SetCallBack(Main2Activity.this);
     }
+
+    public void iniciarServicio(){
+        //mContext.startService(new Intent(getActivity(), VerificarAccesoAlSistemaService.class));
+        startService(new Intent(Main2Activity.this, ActualizarService.class));
+    }
+
+    public String getVersionName(Context ctx){
+        return BuildConfig.VERSION_NAME;
+    }
+
+
 
     public void hola(View v){
         TextView t = (TextView)findViewById(R.id.txtJugada);

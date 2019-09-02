@@ -49,6 +49,7 @@ import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.jean2.creta.Servicios.ActualizarService;
 import com.example.jean2.creta.Servicios.VerificarAccesoAlSistemaService;
 import com.izettle.html2bitmap.Html2Bitmap;
 import com.izettle.html2bitmap.content.WebViewContent;
@@ -89,7 +90,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
     private static int descontar = 0;
     private static int deCada = 0;
-    private static int montoTotal = 0;
+    private static float montoTotal = 0;
     private static int montoDescuento = 0;
     private TextView txtSelected;
     IconManager iconManager;
@@ -148,6 +149,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
     public void iniciarServicio(){
         mContext.startService(new Intent(getActivity(), VerificarAccesoAlSistemaService.class));
+       // mContext.startService(new Intent(getActivity(), ActualizarService.class));
     }
 
     @Override
@@ -159,17 +161,20 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
     private void comprobarPermisos(){
         int permisosCamara = ActivityCompat.checkSelfPermission(mContext, Manifest.permission.CAMERA);
         int permisosStorage = ActivityCompat.checkSelfPermission(mContext, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        int permisosSms = ActivityCompat.checkSelfPermission(mContext, Manifest.permission.SEND_SMS);
+//        int permisosSms = ActivityCompat.checkSelfPermission(mContext, Manifest.permission.SEND_SMS);
         int permisosLocation = ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION);
 
 
-        if(permisosStorage != PackageManager.PERMISSION_GRANTED || permisosCamara != PackageManager.PERMISSION_GRANTED || permisosSms != PackageManager.PERMISSION_GRANTED || permisosLocation != PackageManager.PERMISSION_GRANTED){
+        //|| permisosSms != PackageManager.PERMISSION_GRANTED
+        //, Manifest.permission.SEND_SMS
+        if(permisosStorage != PackageManager.PERMISSION_GRANTED || permisosCamara != PackageManager.PERMISSION_GRANTED || permisosLocation != PackageManager.PERMISSION_GRANTED){
             //if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA, Manifest.permission.SEND_SMS, Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE_ASK_PERMISSION);
+            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA, Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE_ASK_PERMISSION);
             //}
         }
 
     }
+
 
 
 
@@ -367,6 +372,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
 
 
+        calcularTotal();
 
         return view;
     }
@@ -375,6 +381,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
     @Override
     public void onAttach(Context context) {
+
         mContext=(FragmentActivity) context;
         super.onAttach(context);
     }
@@ -717,15 +724,22 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                 if(jugada_monto_active){
 
                 }else{
-                    int indexOf = String.valueOf(txtMontojugar.getText()).indexOf(".");
-                    if(indexOf != -1){
 
+                    if(txtMontojugar.getText().toString().length() == 0){
+                        caracteres = "0.";
+                    }else{
+                        int indexOf = String.valueOf(txtMontojugar.getText()).indexOf(".");
+
+                        if(indexOf == -1){
+                            Log.d("caracter1", String.valueOf(indexOf));
+                            caracteres = txtMontojugar.getText().toString() + ".";
+                            txtMontojugar.setText(caracteres);
+                            return;
+                        }
                     }
+
                 }
-                if(String.valueOf(txtJugada.getText()).length() == 2){
-                    caracteres = ".";
-                }
-                break;
+
         }
 
         Log.d("Caracter: ", String.valueOf(jugada_monto_active));
@@ -1058,7 +1072,9 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         arregloLoterias[0] = 1;
 
         try {
+            int compartido = (ckbPrint.isChecked()) ? 0 : 1;
             jugada.put("idVenta", idVenta);
+            jugada.put("compartido", compartido);
             jugada.put("idUsuario", Utilidades.getIdUsuario(mContext));
             jugada.put("idBanca", Utilidades.getIdBanca(mContext));
             jugada.put("descuentoMonto", montoDescuento);
@@ -1245,7 +1261,26 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                 }
                 else if(error instanceof TimeoutError){
                     Toast.makeText(mContext, "Conexion lenta, verifique conexion e intente de nuevo", Toast.LENGTH_SHORT).show();
-                    guardar();
+                    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            switch (which){
+                                case DialogInterface.BUTTON_POSITIVE:
+                                    //Yes button clicked
+                                    guardar();
+                                    break;
+
+                                case DialogInterface.BUTTON_NEGATIVE:
+                                    //No button clicked
+                                    break;
+                            }
+                        }
+                    };
+
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                    builder.setMessage("Conexion lenta, desea realizar la venta otra vez?").setPositiveButton("Si", dialogClickListener)
+                            .setNegativeButton("No", dialogClickListener).show();
                 }
 
             }
@@ -1336,11 +1371,15 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
 
         /********* Set value to spinner *************/
-//        if(ventasIdTicketSecuenciaSpinner == null)
-//            return;
-        ArrayAdapter<String> adapter =new ArrayAdapter<String>(getActivity(),android.R.layout.simple_spinner_item, ventasIdTicketSecuenciaSpinner);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerTicket.setAdapter(adapter);
+        if(ventasIdTicketSecuenciaSpinner == null)
+            return;
+       try{
+           ArrayAdapter<String> adapter =new ArrayAdapter<String>(getActivity(),android.R.layout.simple_spinner_item, ventasIdTicketSecuenciaSpinner);
+           adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+           spinnerTicket.setAdapter(adapter);
+       }catch (Exception e){
+           e.printStackTrace();
+       }
 
         seleccionarLoteriasMultiSelect(null, true);
     }
@@ -1539,6 +1578,10 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
             return;
         }
 
+        if(txtMontojugar.getText().toString().equals("0")){
+            return;
+        }
+
 
 
 
@@ -1611,7 +1654,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
                             jugadaObject = new JSONObject();
                             jugadaObject.put("idLoteria", idLoteriasMap.get(mUserItems.get(contadorLoteria)));
-                            jugadaObject.put("descripcion", listDescripcionLoterias[contadorLoteria]);
+                            jugadaObject.put("descripcion", listDescripcionLoterias[mUserItems.get(contadorLoteria)]);
                             jugadaObject.put("jugada", jugada);
                             jugadaObject.put("sorteo", "no");
                             jugadaObject.put("tam", txtJugada.getText().length());
@@ -1658,13 +1701,14 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
     public static void calcularTotal(){
         montoTotal = jugadasClase.calcularTotal();
         Log.d("PrincipalFragment", "calcularTotal: " + String.valueOf(montoTotal));
-        txtTotal.setText("Tot: $"+String.valueOf(montoTotal) + ".00");
+        txtTotal.setText("Tot: $"+String.valueOf(montoTotal));
         if(ckbDescuento.isChecked() && montoTotal > 0){
-            montoDescuento = (montoTotal / deCada) * descontar;
-            txtDescuento.setText("Des: $"+String.valueOf(montoDescuento) + ".00");
+            float calculoDescuento = (montoTotal / deCada) * descontar;
+            montoDescuento = (int) calculoDescuento;
+            txtDescuento.setText("Des: $"+String.valueOf(montoDescuento) + ".0");
         }else{
             montoDescuento = 0;
-            txtDescuento.setText("Des: $"+String.valueOf(montoDescuento) + ".00");
+            txtDescuento.setText("Des: $"+String.valueOf(montoDescuento));
         }
     }
 

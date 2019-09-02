@@ -33,8 +33,8 @@ public class MySingleton {
 
     public <T> void addToRequestQueue(Request<T> request){
         request.setRetryPolicy(new DefaultRetryPolicy(
+                5000,
                 0,
-                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         requestQueue.add(request);
     }

@@ -163,12 +163,12 @@ public class Jugadas {
         return true;
     }
 
-    public int calcularTotal(){
-        int total = 0;
+    public float calcularTotal(){
+        float total = 0;
         try {
             for (int i=0; i < jsonArrayJugadas.length(); i++){
                 JSONObject item = (JSONObject)jsonArrayJugadas.get(i);
-                int monto = (int)Float.parseFloat(item.getString("monto").toString());
+                float monto = Float.parseFloat(item.getString("monto").toString());
 
                 Log.d("Jugadas", "calcularTotal monto: " + monto);
 //                if(isInteger(monto))
