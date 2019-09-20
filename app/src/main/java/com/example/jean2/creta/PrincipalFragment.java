@@ -452,144 +452,145 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 //        }catch (Exception e){
 //            e.printStackTrace();
 //        }
-        seleccionarLoteriasMultiSelect(loterias, false);
 
-        AlertDialog.Builder mBuilder = new AlertDialog.Builder(getActivity());
-        mBuilder.setTitle("Seleccionar loteria");
-        mBuilder.setMultiChoiceItems(listDescripcionLoterias, checkedItems, new DialogInterface.OnMultiChoiceClickListener() {
-
-            @Override
-            public void onClick(DialogInterface dialogInterface, int position, boolean isChecked) {
-                if(isChecked){
-                    mUserItems.add(position);
-                    posicionDeNuevasLoteriasAnadidasParaDuplicar.add(position);
-                }else{
-                    mUserItems.remove((Integer.valueOf(position)));
-                    if(existePosicionDeNuevasLoteriasAnadidasParaDuplicar(position))
-                        posicionDeNuevasLoteriasAnadidasParaDuplicar.remove((Integer.valueOf(position)));
-                }
-            }
-        });
-
-        mBuilder.setCancelable(false);
-        mBuilder.setPositiveButton(R.string.ok_label, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int which) {
-                String item = "";
-                for (int i = 0; i < mUserItems.size(); i++) {
-                    item = item + listDescripcionLoterias[mUserItems.get(i)];
-                    if (i != mUserItems.size() - 1) {
-                        item = item + ", ";
-                    }
-                   // Toast.makeText(mContext, listDescripcionLoterias[mUserItems.get(i)] + " " + idLoteriasMap.get(mUserItems.get(i)), Toast.LENGTH_LONG).show();
-                    try {
-                        //Si la loteria no se ha anadido, osea que es la loteria orinal que tiene la jugada entonces entrara al ciclo
-                        // y solo se duplicaran las jugadas que pertenezcan a esta loteria
-                        if(!existePosicionDeNuevasLoteriasAnadidasParaDuplicar(i)){
-                            for (int c=0; c< jugadas.length(); c++){
-
-
-                                //Si la loteria es igual a la loteria que tiene la jugada entonces se duplicara la jugada
-                                if(((JSONObject) jugadas.get(c)).getString("idLoteria").equals(idLoteriasMap.get(mUserItems.get(i)))){
-                                    JSONObject jugadaObject = new JSONObject();
-                                    String jugada = ((JSONObject) jugadas.get(c)).getString("jugada");
-                                    jugadaObject.put("jugada", Utilidades.agregarGuionPorSorteo(jugada, ((JSONObject) jugadas.get(c)).getString("sorteo")));
-
-                                    jugadaObject.put("descripcion", listDescripcionLoterias[mUserItems.get(i)]);
-                                    jugadaObject.put("idLoteria", idLoteriasMap.get(mUserItems.get(i)));
-                                    jugadaObject.put("monto", (int)Float.parseFloat(((JSONObject) jugadas.get(c)).getString("monto").toString()));
-                                    Log.d("PrincipalFragment", "Duplicar jugada: " + jugadaObject.getString("descripcion") + " " +jugadaObject.getString("jugada"));
-                                    jugadasClase.add(jugadaObject);
-                                }
-                            }
-                        }else{
-                            //Como la loteria se ha anadido para duplicar entonces se duplicaran todas las jugadas del ticket para
-                            // esta loteria, sin importar que no sean de esta loteria
-                            for (int c=0; c< jugadas.length(); c++){
-                                JSONObject jugadaObject = (JSONObject)jugadas.get(c);
-                                jugadaObject.put("descripcion", listDescripcionLoterias[mUserItems.get(i)]);
-                                jugadaObject.put("idLoteria", idLoteriasMap.get(mUserItems.get(i)));
-                                String jugada = ((JSONObject) jugadas.get(c)).getString("jugada");
-                                jugadaObject.put("jugada", Utilidades.agregarGuionPorSorteo(jugada, ((JSONObject) jugadas.get(c)).getString("sorteo")));
-                                jugadaObject.put("monto", (int)Float.parseFloat(jugadaObject.getString("monto").toString()));
-                                Log.d("PrincipalFragment", "Duplicar jugada: " + jugadaObject.getString("descripcion") + " " +jugadaObject.getString("jugada"));
-                                jugadasClase.add(jugadaObject);
-                            }
-                        }
-                    }catch (Exception e){
-                        e.printStackTrace();
-                    }
-                }
-                calcularTotal();
-                txtSelected.setText(item);
-                Log.d("PrincipalFragment", "Duplicar jugada objeto: " + jugadasClase.getJsonArrayJugadas().toString());
-            }
-        });
-
-
-
-
-
-
-        mBuilder.setNegativeButton(R.string.dismiss_label, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.dismiss();
-            }
-        });
-
-
-
-        mBuilder.setNeutralButton(R.string.clear_all_label, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int which) {
-                for (int i = 0; i < checkedItems.length; i++) {
-                    checkedItems[i] = true;
-                    mUserItems.clear();
-                    txtSelected.setText("");
-//                    if(jugadas.length() > 0){
-//                        for(int c=0)
+//        seleccionarLoteriasMultiSelect(loterias, false);
+//
+//        AlertDialog.Builder mBuilder = new AlertDialog.Builder(getActivity());
+//        mBuilder.setTitle("Seleccionar loteria");
+//        mBuilder.setMultiChoiceItems(listDescripcionLoterias, checkedItems, new DialogInterface.OnMultiChoiceClickListener() {
+//
+//            @Override
+//            public void onClick(DialogInterface dialogInterface, int position, boolean isChecked) {
+//                if(isChecked){
+//                    mUserItems.add(position);
+//                    posicionDeNuevasLoteriasAnadidasParaDuplicar.add(position);
+//                }else{
+//                    mUserItems.remove((Integer.valueOf(position)));
+//                    if(existePosicionDeNuevasLoteriasAnadidasParaDuplicar(position))
+//                        posicionDeNuevasLoteriasAnadidasParaDuplicar.remove((Integer.valueOf(position)));
+//                }
+//            }
+//        });
+//
+//        mBuilder.setCancelable(false);
+//        mBuilder.setPositiveButton(R.string.ok_label, new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialogInterface, int which) {
+//                String item = "";
+//                for (int i = 0; i < mUserItems.size(); i++) {
+//                    item = item + listDescripcionLoterias[mUserItems.get(i)];
+//                    if (i != mUserItems.size() - 1) {
+//                        item = item + ", ";
 //                    }
-                }
-            }
-        });
-
-//        AlertDialog mDialog = mBuilder.create();
-        AlertDialog alertDialog = mBuilder.create();
-
-        //Este evento se dispara cuando se agregan o quitan elemento de la vista
-        alertDialog.getListView().setOnHierarchyChangeListener(
-                new ViewGroup.OnHierarchyChangeListener() {
-                    @Override
-                    public void onChildViewAdded(View parent, final View child) {
-                        CharSequence text = ((AppCompatCheckedTextView)child).getText();
-                        int itemIndex = Arrays.asList(listDescripcionLoterias).indexOf(text);
-                        if(checkedItems[itemIndex] == true){
-                            child.setEnabled(checkedItems[itemIndex]);
-                        }else{
-                            child.setEnabled(checkedItems[itemIndex]);
-                            child.setOnClickListener(null);
-                        }
-
-//                        child.setOnClickListener(null);
-//                        child.setOnClickListener(new View.OnClickListener() {
-//                            @Override
-//                            public void onClick(View view) {
-//                                child.setEnabled(checkedItems[4]);
-//                                Toast.makeText(mContext, "Dentro child", Toast.LENGTH_SHORT).show();
+//                   // Toast.makeText(mContext, listDescripcionLoterias[mUserItems.get(i)] + " " + idLoteriasMap.get(mUserItems.get(i)), Toast.LENGTH_LONG).show();
+//                    try {
+//                        //Si la loteria no se ha anadido, osea que es la loteria orinal que tiene la jugada entonces entrara al ciclo
+//                        // y solo se duplicaran las jugadas que pertenezcan a esta loteria
+//                        if(!existePosicionDeNuevasLoteriasAnadidasParaDuplicar(i)){
+//                            for (int c=0; c< jugadas.length(); c++){
+//
+//
+//                                //Si la loteria es igual a la loteria que tiene la jugada entonces se duplicara la jugada
+//                                if(((JSONObject) jugadas.get(c)).getString("idLoteria").equals(idLoteriasMap.get(mUserItems.get(i)))){
+//                                    JSONObject jugadaObject = new JSONObject();
+//                                    String jugada = ((JSONObject) jugadas.get(c)).getString("jugada");
+//                                    jugadaObject.put("jugada", Utilidades.agregarGuionPorSorteo(jugada, ((JSONObject) jugadas.get(c)).getString("sorteo")));
+//
+//                                    jugadaObject.put("descripcion", listDescripcionLoterias[mUserItems.get(i)]);
+//                                    jugadaObject.put("idLoteria", idLoteriasMap.get(mUserItems.get(i)));
+//                                    jugadaObject.put("monto", (int)Float.parseFloat(((JSONObject) jugadas.get(c)).getString("monto").toString()));
+//                                    Log.d("PrincipalFragment", "Duplicar jugada: " + jugadaObject.getString("descripcion") + " " +jugadaObject.getString("jugada"));
+//                                    jugadasClase.add(jugadaObject);
+//                                }
 //                            }
-//                        });
-
-                    }
-
-                    @Override
-                    public void onChildViewRemoved(View view, View view1) {
-                    }
-                });
-
-        //mDialog.getButton(DialogInterface.OnShowListener).performClick();
-//        mDialog.show();
-        alertDialog.show();
+//                        }else{
+//                            //Como la loteria se ha anadido para duplicar entonces se duplicaran todas las jugadas del ticket para
+//                            // esta loteria, sin importar que no sean de esta loteria
+//                            for (int c=0; c< jugadas.length(); c++){
+//                                JSONObject jugadaObject = (JSONObject)jugadas.get(c);
+//                                jugadaObject.put("descripcion", listDescripcionLoterias[mUserItems.get(i)]);
+//                                jugadaObject.put("idLoteria", idLoteriasMap.get(mUserItems.get(i)));
+//                                String jugada = ((JSONObject) jugadas.get(c)).getString("jugada");
+//                                jugadaObject.put("jugada", Utilidades.agregarGuionPorSorteo(jugada, ((JSONObject) jugadas.get(c)).getString("sorteo")));
+//                                jugadaObject.put("monto", (int)Float.parseFloat(jugadaObject.getString("monto").toString()));
+//                                Log.d("PrincipalFragment", "Duplicar jugada: " + jugadaObject.getString("descripcion") + " " +jugadaObject.getString("jugada"));
+//                                jugadasClase.add(jugadaObject);
+//                            }
+//                        }
+//                    }catch (Exception e){
+//                        e.printStackTrace();
+//                    }
+//                }
+//                calcularTotal();
+//                txtSelected.setText(item);
+//                Log.d("PrincipalFragment", "Duplicar jugada objeto: " + jugadasClase.getJsonArrayJugadas().toString());
+//            }
+//        });
+//
+//
+//
+//
+//
+//
+//        mBuilder.setNegativeButton(R.string.dismiss_label, new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialogInterface, int i) {
+//                dialogInterface.dismiss();
+//            }
+//        });
+//
+//
+//
+//        mBuilder.setNeutralButton(R.string.clear_all_label, new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialogInterface, int which) {
+//                for (int i = 0; i < checkedItems.length; i++) {
+//                    checkedItems[i] = true;
+//                    mUserItems.clear();
+//                    txtSelected.setText("");
+////                    if(jugadas.length() > 0){
+////                        for(int c=0)
+////                    }
+//                }
+//            }
+//        });
+//
+////        AlertDialog mDialog = mBuilder.create();
+//        AlertDialog alertDialog = mBuilder.create();
+//
+//        //Este evento se dispara cuando se agregan o quitan elemento de la vista
+//        alertDialog.getListView().setOnHierarchyChangeListener(
+//                new ViewGroup.OnHierarchyChangeListener() {
+//                    @Override
+//                    public void onChildViewAdded(View parent, final View child) {
+//                        CharSequence text = ((AppCompatCheckedTextView)child).getText();
+//                        int itemIndex = Arrays.asList(listDescripcionLoterias).indexOf(text);
+//                        if(checkedItems[itemIndex] == true){
+//                            child.setEnabled(checkedItems[itemIndex]);
+//                        }else{
+//                            child.setEnabled(checkedItems[itemIndex]);
+//                            child.setOnClickListener(null);
+//                        }
+//
+////                        child.setOnClickListener(null);
+////                        child.setOnClickListener(new View.OnClickListener() {
+////                            @Override
+////                            public void onClick(View view) {
+////                                child.setEnabled(checkedItems[4]);
+////                                Toast.makeText(mContext, "Dentro child", Toast.LENGTH_SHORT).show();
+////                            }
+////                        });
+//
+//                    }
+//
+//                    @Override
+//                    public void onChildViewRemoved(View view, View view1) {
+//                    }
+//                });
+//
+//        //mDialog.getButton(DialogInterface.OnShowListener).performClick();
+////        mDialog.show();
+//        alertDialog.show();
 
     }
 
@@ -832,7 +833,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
     }
 
     private void jsonParse(){
-        String url = "http://loterias.ml/api/principal/indexPost";
+        String url = "https://loterias.ml/api/principal/indexPost";
 //        progressBar.setVisibility(View.VISIBLE);
         Main2Activity.progressBarToolbar.setVisibility(View.VISIBLE);
 
@@ -894,7 +895,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
     }
 
     private void getMontoDisponible(){
-        String url = "http://loterias.ml/api/principal/montodisponible";
+        String url = "https://loterias.ml/api/principal/montodisponible";
         monto = "0";
         Log.d("Arreglo loteria size: ", String.valueOf(mUserItems.size()));
         final String jugada = String.valueOf(txtJugada.getText());
@@ -1050,7 +1051,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
 
     private void guardar(){
-        String url = "http://loterias.ml/api/principal/guardar";
+        String url = "https://loterias.ml/api/principal/guardar";
 
 
         if(jugadasClase.length() == 0){
@@ -1814,7 +1815,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
     private void cancelarTicket(final JSONObject venta){
 
-        String url = "http://loterias.ml/api/principal/cancelar";
+        String url = "https://loterias.ml/api/principal/cancelar";
 
         JSONObject loteria = new JSONObject();
         JSONObject datosObj = new JSONObject();

@@ -44,7 +44,7 @@ public class ActualizarService extends Service {
     }
 
     private void verificarVersion(){
-        String url = "http://loterias.ml/api/versiones/publicada";
+        String url = "https://loterias.ml/api/versiones/publicada";
 
 
         JSONObject loteria = new JSONObject();

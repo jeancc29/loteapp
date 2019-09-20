@@ -246,7 +246,7 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
     }
 
     public static void duplicarTicket(String codigoBarraQR, boolean esQR){
-        String url = "http://loterias.ml/api/principal/duplicar";
+        String url = "https://loterias.ml/api/principal/duplicar";
 
         JSONObject loteria = new JSONObject();
         JSONObject datosObj = new JSONObject();
@@ -383,7 +383,7 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
     }
 
     public static void pagarTicket(String codigoBarraQR, boolean esQR){
-        String url = "http://loterias.ml/api/principal/pagar";
+        String url = "https://loterias.ml/api/principal/pagar";
         boolean tienePremioYtienePendiente = false;
 
         double montoAPagar = Double.parseDouble(obtenerAtributoJsonObjectTicket("montoAPagar"));
@@ -474,7 +474,7 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
 
 
     public static void buscarTicketAPagar(String codigoBarraQR, boolean esQR){
-        String url = "http://loterias.ml/api/principal/buscarTicketAPagar";
+        String url = "https://loterias.ml/api/principal/buscarTicketAPagar";
 
         JSONObject loteria = new JSONObject();
         JSONObject datosObj = new JSONObject();

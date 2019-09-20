@@ -47,15 +47,22 @@ public class DuplicarAvanzadoDialog extends AppCompatDialogFragment {
             for(int contadorLoteria = 0; contadorLoteria < loterias.length(); contadorLoteria++){
                 JSONObject loteria = loterias.getJSONObject(contadorLoteria);
                 LinearLayout linearLayout = createLinealLayout(mContext);
-                TextView textView = createTv(loteria.getString("descripcion"), 1, mContext, true);
+
                 Spinner spinner = createSpinner(mContext);
                 ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(mContext, android.R.layout.simple_spinner_dropdown_item, listDescripcionLoterias);
                 spinner.setAdapter(spinnerArrayAdapter);
 
+                TextView textView;
                 int itemIndex = Arrays.asList(PrincipalFragment.listDescripcionLoterias).indexOf(loteria.getString("descripcion"));
+                if(itemIndex == -1){
+                     textView = createTv(loteria.getString("descripcion"), 2, mContext, true);
+                }else{
+                     textView = createTv(loteria.getString("descripcion"), 1, mContext, true);
+                }
+                //Log.d("duplicarIndex", String.valueOf(itemIndex));
 //                int idLoteria = Utilidades.toInt(PrincipalFragment.idLoteriasMap.get(itemIndex));
 //                spinner.setId(idLoteria);
-                spinner.setTag(PrincipalFragment.listDescripcionLoterias[itemIndex]);
+                spinner.setTag(loteria.getString("descripcion"));
                 linearLayout.addView(textView);
                 linearLayout.addView(spinner);
                 linearLayoutPrincipal.addView(linearLayout);
@@ -111,13 +118,15 @@ public class DuplicarAvanzadoDialog extends AppCompatDialogFragment {
                                 for(int contadorJugada = 0; contadorJugada < jugadas.length(); contadorJugada++){
                                     JSONObject jugadaObject = new JSONObject();
                                     String jugada = ((JSONObject) jugadas.get(contadorJugada)).getString("jugada");
+                                    jugada = Utilidades.agregarGuionPorSorteo(jugada, ((JSONObject) jugadas.get(contadorJugada)).getString("sorteo"));
+//                                    jugada = Utilidades.agregarGuionPorSorteo(jugada, ((JSONObject) jugadas.get(contadorJugada)).getString("sorteo"));
                                     if(PrincipalFragment.jugadasClase.jugadaExiste(jugada, String.valueOf(idLoteria))){
                                         PrincipalFragment.aceptaInsertarJugadaExistente(jugada, String.valueOf(idLoteria), descripcion, String.valueOf(Float.parseFloat(((JSONObject) jugadas.get(contadorJugada)).getString("monto").toString())));
                                         continue;
                                     }
 
-
-                                    jugadaObject.put("jugada", Utilidades.agregarGuionPorSorteo(jugada, ((JSONObject) jugadas.get(contadorJugada)).getString("sorteo")));
+                                    Log.d("duplicarExiste", jugada);
+                                    jugadaObject.put("jugada", jugada);
 
                                     jugadaObject.put("descripcion", descripcion);
                                     jugadaObject.put("idLoteria", idLoteria);
@@ -217,7 +226,7 @@ public class DuplicarAvanzadoDialog extends AppCompatDialogFragment {
         return spinner;
     }
 
-    private static TextView createTv(String text, int es_normal_header_grande, Context context, boolean center){
+    private static TextView createTv(String text, int es_loteria_cerrada_o_no, Context context, boolean center){
         /* create cell element - textview */
         TextView tv = new TextView(context);
         TableRow.LayoutParams cellParams = new TableRow.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT);
@@ -227,15 +236,17 @@ public class DuplicarAvanzadoDialog extends AppCompatDialogFragment {
         //tv.setBackgroundColor(0xff12dd12);
         tv.setText(text);
 
-        if(es_normal_header_grande == 1){
+        if(es_loteria_cerrada_o_no == 1){
             tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
 //            tv.setBackgroundResource(R.color.colorPrimary);
 //            tv.setTextColor(Color.WHITE);
             tv.setPadding(2, 10, 2, 10);
         }
-        else if(es_normal_header_grande == 2){
-            tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
-            tv.setTextColor(Color.BLACK);
+        else if(es_loteria_cerrada_o_no == 2){
+//            tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
+            tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
+            tv.setPadding(2, 10, 2, 10);
+            tv.setTextColor(Color.RED);
         }
         else{
             cellParams = new TableRow.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT);

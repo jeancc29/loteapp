@@ -133,7 +133,7 @@ public class MenuFragment extends Fragment implements DuplicarDialog.DuplicarDia
 
 
     private void duplicarTicket(String codigoBarra){
-        String url = "http://loterias.ml/api/principal/duplicar";
+        String url = "https://loterias.ml/api/principal/duplicar";
 
         JSONObject loteria = new JSONObject();
         JSONObject datosObj = new JSONObject();

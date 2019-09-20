@@ -183,7 +183,7 @@ public class HistoricoVentasActivity extends AppCompatActivity {
     }
 
     private void getVentas(){
-        String url = "http://loterias.ml/api/reportes/ventas";
+        String url = "https://loterias.ml/api/reportes/ventas";
         progressBarToolbar.setVisibility(View.VISIBLE);
 
 

@@ -334,7 +334,7 @@ public class MonitoreoActivity extends AppCompatActivity {
 
 
     private void getMonitoreo(){
-        String url = "http://loterias.ml/api/reportes/monitoreo";
+        String url = "https://loterias.ml/api/reportes/monitoreo";
         progressBar.setVisibility(View.VISIBLE);
 
 
@@ -409,7 +409,7 @@ public class MonitoreoActivity extends AppCompatActivity {
     }
 
     private void cancelarTicket(JSONObject jsonObject){
-        String url = "http://loterias.ml/api/principal/cancelar";
+        String url = "https://loterias.ml/api/principal/cancelar";
 
         JSONObject loteria = new JSONObject();
         JSONObject datosObj = new JSONObject();
