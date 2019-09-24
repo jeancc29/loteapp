@@ -50,6 +50,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.jean2.creta.Servicios.ActualizarService;
+import com.example.jean2.creta.Servicios.JPrinterConnectService;
 import com.example.jean2.creta.Servicios.VerificarAccesoAlSistemaService;
 import com.izettle.html2bitmap.Html2Bitmap;
 import com.izettle.html2bitmap.content.WebViewContent;
@@ -1059,7 +1060,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
             return;
         }
         if(ckbPrint.isChecked()){
-            if(BluetoothSearchDialog.isPrinterConnected() == false){
+            if(JPrinterConnectService.isPrinterConnected() == false){
                 Toast.makeText(mContext, "Debe conectarse a una impresora", Toast.LENGTH_SHORT).show();
                 Main2Activity.txtBluetooth.performClick();
                 return;
@@ -1121,7 +1122,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                                // ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
                                 Toast.makeText(getContext(), response.getString("mensaje"), Toast.LENGTH_SHORT).show();
                                 if(ckbPrint.isChecked()){
-//                                    if(BluetoothSearchDialog.isPrinterConnected() == false){
+//                                    if(JPrinterConnectService.isPrinterConnected() == false){
 //                                        Main2Activity.txtBluetooth.performClick();
 //                                    }
 
@@ -1390,7 +1391,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
             return;
 
 
-        if(BluetoothSearchDialog.isPrinterConnected() == false){
+        if(JPrinterConnectService.isPrinterConnected() == false){
             Toast.makeText(mContext, "Debe conectarse a una impresora", Toast.LENGTH_SHORT).show();
             Main2Activity.txtBluetooth.performClick();
             return;
@@ -1400,6 +1401,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
            JSONObject ticket  = jsonArrayVentas.getJSONObject((int)spinnerTicket.getSelectedItemId());
            JSONObject venta = new JSONObject();
            venta.put("venta", ticket);
+           Log.d("PrincipaFragment", "print: " + jsonArrayVentas.toString());
            es.submit(new BluetoothSearchDialog.TaskPrint(venta, false));
            Toast.makeText(mContext, "idx:" + spinnerTicket.getSelectedItemId(), Toast.LENGTH_SHORT).show();
 
@@ -1724,7 +1726,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         if(spinnerTicket.getSelectedItem() == "No hay ventas")
             return;
 
-        if(BluetoothSearchDialog.isPrinterConnected() == false){
+        if(JPrinterConnectService.isPrinterConnected() == false){
             Toast.makeText(mContext, "Debe conectarse a una impresora", Toast.LENGTH_SHORT).show();
             Main2Activity.txtBluetooth.performClick();
 //                mostrarDispositivosBluetooth();
@@ -1762,7 +1764,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
     }
 
     private void ImprimirTicketCancelado(JSONObject venta){
-        if(BluetoothSearchDialog.isPrinterConnected() == false){
+        if(JPrinterConnectService.isPrinterConnected() == false){
             Toast.makeText(mContext, "Debe conectarse a una impresora", Toast.LENGTH_SHORT).show();
             Main2Activity.txtBluetooth.performClick();
 //                mostrarDispositivosBluetooth();

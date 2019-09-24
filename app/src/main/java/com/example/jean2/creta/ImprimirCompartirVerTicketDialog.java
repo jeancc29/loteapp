@@ -17,6 +17,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.jean2.creta.Servicios.JPrinterConnectService;
 import com.izettle.html2bitmap.Html2Bitmap;
 import com.izettle.html2bitmap.content.WebViewContent;
 
@@ -122,7 +123,7 @@ public class ImprimirCompartirVerTicketDialog extends AppCompatDialogFragment {
     }
 
     private void ImprimirTicket(){
-        if(BluetoothSearchDialog.isPrinterConnected() == false){
+        if(JPrinterConnectService.isPrinterConnected() == false){
             Toast.makeText(mContext, "Debe conectarse a una impresora", Toast.LENGTH_SHORT).show();
             MonitoreoActivity.mostrarFragmentDialogBluetoothSearch();
 //                mostrarDispositivosBluetooth();

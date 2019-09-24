@@ -16,6 +16,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatDialogFragment;
@@ -63,7 +64,7 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
     static JPrinterBluetoothSingleton jPrinterBluetoothSingleton = JPrinterBluetoothSingleton.getInstance();
 //    BTPrinting mBt = new BTPrinting();
 //        static Pos mPos = new Pos();
-        static Pos mPos = jPrinterBluetoothSingleton.getmPos();
+        static Pos mPos = JPrinterConnectService.mPos;
         BTPrinting mBt = jPrinterBluetoothSingleton.getmBt();
 
 
@@ -129,7 +130,7 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
 
 //        initBroadcast();
 
-        if(jPrinterBluetoothSingleton.isConnected()){
+        if(JPrinterConnectService.isPrinterConnected()){
 
             Log.d(TAG, "onCreateDialog: " +String.valueOf(jPrinterBluetoothSingleton.getName()));
             mostrarBotonConectado();
@@ -235,7 +236,7 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
         switch (arg0.getId()) {
             case R.id.buttonSearch: {
                 initBroadcast();
-                if(jPrinterBluetoothSingleton.isConnected() == false){
+                if(JPrinterConnectService.isPrinterConnected() == false){
                     BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
                     if (null == adapter) {
                         return;
@@ -266,7 +267,7 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
                 //es.submit(new TaskOpen(mBt,jPrinterBluetoothSingleton.getAddress(), jPrinterBluetoothSingleton.getName(), getActivity()));
 
                 mContext.stopService(new Intent(getActivity(), JPrinterConnectService.class));
-                jPrinterBluetoothSingleton.Disconnect();
+                // jPrinterBluetoothSingleton.Disconnect();
                 btnSearch.setEnabled(true);
                 btnSearch.performClick();
 
@@ -337,7 +338,10 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
                             Intent serviceIntent = new Intent(getActivity(), JPrinterConnectService.class);
                             serviceIntent.putExtra("address", address);
                             serviceIntent.putExtra("name", nombre);
-                            mContext.startService(serviceIntent);
+                            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                                mContext.startForegroundService(serviceIntent);
+                            else
+                                mContext.startService(serviceIntent);
 
 //                            es.submit(new TaskOpen(mBt,address, nombre, getActivity()));
 //                            jPrinterBluetoothSingleton.mBtOpen(mContext);

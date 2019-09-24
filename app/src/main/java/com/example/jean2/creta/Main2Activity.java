@@ -43,6 +43,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.jean2.creta.Servicios.ActualizarService;
+import com.example.jean2.creta.Servicios.JPrinterConnectService;
 import com.example.jean2.creta.Servicios.VerificarAccesoAlSistemaService;
 import com.lvrenyang.io.BTPrinting;
 import com.lvrenyang.io.IOCallBack;
@@ -390,7 +391,7 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
         if(montoAPagar > 0){
             if(tieneJugadasPendientes()){
                 tienePremioYtienePendiente = true;
-                if(BluetoothSearchDialog.isPrinterConnected() == false){
+                if(JPrinterConnectService.isPrinterConnected() == false){
                     Toast.makeText(mContext, "Debe conectarse a una impresora", Toast.LENGTH_SHORT).show();
                     mostrarFragmentDialogBluetoothSearch();
 //                mostrarDispositivosBluetooth();

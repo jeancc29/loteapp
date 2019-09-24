@@ -57,9 +57,11 @@ public class JPrinterBluetoothSingleton {
         this.name = name;
     }
 
+
     public void setAddress(String address) {
         this.address = address;
     }
+
 
     public String getName() {
         return name;

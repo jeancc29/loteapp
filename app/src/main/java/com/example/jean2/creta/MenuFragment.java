@@ -112,7 +112,7 @@ public class MenuFragment extends Fragment implements DuplicarDialog.DuplicarDia
             public void onClick(View view) {
                 Utilidades.eliminarUsuario(getContext());
                 Intent intent = new Intent(getContext(), LoginActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
             }
         });

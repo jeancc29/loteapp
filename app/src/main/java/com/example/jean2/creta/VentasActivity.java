@@ -411,12 +411,17 @@ public class VentasActivity extends AppCompatActivity {
                 }
                 /* add views to the row */
                 tableRow.setId(idRow);
+                String primera = dato.getString("primera");
+                String segunda = dato.getString("segunda");
+                String tercera = dato.getString("tercera");
+                String pick3 = (dato.getString("pick3").equals("null")) ? "-" : dato.getString("pick3");
+                String pick4 = (dato.getString("pick4").equals("null")) ? "-" : dato.getString("pick4");
                 tableRow.addView(createTv(dato.getString("descripcion"), false, mContext, true));
                 tableRow.addView(createTv(dato.getString("primera"), false, mContext, true));
                 tableRow.addView(createTv(dato.getString("segunda"), false, mContext, true));
                 tableRow.addView(createTv(dato.getString("tercera"), false, mContext, true));
-                tableRow.addView(createTv("-", false, mContext, true));
-                tableRow.addView(createTv("-", false, mContext, true));
+                tableRow.addView(createTv(pick3, false, mContext, true));
+                tableRow.addView(createTv(pick4, false, mContext, true));
 
 
 
@@ -509,8 +514,9 @@ public class VentasActivity extends AppCompatActivity {
                 }
                 /* add views to the row */
                 tableRow.setId(idRow);
-                tableRow.addView(createTv(dato.getString("created_at"), false, mContext, true));
-                tableRow.addView(createTv(dato.getString("idTicket"), false, mContext, true));
+                tableRow.addView(createTv(dato.getString("fecha"), false, mContext, true));
+                String secuencia = Utilidades.toSecuencia(dato.getString("idTicket"), dato.getString("codigo"));
+                tableRow.addView(createTv(secuencia, false, mContext, true));
                 tableRow.addView(createTv(dato.getString("premio"), false, mContext, true));
 
                 tableTicketsGanadores.addView(tableRow);

@@ -34,6 +34,7 @@ import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.jean2.creta.Servicios.JPrinterConnectService;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -126,8 +127,8 @@ public class MonitoreoActivity extends AppCompatActivity {
 
     public void aceptaCancelarTicket(final JSONObject ticket){
         try {
-            if(BluetoothSearchDialog.isPrinterConnected() == false){
-                Toast.makeText(mContext, "Debe conectarse a una impresora", Toast.LENGTH_SHORT).show();
+            if(JPrinterConnectService.isPrinterConnected() == false){
+                Toast.makeText(mContext, "Debe conectarse a una impresora culo", Toast.LENGTH_SHORT).show();
                 mostrarFragmentDialogBluetoothSearch();
 //                mostrarDispositivosBluetooth();
                 return;
@@ -489,8 +490,15 @@ public class MonitoreoActivity extends AppCompatActivity {
 
 
     private void ImprimirTicketCancelado(JSONObject venta){
-        if(BluetoothSearchDialog.isPrinterConnected() == false){
-            Toast.makeText(mContext, "Debe conectarse a una impresora", Toast.LENGTH_SHORT).show();
+//        if(BluetoothSearchDialog.isPrinterConnected() == false){
+//            Toast.makeText(mContext, "Debe conectarse a una impresora", Toast.LENGTH_SHORT).show();
+//            MonitoreoActivity.mostrarFragmentDialogBluetoothSearch();
+////                mostrarDispositivosBluetooth();
+//            return;
+//        }
+
+        if(JPrinterConnectService.isPrinterConnected() == false){
+            Toast.makeText(mContext, "Debe conectarse a una impresora culoo", Toast.LENGTH_SHORT).show();
             MonitoreoActivity.mostrarFragmentDialogBluetoothSearch();
 //                mostrarDispositivosBluetooth();
             return;
