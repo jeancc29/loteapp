@@ -1,10 +1,13 @@
 package com.example.jean2.creta.Servicios;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -40,30 +43,57 @@ public class JPrinterConnectService extends Service implements IOCallBack {
     public static final String CHANNEL_ID = "ForegroundServiceChannel";
 
     public void onCreate(){
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-
-
-            Intent notificationIntent = new Intent(this, JPrinterConnectService.class);
-            PendingIntent pendingIntent = PendingIntent.getActivity(this,
-                    0, notificationIntent, 0);
-
-            Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-                    .setContentTitle("Foreground Service")
-                    .setContentText("Servicio impresora")
-                    .setContentIntent(pendingIntent)
-                    .build();
-
-            startForeground(1, notification);
-        }
+        try{
+//            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+//
+//
+//                Intent notificationIntent = new Intent(this, JPrinterConnectService.class);
+//                PendingIntent pendingIntent = PendingIntent.getActivity(this,
+//                        0, notificationIntent, 0);
+//
+//                Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
+//                        .setContentTitle("Foreground Service")
+//                        .setContentText("Servicio impresora")
+//                        .setContentIntent(pendingIntent)
+//                        .build();
+//
+//                startForeground(1, notification);
+//            }
             //startForeground(1, "Impresora conectada");
 //        else
 //            mContext.startService(serviceIntent);
-        handler = new Handler();
-        //jPrinterBluetoothSingleton.setCallBack(this);
+            handler = new Handler();
+            //jPrinterBluetoothSingleton.setCallBack(this);
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                String NOTIFICATION_CHANNEL_ID = "com.example.simpleapp";
+                String channelName = "My Background Service";
+                NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
+                chan.setLightColor(Color.BLUE);
+                chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+                NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                assert manager != null;
+                manager.createNotificationChannel(chan);
 
-        mPos.Set(mBt);
-        mBt.SetCallBack(this);
-        Log.d("JPrinterConnectS", "create name:" + address + " address:" + address);
+                NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
+                Notification notification = notificationBuilder.setOngoing(true)
+                        .setSmallIcon(R.drawable.ic_launcher_background)
+                        .setContentTitle("App is running in background")
+                        .setPriority(NotificationManager.IMPORTANCE_MIN)
+                        .setCategory(Notification.CATEGORY_SERVICE)
+                        .build();
+                startForeground(2, notification);
+            }
+
+
+
+            mPos.Set(mBt);
+            mBt.SetCallBack(this);
+            Log.d("JPrinterConnectS", "create name:" + address + " address:" + address);
+        }catch (Exception e){
+            Toast.makeText(this, "Error servicio: " + e.toString(), Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }
+
         super.onCreate();
         //verificarSesion();
     }
@@ -103,6 +133,25 @@ public class JPrinterConnectService extends Service implements IOCallBack {
         return mPos.GetIO().IsOpened();
     }
 
+//    private void startMyOwnForeground(){
+//        String NOTIFICATION_CHANNEL_ID = "com.example.simpleapp";
+//        String channelName = "My Background Service";
+//        NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
+//        chan.setLightColor(Color.BLUE);
+//        chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+//        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+//        assert manager != null;
+//        manager.createNotificationChannel(chan);
+//
+//        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
+//        Notification notification = notificationBuilder.setOngoing(true)
+//                .setSmallIcon(R.drawable.icon_1)
+//                .setContentTitle("App is running in background")
+//                .setPriority(NotificationManager.IMPORTANCE_MIN)
+//                .setCategory(Notification.CATEGORY_SERVICE)
+//                .build();
+//        startForeground(2, notification);
+//    }
 
 
     @Nullable
