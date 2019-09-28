@@ -652,9 +652,12 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
                         if(jugadas.length() == 0)
                             continue;
                         for (int contadorCicleJugadas =0; contadorCicleJugadas < jugadas.length(); contadorCicleJugadas++){
+
                             if(!pos.GetIO().IsOpened())
                                 break;
                             JSONObject jugada = jugadas.getJSONObject(contadorCicleJugadas);
+                            Log.d("BluetoothSearchDia", "Print: " + jugada.getString("jugada") + " - " + Utilidades.agregarGuionPorSorteo(jugada.getString("jugada"), jugada.getString("sorteo")) +jugada.getString("sorteo"));
+
                             if(contadorCicleJugadas == 0){
                                 pos.POS_S_TextOut("---------------\n", 1, 1, 1, 0, 0x00);
                                 pos.POS_S_TextOut(loteria.getString("descripcion") + "\n", 1, 0, 1, 0, 0x00);
@@ -695,7 +698,7 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
                         pos.POS_S_TextOut("descuento: " + venta.getDouble("descuentoMonto") + "\n", 1, 0, 1, 0, 0x00);
                     }
                     String saltoLineaTotal = "\n";
-                    if(this.original == false){
+                    if(this.original == false || venta.getJSONObject("banca").getInt("imprimirCodigoQr") == 0){
                         saltoLineaTotal+="\n\n";
                     }
                     pos.POS_S_TextOut("- TOTAL: " + total + " -" + saltoLineaTotal, 1, 0, 1, 0, 0x00);
@@ -713,7 +716,8 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
                             pos.POS_S_TextOut(venta.getJSONObject("banca").getString("piepagina3") + "\n", 1, 0, 1, 0, 0x00);
                         if(!venta.getJSONObject("banca").getString("piepagina4").equals("null"))
                             pos.POS_S_TextOut(venta.getJSONObject("banca").getString("piepagina4") + "\n", 1, 0, 1, 0, 0x00);
-                        pos.POS_S_SetQRcode(venta.getString("codigoQr"), 8, 0, 3);
+                        if(venta.getJSONObject("banca").getInt("imprimirCodigoQr") == 1)
+                            pos.POS_S_SetQRcode(venta.getString("codigoQr"), 8, 0, 3);
                         pos.POS_S_TextOut("\n\n\n", 1, 0, 1, 0, 0x00);
 
                     }

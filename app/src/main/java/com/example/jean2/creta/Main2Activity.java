@@ -243,7 +243,8 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
 
     @Override
     public void setCodigoBarraPagar(String codigoBarra) {
-        pagarTicket(codigoBarra, false);
+        Log.d("Main2Activity", "setCodigoBarra:" + codigoBarra);
+        buscarTicketAPagar(codigoBarra, false);
     }
 
     public static void duplicarTicket(String codigoBarraQR, boolean esQR){
@@ -374,11 +375,14 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
     }
 
     private static String obtenerAtributoJsonObjectTicket(String atributo){
+
         try{
+
+            Log.d("Main2Activit", "obtenerAtributo: " + Main2Activity.pagarTicketDatos.toString());
             return Main2Activity.pagarTicketDatos.getString(atributo);
         }catch (Exception e){
             e.printStackTrace();
-
+            Log.d("Main2Activit", "obtenerAtributo: " + Main2Activity.pagarTicketDatos.toString());
             return "";
         }
     }
@@ -440,10 +444,10 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
                                     //las jugadas pendientes
                                     es.submit(new BluetoothSearchDialog.TaskPrint(response, 2));
                                 }
-                                Toast.makeText(mActivity, response.getString("mensaje") + " e: " + errores, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(mActivity, response.getString("mensaje") + " e: " + errores, Toast.LENGTH_LONG).show();
                             }
                             else
-                                Toast.makeText(mActivity, response.getString("mensaje") + " e: " + errores, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(mActivity, response.getString("mensaje") + " e: " + errores, Toast.LENGTH_LONG).show();
 
                         } catch (JSONException e) {
                             Log.d("Error: ", e.toString());
@@ -516,7 +520,7 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
                                 //Toast.makeText(mActivity, response.getString("mensaje") + " e: " + errores, Toast.LENGTH_SHORT).show();
                             }
                             else
-                                Toast.makeText(mActivity, response.getString("mensaje") + " e: " + errores, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(mActivity, response.getString("mensaje") + " e: " + errores, Toast.LENGTH_LONG).show();
 
                         } catch (JSONException e) {
                             Log.d("Error: ", e.toString());
