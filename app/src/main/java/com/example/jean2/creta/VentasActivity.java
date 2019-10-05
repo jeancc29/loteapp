@@ -513,14 +513,18 @@ public class VentasActivity extends AppCompatActivity {
                     tableTicketsGanadores.addView(tableRow1);
                 }
                 /* add views to the row */
-                tableRow.setId(idRow);
-                tableRow.addView(createTv(dato.getString("fecha"), false, mContext, true));
-                String secuencia = Utilidades.toSecuencia(dato.getString("idTicket"), dato.getString("codigo"));
-                tableRow.addView(createTv(secuencia, false, mContext, true));
-                tableRow.addView(createTv(dato.getString("premio"), false, mContext, true));
+                double montoAPagar = dato.getDouble("montoAPagar");
+                if(montoAPagar > 0){
+                    tableRow.setId(idRow);
+                    tableRow.addView(createTv(dato.getString("fecha"), false, mContext, true));
+                    String secuencia = Utilidades.toSecuencia(dato.getString("idTicket"), dato.getString("codigo"));
+                    tableRow.addView(createTv(secuencia, false, mContext, true));
+                    tableRow.addView(createTv(dato.getString("montoAPagar"), false, mContext, true));
 
-                tableTicketsGanadores.addView(tableRow);
-                idRow++;
+                    tableTicketsGanadores.addView(tableRow);
+                    idRow++;
+                }
+
             }catch (Exception e){
                 e.printStackTrace();
             }

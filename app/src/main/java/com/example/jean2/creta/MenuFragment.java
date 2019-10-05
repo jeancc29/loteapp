@@ -1,6 +1,8 @@
 package com.example.jean2.creta;
 
 
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -24,6 +26,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.List;
+
+import static android.bluetooth.BluetoothProfile.GATT;
+import static android.content.Context.BLUETOOTH_SERVICE;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -37,6 +44,7 @@ public class MenuFragment extends Fragment implements DuplicarDialog.DuplicarDia
     Button btnDuplicar;
     Button btnSalir;
     Button btnPendienteDePago;
+    Button btnVersion;
     private FragmentActivity mContext;
     //private RequestQueue mQueue;
     public MenuFragment() {
@@ -106,11 +114,24 @@ public class MenuFragment extends Fragment implements DuplicarDialog.DuplicarDia
             }
         });
 
+        btnVersion = (Button)view.findViewById(R.id.btnVersion);
+        btnVersion.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                BluetoothManager manager = (BluetoothManager) mContext.getSystemService(BLUETOOTH_SERVICE);
+                List<BluetoothDevice> connected = manager.getConnectedDevices(GATT);
+                Log.d("ConnectedDevices: ", connected.size()+"");
+
+                Toast.makeText(mContext, "Version: " + Utilidades.getVersionName(mContext), Toast.LENGTH_LONG).show();
+            }
+        });
+
         btnSalir = (Button)view.findViewById(R.id.btnSalir);
         btnSalir.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Utilidades.eliminarUsuario(getContext());
+                PrincipalFragment.jugadasClase.removeAll();
                 Intent intent = new Intent(getContext(), LoginActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);

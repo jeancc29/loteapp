@@ -38,6 +38,10 @@ public class Jugadas {
         }
     }
 
+    public void deleteAll(){
+        jsonArrayJugadas = new JSONArray(new ArrayList<String>());
+    }
+
     public JSONArray getJsonArrayJugadas() {
         return jsonArrayJugadas;
     }
@@ -54,6 +58,9 @@ public class Jugadas {
         boolean existe = false;
         if(jugada.length() == 0)
             return existe;
+
+        jugada = Utilidades.ordenarMenorAMayor(jugada);
+
 
         try {
             for (int i=0; i < jsonArrayJugadas.length(); i++){
@@ -78,6 +85,8 @@ public class Jugadas {
 
         if(jsonArrayJugadas.length() == 0)
             return existe;
+
+        jugada = Utilidades.ordenarMenorAMayor(jugada);
 
         try {
             for (int i=0; i < jsonArrayJugadas.length(); i++){

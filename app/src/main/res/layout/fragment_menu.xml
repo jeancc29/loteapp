@@ -67,6 +67,14 @@
         android:paddingTop="25dp"/>
 
         <Button
+            android:id="@+id/btnVersion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Version"
+            android:paddingBottom="25dp"
+            android:paddingTop="25dp"/>
+
+        <Button
             android:id="@+id/btnSalir"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

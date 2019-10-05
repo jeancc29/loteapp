@@ -7,8 +7,8 @@ android {
 //        applicationId "com.example.jean2.creta"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 16
-        versionName "1.11"
+        versionCode 19
+        versionName "1.14"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -16,6 +16,14 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+    configurations {
+        cleanedAnnotations
+        compile.exclude group: 'org.jetbrains' , module:'annotations'
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
@@ -37,5 +45,7 @@ dependencies {
     implementation 'com.izettle:html2bitmap:1.9'
     implementation 'androidmads.library.qrgenearator:QRGenearator:1.0.3'
     implementation 'com.intellij:annotations:+@jar'
+    implementation 'com.github.mazenrashed:Printooth:1.2.1'
+
 
 }

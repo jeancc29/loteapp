@@ -1,5 +1,7 @@
 package com.example.jean2.creta;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -9,14 +11,18 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
 import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.jean2.creta.Servicios.JPrinterConnectService;
+
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Set;
 
 public class Utilidades {
     public static boolean guardarUsuario(Context context, boolean recordar, JSONObject jsonObjectUsuario){
@@ -38,6 +44,31 @@ public class Utilidades {
 
         editor.commit();
         return true;
+    }
+
+
+    public static boolean guardarImpresora(Context context, String address){
+        SharedPreferences preferences = context.getSharedPreferences("impresoras", Context.MODE_PRIVATE);
+
+        SharedPreferences.Editor editor = preferences.edit();
+        String nombre = "impresora" + address;
+        try {
+
+            editor.putString(nombre, address);
+
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+
+        editor.commit();
+        return true;
+    }
+
+    public static String getImpresora(Context context, String address){
+        SharedPreferences preferences = context.getSharedPreferences("impresoras", Context.MODE_PRIVATE);
+        String nombre = "impresora" + address;
+        return preferences.getString(nombre, "");
     }
 
     public static boolean eliminarUsuario(Context context){
@@ -170,6 +201,26 @@ public class Utilidades {
         }
     }
 
+
+    public static String ordenarMenorAMayor(String jugada)
+    {
+        //Esta funcion ordena los paleses de menor a mayor
+        if(jugada.length() == 4 && Utilidades.toInt(jugada) != 0){
+            String primerParNumeros = jugada.substring(0, 2);
+            String segundoParNumeros = jugada.substring(2, 4);
+            String jugadaRetornar = jugada;
+
+            if(Utilidades.toInt(primerParNumeros) < Utilidades.toInt(segundoParNumeros)){
+                return jugadaRetornar;
+            }else{
+                jugadaRetornar = segundoParNumeros + primerParNumeros;
+                return  jugadaRetornar;
+            }
+        }
+
+        return jugada;
+    }
+
     public static String agregarGuion(String jugada){
         String cadena = jugada;
         //Si se ha enviado un sorteo diferente de nulo entonces se debe agregar a la cadena el signo (+ o -) correspondiente a cada sorteo
@@ -240,6 +291,32 @@ public class Utilidades {
             return Integer.parseInt(valor);
         } catch(NumberFormatException nfe) {
             return 0;
+        }
+    }
+
+    public static String getVersionName(Context ctx){
+        return BuildConfig.VERSION_NAME;
+    }
+
+    public static void conectarseAutomaticamente(Context context){
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
+        if (pairedDevices.size() > 0) {
+            // There are paired devices. Get the name and address of each paired device.
+            for (BluetoothDevice device : pairedDevices) {
+                String deviceName = device.getName();
+                String deviceHardwareAddress = device.getAddress(); // MAC address
+                if(Utilidades.getImpresora(context, deviceHardwareAddress).equals("") == false){
+                    Intent serviceIntent = new Intent(context, JPrinterConnectService.class);
+                    serviceIntent.putExtra("address", deviceHardwareAddress);
+                    serviceIntent.putExtra("name", deviceName);
+                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                        context.startForegroundService(serviceIntent);
+                    else
+                        context.startService(serviceIntent);
+                }
+                Toast.makeText(context, "Device: " + deviceName + " - " + deviceHardwareAddress, Toast.LENGTH_SHORT).show();
+            }
         }
     }
 }

@@ -899,7 +899,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         String url = "https://loterias.ml/api/principal/montodisponible";
         monto = "0";
         Log.d("Arreglo loteria size: ", String.valueOf(mUserItems.size()));
-        final String jugada = String.valueOf(txtJugada.getText());
+        final String jugada = Utilidades.ordenarMenorAMayor(String.valueOf(txtJugada.getText()));
         if(jugada == "" || jugada == null || jugada.length() == 0 || jugada.length() == 1)
             return;
         if(mUserItems.size() == 0){
@@ -1549,7 +1549,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         String monto = String.valueOf(txtMontojugar.getText());
         String montoDisponible = String.valueOf(txtMontodisponible.getText());
         String jugada = String.valueOf(txtJugada.getText());
-
+        jugada = Utilidades.ordenarMenorAMayor(jugada);
         getJugadas();
 
         if(mUserItems.size() == 0){

@@ -114,11 +114,14 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
         //Toast.makeText(Main2Activity.this, getVersionName(mContext), Toast.LENGTH_SHORT).show();
         principalFragment = new PrincipalFragment();
 
+
+
        // mQueue = Volley.newRequestQueue(this);
 //        listener = (DuplicarPrincipalInterface) this;
 
         mActivity = this;
         mContext = Main2Activity.this;
+        //Utilidades.conectarseAutomaticamente(mContext);
         toolbar = findViewById(R.id.toolBar);
         setSupportActionBar(toolbar);
         //toolbar.setTitle("");
@@ -245,6 +248,31 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
     public void setCodigoBarraPagar(String codigoBarra) {
         Log.d("Main2Activity", "setCodigoBarra:" + codigoBarra);
         buscarTicketAPagar(codigoBarra, false);
+    }
+
+    public static void abrirDialogGuardarPrinter(final String address){
+        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which){
+                    case DialogInterface.BUTTON_POSITIVE:
+                        //Yes button clicked
+
+                        Utilidades.guardarImpresora(mContext, address);
+
+                        Toast.makeText(mContext, "Printer: " + Utilidades.getImpresora(mContext, address), Toast.LENGTH_SHORT).show();
+                        break;
+
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        //No button clicked
+                        break;
+                }
+            }
+        };
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+        builder.setMessage("Desea guardar impresora ?").setPositiveButton("Yes", dialogClickListener)
+                .setNegativeButton("No", dialogClickListener).show();
     }
 
     public static void duplicarTicket(String codigoBarraQR, boolean esQR){

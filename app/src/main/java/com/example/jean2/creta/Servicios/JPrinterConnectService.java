@@ -15,8 +15,12 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.jean2.creta.DialogGuardarPrinter;
 import com.example.jean2.creta.JPrinterBluetoothSingleton;
+import com.example.jean2.creta.Main2Activity;
 import com.example.jean2.creta.R;
+import com.example.jean2.creta.Utilidades;
+import com.lvrenyang.io.BLEPrinting;
 import com.lvrenyang.io.BTPrinting;
 import com.lvrenyang.io.IOCallBack;
 import com.lvrenyang.io.Pos;
@@ -121,10 +125,14 @@ public class JPrinterConnectService extends Service implements IOCallBack {
 //        }
 
 
-        es.submit(new TaskClose());
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            stopForeground(true);
-        }
+       try{
+           es.submit(new TaskClose());
+           if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+               stopForeground(true);
+           }
+       }catch (Exception e){
+           e.printStackTrace();
+       }
         super.onDestroy();
 
     }
@@ -197,7 +205,11 @@ public class JPrinterConnectService extends Service implements IOCallBack {
             @Override
             public void run() {
                 Toast.makeText(JPrinterConnectService.this, "Conectado", Toast.LENGTH_SHORT).show();
+                if(Utilidades.getImpresora(JPrinterConnectService.this, address).equals("")){
 
+                    //Main2Activity.abrirDialogGuardarPrinter(address);
+
+                }
 
             }
         });

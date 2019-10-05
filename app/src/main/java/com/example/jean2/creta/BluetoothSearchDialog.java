@@ -33,6 +33,7 @@ import com.example.jean2.creta.Servicios.JPrinterConnectService;
 import com.lvrenyang.io.BTPrinting;
 import com.lvrenyang.io.IOCallBack;
 import com.lvrenyang.io.Pos;
+//import com.mazenrashed.printooth.Printooth;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -96,7 +97,7 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
         btnPrint.setEnabled(false);
 
 
-
+//        Printooth.INSTANCE.init(mContext);
 
 
 

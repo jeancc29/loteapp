@@ -118,6 +118,7 @@ public class DuplicarAvanzadoDialog extends AppCompatDialogFragment {
                                 for(int contadorJugada = 0; contadorJugada < jugadas.length(); contadorJugada++){
                                     JSONObject jugadaObject = new JSONObject();
                                     String jugada = ((JSONObject) jugadas.get(contadorJugada)).getString("jugada");
+                                    //jugada = Utilidades.ordenarMenorAMayor(jugada);
                                     jugada = Utilidades.agregarGuionPorSorteo(jugada, ((JSONObject) jugadas.get(contadorJugada)).getString("sorteo"));
 //                                    jugada = Utilidades.agregarGuionPorSorteo(jugada, ((JSONObject) jugadas.get(contadorJugada)).getString("sorteo"));
                                     if(PrincipalFragment.jugadasClase.jugadaExiste(jugada, String.valueOf(idLoteria))){
