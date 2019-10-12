@@ -1,10 +1,12 @@
 package com.example.jean2.creta;
 
+import android.app.ActivityManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -22,6 +24,7 @@ import com.example.jean2.creta.Servicios.JPrinterConnectService;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.util.List;
 import java.util.Set;
 
 public class Utilidades {
@@ -318,5 +321,43 @@ public class Utilidades {
                 Toast.makeText(context, "Device: " + deviceName + " - " + deviceHardwareAddress, Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    public static void killAppServiceByPackageName(Context context, String packageName)
+    {
+        List<ApplicationInfo> packages;
+        PackageManager pm;
+        pm = context.getPackageManager();
+        //get a list of installed apps.
+        packages = pm.getInstalledApplications(0);
+
+        if(packageName == null)
+            packageName = "com.example.lotecom.mobile";
+
+        String packageTokill = packageName;
+        ActivityManager mActivityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+
+
+        for (ApplicationInfo packageInfo : packages) {
+
+            if(packageInfo.packageName.equals(packageTokill)) {
+                mActivityManager.killBackgroundProcesses(packageInfo.packageName);
+            }
+
+        }
+    }
+
+    public String getPackNameByAppName(Context context, String name) {
+        PackageManager pm = context.getPackageManager();
+        List<ApplicationInfo> l = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+        String packName = "";
+        for (ApplicationInfo ai : l) {
+            String n = (String)pm.getApplicationLabel(ai);
+            if (n.contains(name) || name.contains(n)){
+                packName = ai.packageName;
+            }
+        }
+
+        return packName;
     }
 }
