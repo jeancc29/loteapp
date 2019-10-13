@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.jean2.creta">
 
-
     <uses-feature
         android:name="android.hardware.wifi"
         android:required="false" />
@@ -15,7 +14,6 @@
     <uses-feature
         android:name="android.hardware.touchscreen"
         android:required="false" />
-
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
@@ -40,10 +38,7 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-
-
     <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
-
 
     <application
         android:allowBackup="true"
@@ -52,8 +47,8 @@
         android:roundIcon="@mipmap/ic_loterias_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
-        <activity android:name=".ActualizarActivity"></activity>
+        <activity android:name=".BluetoothDevices"></activity>
+        <activity android:name=".ActualizarActivity" />
         <activity
             android:name=".PendientesDePago"
             android:parentActivityName=".Main2Activity" />
@@ -100,7 +95,6 @@
         <receiver android:name=".ExampleBroadcastReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
-
             </intent-filter>
         </receiver>
 

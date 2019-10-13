@@ -1396,18 +1396,96 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
             Main2Activity.txtBluetooth.performClick();
             return;
         }
-       try{
+//       try{
+//
+//           JSONObject ticket  = jsonArrayVentas.getJSONObject((int)spinnerTicket.getSelectedItemId());
+//           JSONObject venta = new JSONObject();
+//           venta.put("venta", ticket);
+//           Log.d("PrincipaFragment", "print: " + jsonArrayVentas.toString());
+//           es.submit(new BluetoothSearchDialog.TaskPrint(venta, false));
+//           Toast.makeText(mContext, "idx:" + spinnerTicket.getSelectedItemId(), Toast.LENGTH_SHORT).show();
+//
+//       }catch (Exception e){
+//           e.printStackTrace();
+//       }
 
-           JSONObject ticket  = jsonArrayVentas.getJSONObject((int)spinnerTicket.getSelectedItemId());
-           JSONObject venta = new JSONObject();
-           venta.put("venta", ticket);
-           Log.d("PrincipaFragment", "print: " + jsonArrayVentas.toString());
-           es.submit(new BluetoothSearchDialog.TaskPrint(venta, false));
-           Toast.makeText(mContext, "idx:" + spinnerTicket.getSelectedItemId(), Toast.LENGTH_SHORT).show();
 
-       }catch (Exception e){
-           e.printStackTrace();
-       }
+
+
+
+
+
+
+
+
+        String url = "https://loterias.ml/api/reportes/getTicketById";
+        //progressBar.setVisibility(View.VISIBLE);
+
+
+        JSONObject dato = new JSONObject();
+        JSONObject datosObj = new JSONObject();
+
+        try {
+            JSONObject ticket  = jsonArrayVentas.getJSONObject((int)spinnerTicket.getSelectedItemId());
+            dato.put("idUsuario", Utilidades.getIdUsuario(mContext));
+            dato.put("idTicket", ticket.getString("idTicket"));
+            datosObj.put("datos", dato);
+
+        } catch (JSONException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        String jsonString = datosObj.toString();
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, datosObj,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        //progressBar.setVisibility(View.GONE);
+                        try {
+
+
+                            JSONObject venta = new JSONObject();
+                            venta.put("venta", response.getJSONObject("ticket"));
+                            es.submit(new BluetoothSearchDialog.TaskPrint(venta, false));
+
+
+                            //getDialog().dismiss();
+                            //updateTable(jsonArray);
+                        } catch (JSONException e) {
+                            Log.d("Error: ", e.toString());
+                            e.printStackTrace();
+
+
+
+
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("responseerror: ", String.valueOf(error));
+                // progressBar.setVisibility(View.GONE);
+                error.printStackTrace();
+                if(error instanceof NetworkError){
+                    Toast.makeText(mContext, "Verifique coneccion e intente de nuevo", Toast.LENGTH_SHORT).show();
+                }
+                else if(error instanceof ServerError){
+                    Toast.makeText(mContext, "No se puede encontrar el servidor", Toast.LENGTH_SHORT).show();
+                }
+                else if(error instanceof TimeoutError){
+                    Toast.makeText(mContext, "Conexion lenta, verifique conexion e intente de nuevo", Toast.LENGTH_SHORT).show();
+                }
+
+
+
+            }
+        });
+
+//        mQueue.add(request);
+        MySingleton.getInstance(mContext).addToRequestQueue(request);
     }
 
     public void fillSpinnerWithoutInternetTest(){
@@ -1814,8 +1892,87 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
 
 
+    private void cancelarTicket(JSONObject jsonObject){
+        String url = "https://loterias.ml/api/principal/cancelarMovil";
 
-    private void cancelarTicket(final JSONObject venta){
+        JSONObject loteria = new JSONObject();
+        JSONObject datosObj = new JSONObject();
+
+        try {
+            loteria.put("codigoBarra", jsonObject.getString("codigoBarra"));
+            loteria.put("razon", "Cancelado desde movil");
+            loteria.put("idUsuario", Utilidades.getIdUsuario(mContext));
+            loteria.put("idBanca", Utilidades.getIdBanca(mContext));
+
+            datosObj.put("datos", loteria);
+
+        } catch (JSONException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        String jsonString = datosObj.toString();
+
+        final JSONObject venta = new JSONObject();
+
+        try {
+            venta.put("venta", jsonObject);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, datosObj,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            String errores = response.getString("errores");
+                            if(errores.equals("0")){
+
+                                JSONObject venta2 = new JSONObject();
+                                venta2.put("venta", response.getJSONObject("ticket"));
+                                Log.d("CancelarTicketDo", venta2.toString());
+                                jsonParse();
+                                ImprimirTicketCancelado(response.getJSONObject("ticket"));
+                                Toast.makeText(mContext, response.getString("mensaje"), Toast.LENGTH_SHORT).show();
+                            }
+                            else
+                                Toast.makeText(mContext, response.getString("mensaje") + " e: " + errores, Toast.LENGTH_SHORT).show();
+
+                        } catch (JSONException e) {
+                            Log.d("Error: ", e.toString());
+                            e.printStackTrace();
+
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("responseerror: ", String.valueOf(error));
+                error.printStackTrace();
+                if(error instanceof NetworkError){
+                    Toast.makeText(mContext, "Verifique coneccion e intente de nuevo", Toast.LENGTH_SHORT).show();
+                }
+                else if(error instanceof ServerError){
+                    Toast.makeText(mContext, "No se puede encontrar el servidor", Toast.LENGTH_SHORT).show();
+                }
+                else if(error instanceof TimeoutError){
+                    Toast.makeText(mContext, "Conexion lenta, verifique conexion e intente de nuevo", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        });
+
+//        mQueue.add(request);
+        MySingleton.getInstance(mContext).addToRequestQueue(request);
+    }
+
+
+
+
+
+    private void cancelarTicketViejo(final JSONObject venta){
 
         String url = "https://loterias.ml/api/principal/cancelar";
 

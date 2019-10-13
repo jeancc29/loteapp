@@ -151,6 +151,8 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
         super.onResume();
     }
 
+    public void 
+
     public void mostrarBotonConectado(){
         btnSearch.setEnabled(false);
         Button button = new Button(mContext);

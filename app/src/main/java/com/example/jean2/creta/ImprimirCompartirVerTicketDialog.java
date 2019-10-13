@@ -17,10 +17,19 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.NetworkError;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.ServerError;
+import com.android.volley.TimeoutError;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.example.jean2.creta.Servicios.JPrinterConnectService;
 import com.izettle.html2bitmap.Html2Bitmap;
 import com.izettle.html2bitmap.content.WebViewContent;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.concurrent.ExecutorService;
@@ -131,66 +140,308 @@ public class ImprimirCompartirVerTicketDialog extends AppCompatDialogFragment {
         }
 
 
-        try{
-            JSONObject venta = new JSONObject();
-            venta.put("venta", MonitoreoActivity.selectedTicket);
-            es.submit(new BluetoothSearchDialog.TaskPrint(venta, false));
-            getDialog().dismiss();
-        }catch(Exception e){
+
+
+
+        String url = "https://loterias.ml/api/reportes/getTicketById";
+        //progressBar.setVisibility(View.VISIBLE);
+
+
+        JSONObject dato = new JSONObject();
+        JSONObject datosObj = new JSONObject();
+
+        try {
+            dato.put("idUsuario", Utilidades.getIdUsuario(mContext));
+            dato.put("idTicket", MonitoreoActivity.selectedTicket.getString("idTicket"));
+            datosObj.put("datos", dato);
+
+        } catch (JSONException e) {
+            // TODO Auto-generated catch block
             e.printStackTrace();
         }
+
+        String jsonString = datosObj.toString();
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, datosObj,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        //progressBar.setVisibility(View.GONE);
+                        try {
+                            MonitoreoActivity.selectedTicket = response.getJSONObject("ticket");
+
+                            JSONObject venta = new JSONObject();
+                            venta.put("venta", MonitoreoActivity.selectedTicket);
+                            es.submit(new BluetoothSearchDialog.TaskPrint(venta, false));
+                            getDialog().dismiss();
+
+                            //getDialog().dismiss();
+                            //updateTable(jsonArray);
+                        } catch (JSONException e) {
+                            Log.d("Error: ", e.toString());
+                            e.printStackTrace();
+
+
+                            getDialog().dismiss();
+
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("responseerror: ", String.valueOf(error));
+                // progressBar.setVisibility(View.GONE);
+                error.printStackTrace();
+                if(error instanceof NetworkError){
+                    Toast.makeText(mContext, "Verifique coneccion e intente de nuevo", Toast.LENGTH_SHORT).show();
+                }
+                else if(error instanceof ServerError){
+                    Toast.makeText(mContext, "No se puede encontrar el servidor", Toast.LENGTH_SHORT).show();
+                }
+                else if(error instanceof TimeoutError){
+                    Toast.makeText(mContext, "Conexion lenta, verifique conexion e intente de nuevo", Toast.LENGTH_SHORT).show();
+                }
+
+
+                getDialog().dismiss();
+            }
+        });
+
+//        mQueue.add(request);
+        MySingleton.getInstance(mContext).addToRequestQueue(request);
 
     }
 
 
     private void CompartirTicket(){
 
-        new AsyncTask<Void, Void, Bitmap>() {
+//        new AsyncTask<Void, Void, Bitmap>() {
+//            @Override
+//            protected Bitmap doInBackground(Void... voids) {
+//                Bitmap bitmap;
+//                try {
+//                    bitmap = new Html2Bitmap.Builder().setContext(mContext).setContent(WebViewContent.html(obtenerAtributoJsonObjectTicket("img"))).setBitmapWidth(400).build().getBitmap();
+//                }catch (Exception e){
+//                    e.printStackTrace();
+//                    Log.v("ErrorHtmlWsapp", e.toString());
+//                    bitmap = null;
+//                }
+//
+//                return bitmap;
+//
+//            }
+//
+//            @Override
+//            protected void onPostExecute(Bitmap bitmap) {
+//                if (bitmap != null) {
+//                    String codigoQr;
+//                    try{
+//                        JSONObject venta = getJsonVentaSeleccionado().getJSONObject("venta");
+//                        codigoQr = venta.getString("codigoQr");
+//                    }catch (Exception e){
+//                        e.printStackTrace();
+//                        Log.v("ErrorWhatsappImg", e.toString());
+//                        codigoQr = "";
+//                    }
+//                    QRGEncoder qrgEncoder = new QRGEncoder(codigoQr, null, QRGContents.Type.TEXT, 150);
+//                    try {
+//                        Bitmap bitmapQR = qrgEncoder.encodeAsBitmap();
+//                        bitmapQR = combinarBitmap(bitmap, bitmapQR);
+//                        Utilidades.sendSMS(getContext(), bitmapQR, true);
+//                    }catch (Exception e){
+//                        e.printStackTrace();
+//                        Log.v("ErrorQr", e.toString());
+//                    }
+//
+//                }
+//            }
+//        }.execute();
+
+
+
+
+
+        String url = "https://loterias.ml/api/reportes/getTicketById";
+        //progressBar.setVisibility(View.VISIBLE);
+
+
+        JSONObject dato = new JSONObject();
+        JSONObject datosObj = new JSONObject();
+
+        try {
+            dato.put("idUsuario", Utilidades.getIdUsuario(mContext));
+            dato.put("idTicket", MonitoreoActivity.selectedTicket.getString("idTicket"));
+            datosObj.put("datos", dato);
+
+        } catch (JSONException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        String jsonString = datosObj.toString();
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, datosObj,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        //progressBar.setVisibility(View.GONE);
+                        try {
+                            MonitoreoActivity.selectedTicket = response.getJSONObject("ticket");
+
+                             new AsyncTask<Void, Void, Bitmap>() {
+                                @Override
+                                protected Bitmap doInBackground(Void... voids) {
+                                    Bitmap bitmap;
+                                    try {
+                                        bitmap = new Html2Bitmap.Builder().setContext(mContext).setContent(WebViewContent.html(obtenerAtributoJsonObjectTicket("img"))).setBitmapWidth(400).build().getBitmap();
+                                    }catch (Exception e){
+                                        e.printStackTrace();
+                                        Log.v("ErrorHtmlWsapp", e.toString());
+                                        bitmap = null;
+                                    }
+
+                                    return bitmap;
+
+                                }
+
+                                @Override
+                                protected void onPostExecute(Bitmap bitmap) {
+                                    if (bitmap != null) {
+                                        String codigoQr;
+                                        try{
+                                            JSONObject venta = getJsonVentaSeleccionado().getJSONObject("venta");
+                                            codigoQr = venta.getString("codigoQr");
+                                        }catch (Exception e){
+                                            e.printStackTrace();
+                                            Log.v("ErrorWhatsappImg", e.toString());
+                                            codigoQr = "";
+                                        }
+                                        QRGEncoder qrgEncoder = new QRGEncoder(codigoQr, null, QRGContents.Type.TEXT, 150);
+                                        try {
+                                            Bitmap bitmapQR = qrgEncoder.encodeAsBitmap();
+                                            bitmapQR = combinarBitmap(bitmap, bitmapQR);
+                                            Utilidades.sendSMS(mContext, bitmapQR, true);
+                                        }catch (Exception e){
+                                            e.printStackTrace();
+                                            Log.v("ErrorQr", e.toString());
+                                        }
+
+                                    }
+                                }
+                            }.execute();
+                            getDialog().dismiss();
+                            //updateTable(jsonArray);
+                        } catch (JSONException e) {
+                            Log.d("Error: ", e.toString());
+                            e.printStackTrace();
+
+
+                            getDialog().dismiss();
+
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
             @Override
-            protected Bitmap doInBackground(Void... voids) {
-                Bitmap bitmap;
-                try {
-                    bitmap = new Html2Bitmap.Builder().setContext(mContext).setContent(WebViewContent.html(obtenerAtributoJsonObjectTicket("img"))).setBitmapWidth(400).build().getBitmap();
-                }catch (Exception e){
-                    e.printStackTrace();
-                    Log.v("ErrorHtmlWsapp", e.toString());
-                    bitmap = null;
+            public void onErrorResponse(VolleyError error) {
+                Log.d("responseerror: ", String.valueOf(error));
+                // progressBar.setVisibility(View.GONE);
+                error.printStackTrace();
+                if(error instanceof NetworkError){
+                    Toast.makeText(mContext, "Verifique coneccion e intente de nuevo", Toast.LENGTH_SHORT).show();
+                }
+                else if(error instanceof ServerError){
+                    Toast.makeText(mContext, "No se puede encontrar el servidor", Toast.LENGTH_SHORT).show();
+                }
+                else if(error instanceof TimeoutError){
+                    Toast.makeText(mContext, "Conexion lenta, verifique conexion e intente de nuevo", Toast.LENGTH_SHORT).show();
                 }
 
-                return bitmap;
 
+                getDialog().dismiss();
             }
+        });
 
-            @Override
-            protected void onPostExecute(Bitmap bitmap) {
-                if (bitmap != null) {
-                    String codigoQr;
-                    try{
-                        JSONObject venta = getJsonVentaSeleccionado().getJSONObject("venta");
-                        codigoQr = venta.getString("codigoQr");
-                    }catch (Exception e){
-                        e.printStackTrace();
-                        Log.v("ErrorWhatsappImg", e.toString());
-                        codigoQr = "";
-                    }
-                    QRGEncoder qrgEncoder = new QRGEncoder(codigoQr, null, QRGContents.Type.TEXT, 150);
-                    try {
-                        Bitmap bitmapQR = qrgEncoder.encodeAsBitmap();
-                        bitmapQR = combinarBitmap(bitmap, bitmapQR);
-                        Utilidades.sendSMS(getContext(), bitmapQR, true);
-                    }catch (Exception e){
-                        e.printStackTrace();
-                        Log.v("ErrorQr", e.toString());
-                    }
-
-                }
-            }
-        }.execute();
+//        mQueue.add(request);
+        MySingleton.getInstance(mContext).addToRequestQueue(request);
     }
 
     private void verTicket(){
-        MonitoreoActivity.VerTicket();
-        getDialog().dismiss();
+
+
+
+        String url = "https://loterias.ml/api/reportes/getTicketById";
+        //progressBar.setVisibility(View.VISIBLE);
+
+
+        JSONObject dato = new JSONObject();
+        JSONObject datosObj = new JSONObject();
+
+        try {
+            dato.put("idUsuario", Utilidades.getIdUsuario(mContext));
+            dato.put("idTicket", MonitoreoActivity.selectedTicket.getString("idTicket"));
+            datosObj.put("datos", dato);
+
+        } catch (JSONException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        String jsonString = datosObj.toString();
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, datosObj,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        //progressBar.setVisibility(View.GONE);
+                        try {
+                            MonitoreoActivity.selectedTicket = response.getJSONObject("ticket");
+
+                            MonitoreoActivity.VerTicket();
+                            getDialog().dismiss();
+                            //updateTable(jsonArray);
+                        } catch (JSONException e) {
+                            Log.d("Error: ", e.toString());
+                            e.printStackTrace();
+
+
+                            getDialog().dismiss();
+
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("responseerror: ", String.valueOf(error));
+               // progressBar.setVisibility(View.GONE);
+                error.printStackTrace();
+                if(error instanceof NetworkError){
+                    Toast.makeText(mContext, "Verifique coneccion e intente de nuevo", Toast.LENGTH_SHORT).show();
+                }
+                else if(error instanceof ServerError){
+                    Toast.makeText(mContext, "No se puede encontrar el servidor", Toast.LENGTH_SHORT).show();
+                }
+                else if(error instanceof TimeoutError){
+                    Toast.makeText(mContext, "Conexion lenta, verifique conexion e intente de nuevo", Toast.LENGTH_SHORT).show();
+                }
+
+
+                getDialog().dismiss();
+            }
+        });
+
+//        mQueue.add(request);
+        MySingleton.getInstance(mContext).addToRequestQueue(request);
+    }
+
+
+
+
+
+    private void getMonitoreo(){
+
     }
 
 }

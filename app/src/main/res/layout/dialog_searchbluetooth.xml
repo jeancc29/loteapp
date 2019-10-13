@@ -5,70 +5,79 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ProgressBar
-        android:id="@+id/progressBarSearchStatus"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true" />
-
-    <Button
-        android:id="@+id/buttonSearch"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/progressBarSearchStatus"
-        android:layout_marginTop="10dp"
-        android:text="Buscar"
-        android:background="@color/colorPrimary"
-        android:textColor="#ffffff"/>
 
 
-    <ScrollView
-        android:id="@+id/scrollView1"
-        android:layout_width="match_parent"
-        android:layout_height="255dp"
-        android:layout_above="@+id/buttonDisconnect"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/buttonSearch"
-        android:layout_marginTop="46dp">
+   <RelativeLayout
+       android:layout_width="match_parent"
+       android:layout_height="match_parent"
+       android:id="@+id/relativeSearchDevice">
+
+       <ProgressBar
+           android:id="@+id/progressBarSearchStatus"
+           style="?android:attr/progressBarStyleHorizontal"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:layout_alignParentLeft="true"
+           android:layout_alignParentRight="true"
+           android:layout_alignParentTop="true" />
+
+       <Button
+           android:id="@+id/buttonSearch"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:layout_alignParentLeft="true"
+           android:layout_below="@+id/progressBarSearchStatus"
+           android:layout_marginTop="10dp"
+           android:text="Buscar"
+           android:background="@color/colorPrimary"
+           android:textColor="#ffffff"/>
+
+
+       <ScrollView
+           android:id="@+id/scrollView1"
+           android:layout_width="match_parent"
+           android:layout_height="255dp"
+           android:layout_above="@+id/buttonDisconnect"
+           android:layout_alignParentLeft="true"
+           android:layout_below="@+id/buttonSearch"
+           android:layout_marginTop="46dp">
 
 
 
-        <LinearLayout
-            android:id="@+id/linearlayoutdevices"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+           <LinearLayout
+               android:id="@+id/linearlayoutdevices"
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:orientation="vertical">
 
 
 
-        </LinearLayout>
-    </ScrollView>
+           </LinearLayout>
+       </ScrollView>
 
 
-    <Button
-        android:id="@+id/buttonDisconnect"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/buttonPrint"
-        android:layout_alignParentLeft="true"
-        android:layout_marginTop="10dp"
-        android:text="Disconnect"
-        android:background="#D1856D"
-        android:textColor="#ffffff"/>
+       <Button
+           android:id="@+id/buttonDisconnect"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:layout_above="@+id/buttonPrint"
+           android:layout_alignParentLeft="true"
+           android:layout_marginTop="10dp"
+           android:text="Disconnect"
+           android:background="#D1856D"
+           android:textColor="#ffffff"/>
 
-    <Button
-        android:id="@+id/buttonPrint"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_marginTop="10dp"
-        android:text="Print"
-        android:visibility="visible"
-        />
+       <Button
+           android:id="@+id/buttonPrint"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:layout_alignParentBottom="true"
+           android:layout_alignParentLeft="true"
+           android:layout_marginTop="10dp"
+           android:text="Print"
+           android:visibility="visible"
+           />
+
+   </RelativeLayout>
 
 </RelativeLayout>

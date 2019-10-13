@@ -335,7 +335,7 @@ public class MonitoreoActivity extends AppCompatActivity {
 
 
     private void getMonitoreo(){
-        String url = "https://loterias.ml/api/reportes/monitoreo";
+        String url = "https://loterias.ml/api/reportes/monitoreoMovil";
         progressBar.setVisibility(View.VISIBLE);
 
 
@@ -410,7 +410,7 @@ public class MonitoreoActivity extends AppCompatActivity {
     }
 
     private void cancelarTicket(JSONObject jsonObject){
-        String url = "https://loterias.ml/api/principal/cancelar";
+        String url = "https://loterias.ml/api/principal/cancelarMovil";
 
         JSONObject loteria = new JSONObject();
         JSONObject datosObj = new JSONObject();
@@ -446,6 +446,8 @@ public class MonitoreoActivity extends AppCompatActivity {
                             String errores = response.getString("errores");
                             if(errores.equals("0")){
 
+                                 JSONObject venta = new JSONObject();
+                                venta.put("venta", response.getJSONObject("ticket"));
                                 ImprimirTicketCancelado(venta);
                                 Toast.makeText(mContext, response.getString("mensaje"), Toast.LENGTH_SHORT).show();
                             }
