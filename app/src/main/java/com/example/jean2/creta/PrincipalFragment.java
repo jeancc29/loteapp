@@ -49,8 +49,10 @@ import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.jean2.creta.Clases.PrinterClass;
 import com.example.jean2.creta.Servicios.ActualizarService;
 import com.example.jean2.creta.Servicios.JPrinterConnectService;
+import com.example.jean2.creta.Servicios.PrinterService;
 import com.example.jean2.creta.Servicios.VerificarAccesoAlSistemaService;
 import com.izettle.html2bitmap.Html2Bitmap;
 import com.izettle.html2bitmap.content.WebViewContent;
@@ -398,6 +400,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                 Log.d("SeleccionarLoteria1", "segundo");
 
                 checkedItems[0] = true;
+                mUserItems = new ArrayList<>();
                 mUserItems.add(0);
                 String loteria = listDescripcionLoterias[0];
 
@@ -405,6 +408,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                 Log.d("SeleccionarLoteria1", "tercero: " + loteria);
                 txtSelected.setText(loteria);
             }else{
+                mUserItems = new ArrayList<>();
                 for (int i=0; i< loteriasASeleccionar.length(); i++){
                     JSONObject item = (JSONObject)loteriasASeleccionar.get(i);
                     for(int c=0; c < listDescripcionLoterias.length; c++){
@@ -620,7 +624,15 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         String caracteres = "";
         switch (v.getId()) {
             case (R.id.txtDelete):
-                aceptaCancelarTicket();
+                if(Utilidades.hayImpresorasRegistradas(mContext) == false){
+                    Main2Activity.txtBluetooth.performClick();
+                    Toast.makeText(mContext, "Debe registrar una impresora", Toast.LENGTH_SHORT).show();
+
+                }
+                else{
+                    aceptaCancelarTicket();
+                }
+
                 break;
             case (R.id.txtPrint):
                 print();
@@ -1060,9 +1072,15 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
             return;
         }
         if(ckbPrint.isChecked()){
-            if(JPrinterConnectService.isPrinterConnected() == false){
-                Toast.makeText(mContext, "Debe conectarse a una impresora", Toast.LENGTH_SHORT).show();
+//            if(JPrinterConnectService.isPrinterConnected() == false){
+//                Toast.makeText(mContext, "Debe conectarse a una impresora", Toast.LENGTH_SHORT).show();
+//                Main2Activity.txtBluetooth.performClick();
+//                return;
+//            }
+
+            if(Utilidades.hayImpresorasRegistradas(mContext) == false){
                 Main2Activity.txtBluetooth.performClick();
+                Toast.makeText(mContext, "Debe registrar una impresora", Toast.LENGTH_SHORT).show();
                 return;
             }
         }
@@ -1127,10 +1145,15 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 //                                    }
 
 //                                    Bitmap ticketBitmap = Utilidades.toBitmap(response.getString("img"));
-                                    es.submit(new BluetoothSearchDialog.TaskPrint(response, true));
+//                                    Intent serviceIntent = new Intent(mContext, PrinterService.class);
+//                                    serviceIntent.putExtra("address", Utilidades.getAddressImpresora(mContext));
+//                                    serviceIntent.putExtra("name", "hola");
+//
+//                                    mContext.startService(serviceIntent);
+                                    //es.submit(new BluetoothSearchDialog.TaskPrint(response, true));
 
-//                                    JSONObject venta = response.getJSONObject("venta");
-//                                    Log.d("printVenta", venta.getJSONArray("jugadas").toString());
+
+                                    imprimir(response, 1);
                                 }
                                 else if(ckbSms.isChecked()){
                                     new AsyncTask<Void, Void, Bitmap>() {
@@ -1391,11 +1414,11 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
             return;
 
 
-        if(JPrinterConnectService.isPrinterConnected() == false){
-            Toast.makeText(mContext, "Debe conectarse a una impresora", Toast.LENGTH_SHORT).show();
-            Main2Activity.txtBluetooth.performClick();
-            return;
-        }
+//        if(JPrinterConnectService.isPrinterConnected() == false){
+//            Toast.makeText(mContext, "Debe conectarse a una impresora", Toast.LENGTH_SHORT).show();
+//            Main2Activity.txtBluetooth.performClick();
+//            return;
+//        }
 //       try{
 //
 //           JSONObject ticket  = jsonArrayVentas.getJSONObject((int)spinnerTicket.getSelectedItemId());
@@ -1415,7 +1438,11 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
 
 
-
+        if(Utilidades.hayImpresorasRegistradas(mContext) == false){
+            Main2Activity.txtBluetooth.performClick();
+            Toast.makeText(mContext, "Debe registrar una impresora", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
 
         String url = "https://loterias.ml/api/reportes/getTicketById";
@@ -1438,6 +1465,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
         String jsonString = datosObj.toString();
 
+
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, datosObj,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -1448,7 +1476,8 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
                             JSONObject venta = new JSONObject();
                             venta.put("venta", response.getJSONObject("ticket"));
-                            es.submit(new BluetoothSearchDialog.TaskPrint(venta, false));
+                            imprimir(venta, 2);
+//                            es.submit(new BluetoothSearchDialog.TaskPrint(venta, false));
 
 
                             //getDialog().dismiss();
@@ -1803,13 +1832,19 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
     public void aceptaCancelarTicket(){
         if(spinnerTicket.getSelectedItem() == "No hay ventas")
             return;
-
-        if(JPrinterConnectService.isPrinterConnected() == false){
-            Toast.makeText(mContext, "Debe conectarse a una impresora", Toast.LENGTH_SHORT).show();
+//
+//        if(JPrinterConnectService.isPrinterConnected() == false){
+////            Toast.makeText(mContext, "Debe conectarse a una impresora", Toast.LENGTH_SHORT).show();
+////            Main2Activity.txtBluetooth.performClick();
+//////                mostrarDispositivosBluetooth();
+////            return;
+//        }
+        if(Utilidades.hayImpresorasRegistradas(mContext) == false){
             Main2Activity.txtBluetooth.performClick();
-//                mostrarDispositivosBluetooth();
+            Toast.makeText(mContext, "Debe registrar una impresora", Toast.LENGTH_SHORT).show();
             return;
         }
+
         try{
 
 
@@ -1842,20 +1877,25 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
     }
 
     private void ImprimirTicketCancelado(JSONObject venta){
-        if(JPrinterConnectService.isPrinterConnected() == false){
-            Toast.makeText(mContext, "Debe conectarse a una impresora", Toast.LENGTH_SHORT).show();
-            Main2Activity.txtBluetooth.performClick();
-//                mostrarDispositivosBluetooth();
-            return;
-        }
+//        if(JPrinterConnectService.isPrinterConnected() == false){
+////            Toast.makeText(mContext, "Debe conectarse a una impresora", Toast.LENGTH_SHORT).show();
+////            Main2Activity.txtBluetooth.performClick();
+//////                mostrarDispositivosBluetooth();
+////            return;
+//        }
 
+        if(Utilidades.hayImpresorasRegistradas(mContext) == false){
+            Main2Activity.txtBluetooth.performClick();
+            Toast.makeText(mContext, "Debe registrar una impresora", Toast.LENGTH_SHORT).show();
+
+        }
 
         try{
             JSONObject v = new JSONObject();
             v.put("venta", venta);
             Log.d("MonitoreoCancelado", v.toString());
-            es.submit(new BluetoothSearchDialog.TaskPrint(v, 1));
-
+            //es.submit(new BluetoothSearchDialog.TaskPrint(v, 1));
+            imprimir(v, 3);
 
         }catch(Exception e){
             e.printStackTrace();
@@ -2041,5 +2081,22 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         String pad = "000000000";
         String ans = pad.substring(0, pad.length() - idTicket.length()) + idTicket + " - $" + monto;
         return ans;
+    }
+
+    static void imprimir(JSONObject venta, int original_cancelado_copia)
+    {
+//        Intent serviceIntent = new Intent(mContext, PrinterService.class);
+//        serviceIntent.putExtra("address", Utilidades.getAddressImpresora(mContext));
+//        serviceIntent.putExtra("name", "hola");
+
+        //mContext.startService(serviceIntent);
+        PrinterClass printerClass = new PrinterClass(mContext, venta);
+        printerClass.conectarEImprimir(true, original_cancelado_copia);
+//        if(original_cancelado_copia == 1)
+//            es.submit(new BluetoothSearchDialog.TaskPrint(venta, true));
+//        else if(original_cancelado_copia == 2)
+//            es.submit(new BluetoothSearchDialog.TaskPrint(venta, false));
+//        if(original_cancelado_copia == 3)
+//            es.submit(new BluetoothSearchDialog.TaskPrint(venta, 1));
     }
 }

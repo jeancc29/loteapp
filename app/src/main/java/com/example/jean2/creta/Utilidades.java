@@ -25,6 +25,7 @@ import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class Utilidades {
@@ -50,14 +51,15 @@ public class Utilidades {
     }
 
 
-    public static boolean guardarImpresora(Context context, String address){
+    public static boolean guardarImpresora(Context context, String name, String address){
         SharedPreferences preferences = context.getSharedPreferences("impresoras", Context.MODE_PRIVATE);
 
         SharedPreferences.Editor editor = preferences.edit();
-        String nombre = "impresora" + address;
+        String nombreKey = "impresora" + address;
         try {
 
-            editor.putString(nombre, address);
+            editor.putString("address", address);
+            editor.putString("name", name);
 
         }catch (Exception e){
             e.printStackTrace();
@@ -68,10 +70,43 @@ public class Utilidades {
         return true;
     }
 
-    public static String getImpresora(Context context, String address){
+    public static String getAddressImpresora(Context context){
         SharedPreferences preferences = context.getSharedPreferences("impresoras", Context.MODE_PRIVATE);
-        String nombre = "impresora" + address;
-        return preferences.getString(nombre, "");
+        //String nombreKey = "address" + 1;
+        //String nombreKey = "address" + 2;
+        return preferences.getString("address", "");
+    }
+
+    public static String getNameImpresora(Context context){
+        SharedPreferences preferences = context.getSharedPreferences("impresoras", Context.MODE_PRIVATE);
+//        String nombreKey = "address" + 1;
+//        String nombreKey = "address" + 2;
+        return preferences.getString("name", "");
+    }
+
+    public static Map<String,?> getTodasImpresoras(Context context){
+        SharedPreferences preferences = context.getSharedPreferences("impresoras", Context.MODE_PRIVATE);
+        return preferences.getAll();
+    }
+
+    public static boolean hayImpresorasRegistradas(Context context)
+    {
+        Map<String,?> impresoras = Utilidades.getTodasImpresoras(context);
+        Log.d("BluetoothDevice", "Impresoras:" + impresoras.toString());
+        if(impresoras.size() > 0){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    public static boolean eliminarImpresoras(Context context){
+        SharedPreferences preferences = context.getSharedPreferences("impresoras", Context.MODE_PRIVATE);
+
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.clear();
+        editor.commit();
+        return true;
     }
 
     public static boolean eliminarUsuario(Context context){
@@ -309,7 +344,7 @@ public class Utilidades {
             for (BluetoothDevice device : pairedDevices) {
                 String deviceName = device.getName();
                 String deviceHardwareAddress = device.getAddress(); // MAC address
-                if(Utilidades.getImpresora(context, deviceHardwareAddress).equals("") == false){
+                //if(Utilidades.getImpresora(context, deviceHardwareAddress).equals("") == false){
                     Intent serviceIntent = new Intent(context, JPrinterConnectService.class);
                     serviceIntent.putExtra("address", deviceHardwareAddress);
                     serviceIntent.putExtra("name", deviceName);
@@ -317,7 +352,7 @@ public class Utilidades {
                         context.startForegroundService(serviceIntent);
                     else
                         context.startService(serviceIntent);
-                }
+                //}
                 Toast.makeText(context, "Device: " + deviceName + " - " + deviceHardwareAddress, Toast.LENGTH_SHORT).show();
             }
         }

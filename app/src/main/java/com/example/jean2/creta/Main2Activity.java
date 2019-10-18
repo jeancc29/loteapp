@@ -42,6 +42,7 @@ import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.jean2.creta.Clases.PrinterClass;
 import com.example.jean2.creta.Servicios.ActualizarService;
 import com.example.jean2.creta.Servicios.JPrinterConnectService;
 import com.example.jean2.creta.Servicios.VerificarAccesoAlSistemaService;
@@ -132,8 +133,14 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
         txtBluetooth.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                BluetoothSearchDialog duplicarDialog = new BluetoothSearchDialog();
-                duplicarDialog.show(Main2Activity.this.getSupportFragmentManager(), "Duplicar dialog");
+                Intent intent = new Intent(Main2Activity.this, BluetoothDevices.class);
+                intent.putExtra("esDuplicar", true);
+                startActivity(intent);
+
+//                PrinterClass printerClass = new PrinterClass(mContext);
+//                printerClass.conectarEImprimir(false, 0);
+//                BluetoothSearchDialog duplicarDialog = new BluetoothSearchDialog();
+//                duplicarDialog.show(Main2Activity.this.getSupportFragmentManager(), "Duplicar dialog");
 //                mostrarDispositivosBluetooth();
             }
         });
@@ -251,28 +258,28 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
     }
 
     public static void abrirDialogGuardarPrinter(final String address){
-        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which){
-                    case DialogInterface.BUTTON_POSITIVE:
-                        //Yes button clicked
-
-                        Utilidades.guardarImpresora(mContext, address);
-
-                        Toast.makeText(mContext, "Printer: " + Utilidades.getImpresora(mContext, address), Toast.LENGTH_SHORT).show();
-                        break;
-
-                    case DialogInterface.BUTTON_NEGATIVE:
-                        //No button clicked
-                        break;
-                }
-            }
-        };
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-        builder.setMessage("Desea guardar impresora ?").setPositiveButton("Yes", dialogClickListener)
-                .setNegativeButton("No", dialogClickListener).show();
+//        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialog, int which) {
+//                switch (which){
+//                    case DialogInterface.BUTTON_POSITIVE:
+//                        //Yes button clicked
+//
+//                        Utilidades.guardarImpresora(mContext, address);
+//
+//                        Toast.makeText(mContext, "Printer: " + Utilidades.getImpresora(mContext, address), Toast.LENGTH_SHORT).show();
+//                        break;
+//
+//                    case DialogInterface.BUTTON_NEGATIVE:
+//                        //No button clicked
+//                        break;
+//                }
+//            }
+//        };
+//
+//        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+//        builder.setMessage("Desea guardar impresora ?").setPositiveButton("Yes", dialogClickListener)
+//                .setNegativeButton("No", dialogClickListener).show();
     }
 
     public static void duplicarTicket(String codigoBarraQR, boolean esQR){

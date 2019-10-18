@@ -30,6 +30,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.jean2.creta.Servicios.JPrinterConnectService;
+import com.example.jean2.creta.Servicios.PrinterService;
 import com.lvrenyang.io.BTPrinting;
 import com.lvrenyang.io.IOCallBack;
 import com.lvrenyang.io.Pos;
@@ -48,31 +49,25 @@ import java.util.concurrent.Executors;
 
 public class BluetoothSearchDialog extends AppCompatDialogFragment implements View.OnClickListener, IOCallBack {
 
-    Context mContext;
+    static Context mContext;
     BluetoothAdapter adaptador;
     private static final int REQUEST_ENABLE_BT = 0;
     private static LinearLayout linearlayoutdevices;
     private ProgressBar progressBarSearchStatus;
-
     private BroadcastReceiver broadcastReceiver = null;
     private IntentFilter intentFilter = null;
-
     Button btnSearch,btnDisconnect,btnPrint, btnConnected;
     Context mActivity;
-
     ExecutorService es = Executors.newScheduledThreadPool(30);
-
     static JPrinterBluetoothSingleton jPrinterBluetoothSingleton = JPrinterBluetoothSingleton.getInstance();
 //    BTPrinting mBt = new BTPrinting();
 //        static Pos mPos = new Pos();
         static Pos mPos = JPrinterConnectService.mPos;
         BTPrinting mBt = jPrinterBluetoothSingleton.getmBt();
-
-
     public static Activity mActivity1;
-
     private static String TAG = "SearchBTActivity";
     Handler handler;
+    String [] dispostivosPareados;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -151,7 +146,119 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
         super.onResume();
     }
 
-    public void 
+    public void getPairedDevice()
+    {
+        adaptador = BluetoothAdapter.getDefaultAdapter();
+        Set<BluetoothDevice> mPairedDevices = adaptador.getBondedDevices();
+        linearlayoutdevices.removeAllViews();
+        if (mPairedDevices.size() > 0)
+        {
+            dispostivosPareados = new String[mPairedDevices.size()];
+            int contador = 0;
+            for (BluetoothDevice mDevice : mPairedDevices)
+            {
+                dispostivosPareados[contador] = mDevice.getAddress();
+                contador++;
+                addButtonToLinearLayout(mDevice.getName(), mDevice.getAddress());
+            }
+        }
+        else
+        {
+            dispostivosPareados = null;
+//            String mNoDevices = "None Paired";//getResources().getText(R.string.none_paired).toString();
+//            mPairedDevicesArrayAdapter.add(mNoDevices);
+        }
+    }
+
+    public void addButtonToLinearLayout(String name, String address)
+    {
+        Button button = new Button(mContext);
+        button.setText(name + ": " + address);
+        button.setGravity(android.view.Gravity.CENTER_VERTICAL
+                | Gravity.LEFT);
+        button.setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View arg0) {
+                // TODO Auto-generated method stub
+                Toast.makeText(mContext, "Conectando...", Toast.LENGTH_SHORT).show();
+                Log.d("pruebaBluetooth", String.valueOf((getActivity() == null)));
+                btnSearch.setEnabled(false);
+                linearlayoutdevices.setEnabled(false);
+                for(int i = 0; i < linearlayoutdevices.getChildCount(); ++i)
+                {
+                    Button btn = (Button)linearlayoutdevices.getChildAt(i);
+                    btn.setEnabled(false);
+                }
+                btnDisconnect.setEnabled(true);
+                btnPrint.setEnabled(true);
+
+                /************************ AQUI SE INICIA EL SERVICIO PARA CONECTARSE AL PRINTER **************************/
+//                try{
+//                    Intent serviceIntent = new Intent(getActivity(), JPrinterConnectService.class);
+//                    serviceIntent.putExtra("address", address);
+//                    serviceIntent.putExtra("name", name);
+//                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+//                        mContext.startForegroundService(serviceIntent);
+//                    else
+//                        mContext.startService(serviceIntent);
+//                }catch (Exception e){
+//                    Toast.makeText(mContext, "Error servicio: " + e.toString(), Toast.LENGTH_LONG).show();
+//                    e.printStackTrace();
+//                }
+
+
+
+                abrirDialogGuardarPrinter(name, address);
+            }
+        });
+        button.getBackground().setAlpha(100);
+        linearlayoutdevices.addView(button);
+    }
+
+
+    public static void abrirDialogGuardarPrinter(final String name, final String address){
+        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which){
+                    case DialogInterface.BUTTON_POSITIVE:
+                        //Yes button clicked
+                        Utilidades.eliminarImpresoras(mContext);
+                        Utilidades.guardarImpresora(mContext, name, address);
+                        BluetoothDevices.mostrarCardView();
+                        Toast.makeText(mContext, "Se ha guardado correctamente", Toast.LENGTH_SHORT).show();
+                        break;
+
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        //No button clicked
+                        break;
+                }
+            }
+        };
+
+        android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(mContext);
+        builder.setMessage("Desea guardar impresora ?").setPositiveButton("Yes", dialogClickListener)
+                .setNegativeButton("No", dialogClickListener).show();
+    }
+
+    public boolean existeEntreLosDispositivosPareados(String address)
+    {
+        boolean existe = false;
+        if(dispostivosPareados == null)
+            existe = false;
+
+        if(dispostivosPareados.length > 0){
+            for(int c = 0; c < dispostivosPareados.length; c++){
+                if(dispostivosPareados[c].equals(address)){
+                    existe = true;
+                }
+            }
+        }else{
+            existe = false;
+        }
+
+        return existe;
+    }
 
     public void mostrarBotonConectado(){
         btnSearch.setEnabled(false);
@@ -293,7 +400,7 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
                 String action = intent.getAction();
                 BluetoothDevice device = intent
                         .getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-
+                getPairedDevice();
                 if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                     Log.d("Bluetoothsearch:",String.valueOf(device == null) );
                     if (device == null)
@@ -320,45 +427,49 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
                         }
                     }
 
-                    button.setGravity(android.view.Gravity.CENTER_VERTICAL
-                            | Gravity.LEFT);
-                    button.setOnClickListener(new View.OnClickListener() {
 
-                        public void onClick(View arg0) {
-                            // TODO Auto-generated method stub
-                            Toast.makeText(mContext, "Conectando...", Toast.LENGTH_SHORT).show();
-                            Log.d("pruebaBluetooth", String.valueOf((getActivity() == null)));
-                            btnSearch.setEnabled(false);
-                            linearlayoutdevices.setEnabled(false);
-                            for(int i = 0; i < linearlayoutdevices.getChildCount(); ++i)
-                            {
-                                Button btn = (Button)linearlayoutdevices.getChildAt(i);
-                                btn.setEnabled(false);
-                            }
-                            btnDisconnect.setEnabled(true);
-                            btnPrint.setEnabled(true);
-
-                            try{
-                                Intent serviceIntent = new Intent(getActivity(), JPrinterConnectService.class);
-                                serviceIntent.putExtra("address", address);
-                                serviceIntent.putExtra("name", nombre);
-                                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                                    mContext.startForegroundService(serviceIntent);
-                                else
-                                    mContext.startService(serviceIntent);
-                            }catch (Exception e){
-                                Toast.makeText(mContext, "Error servicio: " + e.toString(), Toast.LENGTH_LONG).show();
-                                e.printStackTrace();
-                            }
-
-
-//                            es.submit(new TaskOpen(mBt,address, nombre, getActivity()));
-//                            jPrinterBluetoothSingleton.mBtOpen(mContext);
-                            //es.submit(new TaskTest(mPos, mBt, address, mActivity));
-                        }
-                    });
-                    button.getBackground().setAlpha(100);
-                    linearlayoutdevices.addView(button);
+                    Log.d("DentroSearch", "dentro");
+//                    button.setGravity(android.view.Gravity.CENTER_VERTICAL
+//                            | Gravity.LEFT);
+//                    button.setOnClickListener(new View.OnClickListener() {
+//
+//                        public void onClick(View arg0) {
+//                            // TODO Auto-generated method stub
+//                            Toast.makeText(mContext, "Conectando...", Toast.LENGTH_SHORT).show();
+//                            Log.d("pruebaBluetooth", String.valueOf((getActivity() == null)));
+//                            btnSearch.setEnabled(false);
+//                            linearlayoutdevices.setEnabled(false);
+//                            for(int i = 0; i < linearlayoutdevices.getChildCount(); ++i)
+//                            {
+//                                Button btn = (Button)linearlayoutdevices.getChildAt(i);
+//                                btn.setEnabled(false);
+//                            }
+//                            btnDisconnect.setEnabled(true);
+//                            btnPrint.setEnabled(true);
+//
+//                            try{
+//                                Intent serviceIntent = new Intent(getActivity(), JPrinterConnectService.class);
+//                                serviceIntent.putExtra("address", address);
+//                                serviceIntent.putExtra("name", nombre);
+//                                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+//                                    mContext.startForegroundService(serviceIntent);
+//                                else
+//                                    mContext.startService(serviceIntent);
+//                            }catch (Exception e){
+//                                Toast.makeText(mContext, "Error servicio: " + e.toString(), Toast.LENGTH_LONG).show();
+//                                e.printStackTrace();
+//                            }
+//
+//
+////                            es.submit(new TaskOpen(mBt,address, nombre, getActivity()));
+////                            jPrinterBluetoothSingleton.mBtOpen(mContext);
+//                            //es.submit(new TaskTest(mPos, mBt, address, mActivity));
+//                        }
+//                    });
+//                    button.getBackground().setAlpha(100);
+//                    linearlayoutdevices.addView(button);
+                    if(existeEntreLosDispositivosPareados(address) == false)
+                        addButtonToLinearLayout(name, address);
                 } else if (BluetoothAdapter.ACTION_DISCOVERY_STARTED
                         .equals(action)) {
                     progressBarSearchStatus.setIndeterminate(true);
@@ -541,6 +652,306 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
         }
 
         public TaskPrint(JSONObject response, int cancelado_o_pagado)
+        {
+            this.pos = mPos;
+            this.response = response;
+
+            if(cancelado_o_pagado == 1)
+                this.cancelado = true;
+            else{
+                this.pagado = true;
+                this.original = true;
+            }
+        }
+
+        @Override
+        public void run() {
+            // TODO Auto-generated method stub
+
+            final boolean bPrintResult = PrintTicket(AppStart.nPrintWidth, AppStart.bCutter, AppStart.bDrawer, AppStart.bBeeper, AppStart.nPrintCount, AppStart.nPrintContent, AppStart.nCompressMethod, AppStart.bCheckReturn);
+            final boolean bIsOpened = pos.GetIO().IsOpened();
+
+            mActivity1.runOnUiThread(new Runnable(){
+                @Override
+                public void run() {
+                    // TODO Auto-generated method stub
+                    Toast.makeText(mActivity1.getApplicationContext(), bPrintResult ? mActivity1.getResources().getString(R.string.printsuccess) : mActivity1.getResources().getString(R.string.printfailed), Toast.LENGTH_SHORT).show();
+                    //btnPrint.setEnabled(bIsOpened);
+                }
+            });
+
+        }
+
+
+        public boolean PrintTicket(int nPrintWidth, boolean bCutter, boolean bDrawer, boolean bBeeper, int nCount, int nPrintContent, int nCompressMethod, boolean bCheckReturn)
+        {
+            boolean bPrintResult = false;
+
+            byte[] status = new byte[1];
+
+            if(!bCheckReturn || (bCheckReturn && pos.POS_QueryStatus(status, 3000, 2)))
+            {
+                Bitmap bm1 = getTestImage1(nPrintWidth, nPrintWidth);
+                Bitmap bm2 = getTestImage2(nPrintWidth, nPrintWidth);
+                Bitmap bmBlackWhite = getImageFromAssetsFile("blackwhite.png");
+                Bitmap bmIu = getImageFromAssetsFile("iu.jpeg");
+                Bitmap bmYellowmen = getImageFromAssetsFile("yellowmen.png");
+
+//                pos.POS_FeedLine();
+//                        pos.POS_S_Align(1);
+//                        pos.POS_S_TextOut("REC" + String.format("%03d", 12) + "\r\nCaysn Printer\r\n测试页\r\n\r\n", 0, 1, 1, 0, 0x100);
+//                        pos.POS_S_TextOut("扫二维码下载苹果APP\r\n", 0, 0, 0, 0, 0x100);
+//                        pos.POS_S_SetQRcode("https://appsto.re/cn/2KF_bb.i", 8, 0, 3);
+//                        pos.POS_FeedLine();
+//                        pos.POS_S_SetBarcode("20160618", 0, 72, 3, 60, 0, 2);
+//                        pos.POS_FeedLine();
+
+                pos.POS_FeedLine();
+//                        pos.POS_S_Align(1);
+//                        pos.POS_S_TextOut("BANCA 1\n", 0, 1, 1, 0, 0x00);
+//                        pos.POS_S_TextOut("** ORIGINAL **\n", 0, 1, 1, 0, 0x00);
+//                        pos.POS_S_TextOut("2019/07/05 4:42 PM\n", 0, 0, 1, 0, 0x00);
+//                        pos.POS_S_TextOut("Ticket: 000000050\n", 0, 0, 1, 0, 0x00);
+//                        pos.POS_S_TextOut("Fecha: 2019/07/05 4:42 PM\n", 0, 0, 1, 0, 0x00);
+//                        pos.POS_S_TextOut("1401831804\n", 1, 1, 1, 0, 0x00);
+//                        pos.POS_S_TextOut("---------------\n", 1, 1, 1, 0, 0x00);
+//                        pos.POS_S_TextOut("NACIONAL: 2\n", 1, 1, 1, 0, 0x00);
+//                        pos.POS_S_TextOut("---------------\n", 1, 1, 1, 0, 0x00);
+//                        pos.POS_FeedLine();
+//                        pos.POS_S_TextOut("JUGADA  MONTO  JUGADA  MONTO\n", 1, 0, 1, 0, 0x00);
+//                        pos.POS_S_TextOut("03-20   12.00 09-98-03 9.00", 1, 0, 1, 0, 0x00);
+//                        pos.POS_FeedLine();
+//                        pos.POS_FeedLine();
+                //pos.POS_S_SetQRcode("https://appsto.re/cn/2KF_bb.i", 8, 0, 3);
+//                        pos.POS_FeedLine();
+
+
+
+                //pos.POS_PrintPicture(this.ticketImg, nPrintWidth, 1, nCompressMethod);
+                //if(!pos.GetIO().IsOpened())
+//                        break;
+
+                try {
+                    JSONObject venta = response.getJSONObject("venta");
+                    JSONArray jsonArrayLoterias = venta.getJSONArray("loterias");
+                    JSONArray jsonArrayJugadas = venta.getJSONArray("jugadas");
+
+                    if(jsonArrayLoterias.length() == 0)
+                        return false;
+                    if(jsonArrayJugadas.length() == 0)
+                        return false;
+
+
+                    PrinterService.POS_S_Align(1);
+                    PrinterService.POS_S_TextOut(venta.getJSONObject("banca").getString("descripcion")+"\n", 0, 1, 1, 0, 0x00);
+                    if(this.original == true && this.cancelado == false)
+                        PrinterService.POS_S_TextOut("** ORIGINAL **\n", 0, 1, 1, 0, 0x00);
+                    else if(this.original == false && this.cancelado == false)
+                        PrinterService.POS_S_TextOut("** COPIA **\n", 0, 1, 1, 0, 0x00);
+                    else if(this.original == false && this.cancelado == true)
+                        PrinterService.POS_S_TextOut("** CANCELADO **\n", 0, 1, 1, 0, 0x00);
+
+                    PrinterService.POS_S_TextOut(venta.getString("fecha")+"\n", 0, 0, 1, 0, 0x00);
+                    PrinterService.POS_S_TextOut("Ticket:"  +Utilidades.toSecuencia(venta.getString("idTicket"), venta.getString("codigo"))+ "\n", 0, 0, 1, 0, 0x00);
+                    PrinterService.POS_S_TextOut("Fecha: " + venta.getString("fecha")+"\n", 0, 0, 1, 0, 0x00);
+                    if(this.original == true && this.cancelado == false)
+                        PrinterService.POS_S_TextOut(venta.getString("codigoBarra")+"\n", 1, 1, 1, 0, 0x00);
+
+                    for(int i=0; i < jsonArrayLoterias.length(); i++){
+//                        if(!pos.GetIO().IsOpened())
+//                            break;
+                        JSONObject loteria = jsonArrayLoterias.getJSONObject(i);
+                        boolean esPrimeraJugadaAInsertar = true;
+                        JSONArray jugadas = jugadasPertenecientesALoteria(loteria.getString("id"), jsonArrayJugadas, pagado);
+                        if(jugadas.length() == 0)
+                            continue;
+                        for (int contadorCicleJugadas =0; contadorCicleJugadas < jugadas.length(); contadorCicleJugadas++){
+
+//                            if(!pos.GetIO().IsOpened())
+//                                break;
+                            JSONObject jugada = jugadas.getJSONObject(contadorCicleJugadas);
+                            Log.d("BluetoothSearchDia", "Print: " + jugada.getString("jugada") + " - " + Utilidades.agregarGuionPorSorteo(jugada.getString("jugada"), jugada.getString("sorteo")) +jugada.getString("sorteo"));
+
+                            if(contadorCicleJugadas == 0){
+                                PrinterService.POS_S_TextOut("---------------\n", 1, 1, 1, 0, 0x00);
+                                PrinterService.POS_S_TextOut(loteria.getString("descripcion") + "\n", 1, 0, 1, 0, 0x00);
+                                PrinterService.POS_S_TextOut("---------------\n", 1, 1, 1, 0, 0x00);
+                            }
+                            if(jugada.getString("idLoteria").equals(loteria.getString("id"))){
+                                PrinterService.POS_S_Align(0);
+                                if(esPrimeraJugadaAInsertar){
+                                    PrinterService.POS_S_TextOut("JUGADA   MONTO  JUGADA   MONTO\n", 1, 0, 1, 0, 0x00);
+                                    esPrimeraJugadaAInsertar = false;
+                                }
+                                if(((contadorCicleJugadas + 1) % 2) == 0){
+                                    Log.d("cjPar", String.valueOf(contadorCicleJugadas));
+                                    PrinterService.POS_S_TextOut("                " + Utilidades.agregarGuion(Utilidades.agregarGuionPorSorteo(jugada.getString("jugada"), jugada.getString("sorteo"))), 1, 0, 1, 0, 0x00);
+                                    PrinterService.POS_S_TextOut("                         " + jugada.getDouble("monto") + "\n", 1, 0, 1, 0, 0x00);
+                                }else{
+                                    String saltoLinea = "";
+                                    if((contadorCicleJugadas + 1) == jugadas.length())
+                                        saltoLinea = "\n";
+                                    PrinterService.POS_S_TextOut(Utilidades.agregarGuion(Utilidades.agregarGuionPorSorteo(jugada.getString("jugada"), jugada.getString("sorteo"))), 0, 0, 1, 0, 0x00);
+                                    PrinterService.POS_S_TextOut("         " + jugada.getDouble("monto") + saltoLinea, 0, 0, 1, 0, 0x00);
+                                }
+
+//                                pos.POS_S_TextOut("culo23", 0, 0, 1, 0, 0x00);
+                                //pos.POS_S_TextOut(" - total: " + getLoteriaTotal(loteria.getInt("id"), jugadas) + "-\n", 1, 0, 1, 0, 0x00);
+
+                            }
+                        }
+                        PrinterService.POS_S_Align(1);
+                        if(jsonArrayLoterias.length() > 1)
+                            PrinterService.POS_S_TextOut("\n total: " + getLoteriaTotal(loteria.getString("id"), jugadas) + "\n\n\n", 1, 0, 1, 0, 0x00);
+                    }
+
+                    double total = venta.getDouble("total");
+                    if(venta.getInt("hayDescuento") == 1){
+                        total -= venta.getDouble("descuentoMonto");
+                        PrinterService.POS_S_TextOut("subTotal: " + venta.getDouble("total") + "\n", 1, 0, 1, 0, 0x00);
+                        PrinterService.POS_S_TextOut("descuento: " + venta.getDouble("descuentoMonto") + "\n", 1, 0, 1, 0, 0x00);
+                    }
+                    String saltoLineaTotal = "\n";
+                    if(this.original == false || venta.getJSONObject("banca").getInt("imprimirCodigoQr") == 0){
+                        saltoLineaTotal+="\n\n";
+                    }
+                    PrinterService.POS_S_TextOut("- TOTAL: " + total + " -" + saltoLineaTotal, 1, 0, 1, 0, 0x00);
+
+                    if(this.original == false && this.cancelado == true){
+                        PrinterService.POS_S_TextOut("** CANCELADO **\n\n\n", 0, 1, 1, 0, 0x00);
+                    }
+
+                    if(this.cancelado == false && this.original == true){
+                        if(!venta.getJSONObject("banca").getString("piepagina1").equals("null"))
+                            PrinterService.POS_S_TextOut(venta.getJSONObject("banca").getString("piepagina1") + "\n", 1, 0, 1, 0, 0x00);
+                        if(!venta.getJSONObject("banca").getString("piepagina2").equals("null"))
+                            PrinterService.POS_S_TextOut(venta.getJSONObject("banca").getString("piepagina2") + "\n", 1, 0, 1, 0, 0x00);
+                        if(!venta.getJSONObject("banca").getString("piepagina3").equals("null"))
+                            pos.POS_S_TextOut(venta.getJSONObject("banca").getString("piepagina3") + "\n", 1, 0, 1, 0, 0x00);
+                        if(!venta.getJSONObject("banca").getString("piepagina4").equals("null"))
+                            PrinterService.POS_S_TextOut(venta.getJSONObject("banca").getString("piepagina4") + "\n", 1, 0, 1, 0, 0x00);
+                        if(venta.getJSONObject("banca").getInt("imprimirCodigoQr") == 1)
+                            PrinterService.POS_S_SetQRcode(venta.getString("codigoQr"), 8, 0, 3);
+                        PrinterService.POS_S_TextOut("\n\n\n", 1, 0, 1, 0, 0x00);
+                        PrinterService.closeSocket(null, false);
+                    }
+
+
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+
+
+
+//                for(int i = 0; i < nCount; ++i)
+//                {
+//                    if(!pos.GetIO().IsOpened())
+//                        break;
+//
+//                    Log.d("nPrintWidth", String.valueOf(nPrintWidth));
+//                    Log.d("nPrintContent", String.valueOf(nPrintContent));
+//
+//                    if(1 >= 1)
+//                    {
+//                        pos.POS_FeedLine();
+//                        pos.POS_S_Align(1);
+//                        pos.POS_S_TextOut("REC" + String.format("%03d", i) + "\r\nCaysn Printer\r\n测试页\r\n\r\n", 0, 1, 1, 0, 0x100);
+//                        pos.POS_S_TextOut("扫二维码下载苹果APP\r\n", 0, 0, 0, 0, 0x100);
+//                        pos.POS_S_SetQRcode("https://appsto.re/cn/2KF_bb.i", 8, 0, 3);
+//                        pos.POS_FeedLine();
+//                        pos.POS_S_SetBarcode("20160618", 0, 72, 3, 60, 0, 2);
+//                        pos.POS_FeedLine();
+//
+//                        //Bitmap t = Utilidades.toBitmap(getString());
+//
+//                        //pos.POS_PrintPicture(bm1, nPrintWidth, 1, nCompressMethod);
+//
+//                    }
+//
+//                    if(nPrintContent >= 2)
+//                    {
+//                        if(bm1 != null)
+//                        {
+//                            pos.POS_PrintPicture(bm1, nPrintWidth, 1, nCompressMethod);
+//                        }
+//                        if(bm2 != null)
+//                        {
+//                            pos.POS_PrintPicture(bm2, nPrintWidth, 1, nCompressMethod);
+//                        }
+//                    }
+//
+//                    if(nPrintContent >= 3)
+//                    {
+//                        if(bmBlackWhite != null)
+//                        {
+//                            pos.POS_PrintPicture(bmBlackWhite, nPrintWidth, 1, nCompressMethod);
+//                        }
+//                        if(bmIu != null)
+//                        {
+//                            pos.POS_PrintPicture(bmIu, nPrintWidth, 0, nCompressMethod);
+//                        }
+//                        if(bmYellowmen != null)
+//                        {
+//                            pos.POS_PrintPicture(bmYellowmen, nPrintWidth, 0, nCompressMethod);
+//                        }
+//                    }
+//                }
+
+
+            }
+
+            return bPrintResult;
+        }
+
+        double getLoteriaTotal(String id, JSONArray jugadas){
+            double total = 0;
+            try {
+                for (int i =0; i < jugadas.length(); i++){
+                    JSONObject jugada = jugadas.getJSONObject(i);
+
+                    if(jugada.getString("idLoteria").equals(id)){
+                        total += jugada.getDouble("monto");
+                    }
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+
+            return total;
+        }
+    }
+    public static class TaskPrint2 implements Runnable
+    {
+        Pos pos = null;
+        Bitmap ticketImg;
+        JSONObject response;
+        boolean original;
+        boolean cancelado;
+        boolean pagado;
+
+        public TaskPrint2(Pos pos)
+        {
+            this.pos = pos;
+        }
+        public TaskPrint2()
+        {
+            this.pos = mPos;
+        }
+
+        public TaskPrint2(Bitmap ticketImg)
+        {
+            this.pos = mPos;
+            this.ticketImg = ticketImg;
+        }
+
+        public TaskPrint2(JSONObject response, boolean original)
+        {
+            this.pos = mPos;
+            this.response = response;
+            this.original = original;
+        }
+
+        public TaskPrint2(JSONObject response, int cancelado_o_pagado)
         {
             this.pos = mPos;
             this.response = response;
