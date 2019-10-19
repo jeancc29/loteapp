@@ -21,6 +21,8 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.jean2.creta.Clases.PrinterClass;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,6 +38,7 @@ public class JugadasFragment extends Fragment implements Updateable{
     private static TableLayout tableLayout;
     JSONArray jugadas = PrincipalFragment.jugadas;
     public static Context mContext;
+    Button btnEliminarTodasLasJugadas;
 
     public JugadasFragment() {
         // Required empty public constructor
@@ -193,8 +196,15 @@ public class JugadasFragment extends Fragment implements Updateable{
 
         tableLayout = (TableLayout)viewRoot. findViewById(R.id.tableJugadas);
 
-
-
+        btnEliminarTodasLasJugadas = (Button)viewRoot.findViewById(R.id.btnEliminarTodasLasJugadas);
+        btnEliminarTodasLasJugadas.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tableLayout.removeAllViews();
+                PrincipalFragment.jugadasClase.removeAll();
+                PrincipalFragment.calcularTotal();
+            }
+        });
 
 
 //        PrincipalFragment principalFragment = new PrincipalFragment();

@@ -42,6 +42,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -68,6 +69,9 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
     private static String TAG = "SearchBTActivity";
     Handler handler;
     String [] dispostivosPareados;
+    boolean seEstaPareandoElDispositivoDesdeEstaApp = false;
+    String nombreDipositivoPareado;
+    String addressDipositivoPareado;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -180,10 +184,10 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
 
             public void onClick(View arg0) {
                 // TODO Auto-generated method stub
-                Toast.makeText(mContext, "Conectando...", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(mContext, "Conectando...", Toast.LENGTH_SHORT).show();
                 Log.d("pruebaBluetooth", String.valueOf((getActivity() == null)));
-                btnSearch.setEnabled(false);
-                linearlayoutdevices.setEnabled(false);
+//                btnSearch.setEnabled(false);
+               // linearlayoutdevices.setEnabled(false);
                 for(int i = 0; i < linearlayoutdevices.getChildCount(); ++i)
                 {
                     Button btn = (Button)linearlayoutdevices.getChildAt(i);
@@ -208,15 +212,49 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
 
 
 
-                abrirDialogGuardarPrinter(name, address);
+                if(existeEntreLosDispositivosPareados(address))
+                    abrirDialogGuardarPrinter(name, address);
+                else{
+                    emparejarDispositivo(name, address);
+//                    if(emparejarDispositivo(name, address)){
+//                        abrirDialogGuardarPrinter(name, address);
+//                    }else{
+//                        Toast.makeText(mActivity, "No se pudo parear el dispostivo", Toast.LENGTH_SHORT).show();
+//                    }
+                }
             }
         });
         button.getBackground().setAlpha(100);
         linearlayoutdevices.addView(button);
     }
 
+    public boolean emparejarDispositivo(String name, String address)
+    {
+        Boolean returnValue;
+        try {
+            IntentFilter intentFilter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
+            mContext.registerReceiver(broadcastReceiverToPairDevice, intentFilter);
+            BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            BluetoothDevice mBluetoothDevice = mBluetoothAdapter.getRemoteDevice(address);
+            Class class1 =Class.forName("android.bluetooth.BluetoothDevice");
+            Method createBondMethod = class1.getMethod("createBond");
+            returnValue = (Boolean) createBondMethod.invoke(mBluetoothDevice);
+            //abrirDialogGuardarPrinter(name, address);
+            seEstaPareandoElDispositivoDesdeEstaApp = true;
+            nombreDipositivoPareado = name;
+            addressDipositivoPareado = address;
 
-    public static void abrirDialogGuardarPrinter(final String name, final String address){
+        }catch (Exception e)
+        {
+            returnValue = false;
+            e.printStackTrace();
+        }
+
+        return returnValue;
+    }
+
+
+    public  void abrirDialogGuardarPrinter(final String name, final String address){
         DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -227,6 +265,7 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
                         Utilidades.guardarImpresora(mContext, name, address);
                         BluetoothDevices.mostrarCardView();
                         Toast.makeText(mContext, "Se ha guardado correctamente", Toast.LENGTH_SHORT).show();
+                        getDialog().dismiss();
                         break;
 
                     case DialogInterface.BUTTON_NEGATIVE:
@@ -240,6 +279,30 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
         builder.setMessage("Desea guardar impresora ?").setPositiveButton("Yes", dialogClickListener)
                 .setNegativeButton("No", dialogClickListener).show();
     }
+
+    private final BroadcastReceiver broadcastReceiverToPairDevice = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+
+            if (BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(action)) {
+                final int state        = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.ERROR);
+                final int prevState    = intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, BluetoothDevice.ERROR);
+
+                if (state == BluetoothDevice.BOND_BONDED && prevState == BluetoothDevice.BOND_BONDING) {
+                    if(seEstaPareandoElDispositivoDesdeEstaApp){
+                        seEstaPareandoElDispositivoDesdeEstaApp = false;
+                        abrirDialogGuardarPrinter(nombreDipositivoPareado, addressDipositivoPareado);
+                    }
+                }
+                else if(state == BluetoothDevice.BOND_NONE){
+                    seEstaPareandoElDispositivoDesdeEstaApp = false;
+                }
+
+                Log.d("broadcastReceiverToPair", "state:" + (state == BluetoothDevice.BOND_NONE));
+
+            }
+        }
+    };
 
     public boolean existeEntreLosDispositivosPareados(String address)
     {

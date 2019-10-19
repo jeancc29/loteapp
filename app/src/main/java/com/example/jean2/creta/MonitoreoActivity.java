@@ -127,10 +127,16 @@ public class MonitoreoActivity extends AppCompatActivity {
 
     public void aceptaCancelarTicket(final JSONObject ticket){
         try {
-            if(JPrinterConnectService.isPrinterConnected() == false){
-                Toast.makeText(mContext, "Debe conectarse a una impresora culo", Toast.LENGTH_SHORT).show();
-                mostrarFragmentDialogBluetoothSearch();
-//                mostrarDispositivosBluetooth();
+//            if(JPrinterConnectService.isPrinterConnected() == false){
+//                Toast.makeText(mContext, "Debe conectarse a una impresora culo", Toast.LENGTH_SHORT).show();
+//                mostrarFragmentDialogBluetoothSearch();
+////                mostrarDispositivosBluetooth();
+//                return;
+//            }
+
+            if(Utilidades.hayImpresorasRegistradas(mContext) == false){
+                Main2Activity.txtBluetooth.performClick();
+                Toast.makeText(mContext, "Debe registrar una impresora", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -499,10 +505,16 @@ public class MonitoreoActivity extends AppCompatActivity {
 //            return;
 //        }
 
-        if(JPrinterConnectService.isPrinterConnected() == false){
-            Toast.makeText(mContext, "Debe conectarse a una impresora culoo", Toast.LENGTH_SHORT).show();
-            MonitoreoActivity.mostrarFragmentDialogBluetoothSearch();
-//                mostrarDispositivosBluetooth();
+//        if(JPrinterConnectService.isPrinterConnected() == false){
+//            Toast.makeText(mContext, "Debe conectarse a una impresora culoo", Toast.LENGTH_SHORT).show();
+//            MonitoreoActivity.mostrarFragmentDialogBluetoothSearch();
+////                mostrarDispositivosBluetooth();
+//            return;
+//        }
+
+        if(Utilidades.hayImpresorasRegistradas(mContext) == false){
+            Main2Activity.txtBluetooth.performClick();
+            Toast.makeText(mContext, "Debe registrar una impresora", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -510,8 +522,8 @@ public class MonitoreoActivity extends AppCompatActivity {
         try{
 
             Log.d("MonitoreoCancelado", venta.toString());
-            es.submit(new BluetoothSearchDialog.TaskPrint(venta, 1));
-
+//            es.submit(new BluetoothSearchDialog.TaskPrint(venta, 1));
+            Utilidades.imprimir(mContext, venta, 3);
             getMonitoreo();
         }catch(Exception e){
             e.printStackTrace();

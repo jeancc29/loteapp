@@ -9,14 +9,14 @@
     android:orientation="vertical"
     >
 
+    <include layout="@layout/toolbar_monitoreo"/>
 
     <Button
         android:id="@+id/btnAgregar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Agregar o cambiar impresora"
-        android:background="@color/colorPrimary"
-        android:textColor="#ffffff"
+
         android:onClick="agregar"
         android:layout_marginLeft="15dp"
         android:layout_marginRight="15dp"

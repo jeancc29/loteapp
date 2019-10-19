@@ -132,10 +132,16 @@ public class ImprimirCompartirVerTicketDialog extends AppCompatDialogFragment {
     }
 
     private void ImprimirTicket(){
-        if(JPrinterConnectService.isPrinterConnected() == false){
-            Toast.makeText(mContext, "Debe conectarse a una impresora", Toast.LENGTH_SHORT).show();
-            MonitoreoActivity.mostrarFragmentDialogBluetoothSearch();
-//                mostrarDispositivosBluetooth();
+//        if(JPrinterConnectService.isPrinterConnected() == false){
+//            Toast.makeText(mContext, "Debe conectarse a una impresora", Toast.LENGTH_SHORT).show();
+//            MonitoreoActivity.mostrarFragmentDialogBluetoothSearch();
+////                mostrarDispositivosBluetooth();
+//            return;
+//        }
+
+        if(Utilidades.hayImpresorasRegistradas(mContext) == false){
+            Main2Activity.txtBluetooth.performClick();
+            Toast.makeText(mContext, "Debe registrar una impresora", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -172,7 +178,8 @@ public class ImprimirCompartirVerTicketDialog extends AppCompatDialogFragment {
 
                             JSONObject venta = new JSONObject();
                             venta.put("venta", MonitoreoActivity.selectedTicket);
-                            es.submit(new BluetoothSearchDialog.TaskPrint(venta, false));
+//                            es.submit(new BluetoothSearchDialog.TaskPrint(venta, false));
+                            Utilidades.imprimir(mContext, venta, 2);
                             getDialog().dismiss();
 
                             //getDialog().dismiss();

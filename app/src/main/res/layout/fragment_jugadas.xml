@@ -9,6 +9,8 @@
     android:background="@color/WHITE"
     >
 
+
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -19,12 +21,19 @@
         android:orientation="vertical">
 
 
+        <Button
+            android:id="@+id/btnEliminarTodasLasJugadas"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Eliminar todas"/>
+
+
             <TableLayout
                 android:id="@+id/tableJugadas"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginVertical="30dp"
-                android:layout_marginHorizontal="10dp"
+                android:layout_marginVertical="15dp"
+                android:layout_marginHorizontal="3dp"
                 android:collapseColumns=""
                 >
 

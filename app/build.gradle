@@ -3,12 +3,12 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 28
     defaultConfig {
-//        applicationId "com.loterias.jean2.creta"
-        applicationId "com.example.jean2.creta"
+        applicationId "com.loterias.jean2.creta"
+//        applicationId "com.example.jean2.creta"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 20
-        versionName "1.15"
+        versionCode 21
+        versionName "1.16"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

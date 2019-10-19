@@ -430,10 +430,16 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
         if(montoAPagar > 0){
             if(tieneJugadasPendientes()){
                 tienePremioYtienePendiente = true;
-                if(JPrinterConnectService.isPrinterConnected() == false){
-                    Toast.makeText(mContext, "Debe conectarse a una impresora", Toast.LENGTH_SHORT).show();
-                    mostrarFragmentDialogBluetoothSearch();
-//                mostrarDispositivosBluetooth();
+//                if(JPrinterConnectService.isPrinterConnected() == false){
+//                    Toast.makeText(mContext, "Debe conectarse a una impresora", Toast.LENGTH_SHORT).show();
+//                    mostrarFragmentDialogBluetoothSearch();
+////                mostrarDispositivosBluetooth();
+//                    return;
+//                }
+
+                if(Utilidades.hayImpresorasRegistradas(mContext) == false){
+                    Main2Activity.txtBluetooth.performClick();
+                    Toast.makeText(mContext, "Debe registrar una impresora", Toast.LENGTH_SHORT).show();
                     return;
                 }
             }
@@ -477,7 +483,8 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
                                     //Crear un listener el archivo BluetoothSearchDialog para que cuando se conecte a la impresora
                                     //este retorne la conexion aqui y se pueda imprimir, tambien crear opcion para que solamente se impriman
                                     //las jugadas pendientes
-                                    es.submit(new BluetoothSearchDialog.TaskPrint(response, 2));
+//                                    es.submit(new BluetoothSearchDialog.TaskPrint(response, 2));
+                                    Utilidades.imprimir(mContext, response, 4);
                                 }
                                 Toast.makeText(mActivity, response.getString("mensaje") + " e: " + errores, Toast.LENGTH_LONG).show();
                             }

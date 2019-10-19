@@ -47,7 +47,7 @@
         android:roundIcon="@mipmap/ic_loterias_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".BluetoothDevices"></activity>
+        <activity android:name=".BluetoothDevices" android:parentActivityName=".Main2Activity"></activity>
         <activity android:name=".ActualizarActivity" />
         <activity
             android:name=".PendientesDePago"

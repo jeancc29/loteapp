@@ -19,6 +19,7 @@ import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.jean2.creta.Clases.PrinterClass;
 import com.example.jean2.creta.Servicios.JPrinterConnectService;
 
 import org.json.JSONObject;
@@ -394,5 +395,11 @@ public class Utilidades {
         }
 
         return packName;
+    }
+
+    static void imprimir(Context context,JSONObject venta, int original_cancelado_copia)
+    {
+        PrinterClass printerClass = new PrinterClass(context, venta);
+        printerClass.conectarEImprimir(true, original_cancelado_copia);
     }
 }

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -25,10 +26,15 @@ public class BluetoothDevices extends AppCompatActivity {
     static TextView txtAddress;
     static CardView deviceCardView;
     static Context mContext;
+    private Toolbar toolbar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bluetooth_devices);
+        toolbar = findViewById(R.id.toolBarMonitoreo);
+        setSupportActionBar(toolbar);
+        toolbar.setTitle("Dispositivos bluetooth");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mContext = this;
         deviceCardView = (CardView)findViewById(R.id.deviceCardView);

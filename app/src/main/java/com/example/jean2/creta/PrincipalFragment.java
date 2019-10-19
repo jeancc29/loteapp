@@ -1153,7 +1153,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                                     //es.submit(new BluetoothSearchDialog.TaskPrint(response, true));
 
 
-                                    imprimir(response, 1);
+                                    Utilidades.imprimir(mContext,response, 1);
                                 }
                                 else if(ckbSms.isChecked()){
                                     new AsyncTask<Void, Void, Bitmap>() {
@@ -1476,7 +1476,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
                             JSONObject venta = new JSONObject();
                             venta.put("venta", response.getJSONObject("ticket"));
-                            imprimir(venta, 2);
+                            Utilidades.imprimir(mContext, venta, 2);
 //                            es.submit(new BluetoothSearchDialog.TaskPrint(venta, false));
 
 
@@ -1895,7 +1895,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
             v.put("venta", venta);
             Log.d("MonitoreoCancelado", v.toString());
             //es.submit(new BluetoothSearchDialog.TaskPrint(v, 1));
-            imprimir(v, 3);
+            Utilidades.imprimir(mContext, v, 3);
 
         }catch(Exception e){
             e.printStackTrace();
@@ -2083,20 +2083,20 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         return ans;
     }
 
-    static void imprimir(JSONObject venta, int original_cancelado_copia)
-    {
-//        Intent serviceIntent = new Intent(mContext, PrinterService.class);
-//        serviceIntent.putExtra("address", Utilidades.getAddressImpresora(mContext));
-//        serviceIntent.putExtra("name", "hola");
-
-        //mContext.startService(serviceIntent);
-        PrinterClass printerClass = new PrinterClass(mContext, venta);
-        printerClass.conectarEImprimir(true, original_cancelado_copia);
-//        if(original_cancelado_copia == 1)
-//            es.submit(new BluetoothSearchDialog.TaskPrint(venta, true));
-//        else if(original_cancelado_copia == 2)
-//            es.submit(new BluetoothSearchDialog.TaskPrint(venta, false));
-//        if(original_cancelado_copia == 3)
-//            es.submit(new BluetoothSearchDialog.TaskPrint(venta, 1));
-    }
+//    static void imprimir(JSONObject venta, int original_cancelado_copia)
+//    {
+////        Intent serviceIntent = new Intent(mContext, PrinterService.class);
+////        serviceIntent.putExtra("address", Utilidades.getAddressImpresora(mContext));
+////        serviceIntent.putExtra("name", "hola");
+//
+//        //mContext.startService(serviceIntent);
+//        PrinterClass printerClass = new PrinterClass(mContext, venta);
+//        printerClass.conectarEImprimir(true, original_cancelado_copia);
+////        if(original_cancelado_copia == 1)
+////            es.submit(new BluetoothSearchDialog.TaskPrint(venta, true));
+////        else if(original_cancelado_copia == 2)
+////            es.submit(new BluetoothSearchDialog.TaskPrint(venta, false));
+////        if(original_cancelado_copia == 3)
+////            es.submit(new BluetoothSearchDialog.TaskPrint(venta, 1));
+//    }
 }
