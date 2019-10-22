@@ -1,5 +1,6 @@
 package com.example.jean2.creta;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -21,6 +22,7 @@ import android.widget.Toast;
 
 import com.example.jean2.creta.Clases.PrinterClass;
 import com.example.jean2.creta.Servicios.JPrinterConnectService;
+import com.example.jean2.creta.Servicios.PrintService;
 
 import org.json.JSONObject;
 
@@ -397,6 +399,21 @@ public class Utilidades {
         return packName;
     }
 
+//    static void imprimir(Context context,JSONObject venta, int original_copia_cancelado_pagado)
+//    {
+//        try{
+//            Intent serviceIntent = new Intent(context, PrintService.class);
+//            serviceIntent.putExtra("venta", venta.toString());
+//            serviceIntent.putExtra("original_copia_cancelado_pagado", original_copia_cancelado_pagado);
+//            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+//                context.startForegroundService(serviceIntent);
+//            else
+//                context.startService(serviceIntent);
+//        }catch (Exception e){
+//            Toast.makeText(context, "Error servicio: " + e.toString(), Toast.LENGTH_LONG).show();
+//            e.printStackTrace();
+//        }
+//    }
     static void imprimir(Context context,JSONObject venta, int original_cancelado_copia)
     {
         PrinterClass printerClass = new PrinterClass(context, venta);

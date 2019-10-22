@@ -1,53 +1,46 @@
-package com.example.jean2.creta.Clases;
-
-import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.AsyncTask;
-import android.os.IBinder;
-import android.util.Log;
-
-import androidx.annotation.Nullable;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.reflect.Method;
-import java.nio.ByteBuffer;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+package com.example.jean2.creta.Servicios;
 
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.ProgressDialog;
+import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
+import android.content.IntentFilter;
+import android.graphics.Color;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Handler;
-import android.os.Message;
+import android.os.IBinder;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+
 import com.example.jean2.creta.Clases.ESCCMD;
-
-
+import com.example.jean2.creta.Clases.PrinterClass;
 import com.example.jean2.creta.Clases.UnicodeFormatter;
+import com.example.jean2.creta.R;
 import com.example.jean2.creta.Utilidades;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-public class PrinterClass {
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+public class PrintService extends Service {
     private JSONObject venta;
     Context mContext;
     protected static final String TAG = "TAG";
@@ -72,13 +65,95 @@ public class PrinterClass {
     ExecutorService es = Executors.newScheduledThreadPool(30);
     ConnectedThread mConnectedThread;
 
+    public void onCreate(){
+        try{
 
-    public PrinterClass(Context context){this.mContext = context; this.address = Utilidades.getAddressImpresora(mContext);}
-    public PrinterClass(Context context, JSONObject venta){
-        this.mContext = context;
-        this.venta = venta;
-        this.address = Utilidades.getAddressImpresora(mContext);
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                String NOTIFICATION_CHANNEL_ID = "com.example.simpleapp";
+                String channelName = "My Background Service";
+                NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
+                chan.setLightColor(Color.BLUE);
+                chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+                NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                assert manager != null;
+                manager.createNotificationChannel(chan);
+
+                NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
+                Notification notification = notificationBuilder.setOngoing(true)
+                        .setSmallIcon(R.drawable.ic_launcher_background)
+                        .setContentTitle("App is running in background")
+                        .setPriority(NotificationManager.IMPORTANCE_MIN)
+                        .setCategory(Notification.CATEGORY_SERVICE)
+                        .build();
+                startForeground(2, notification);
+            }
+
+
+
+
+        }catch (Exception e){
+            Toast.makeText(this, "Error servicio: " + e.toString(), Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }
+
+        super.onCreate();
     }
+
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.v("PrintService", "Todo bien");
+        mContext = this;
+        boolean imprimir_o_probar_impresora_este_activa;
+        int original_copia_cancelado_pagado;
+
+        try {
+            venta = new JSONObject(intent.getStringExtra("venta"));
+            address = Utilidades.getAddressImpresora(mContext);
+            name = Utilidades.getNameImpresora(mContext);
+            imprimir_o_probar_impresora_este_activa = intent.getBooleanExtra("imprimir_o_probar_impresora_este_activa", true);
+            original_copia_cancelado_pagado = intent.getIntExtra("original_copia_cancelado_pagado", 0);
+            conectarEImprimir(imprimir_o_probar_impresora_este_activa, original_copia_cancelado_pagado);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+
+
+
+        return START_STICKY;
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+
+    public void onDestroy(){
+        Log.d("JprinterConnectService", "Servicio destruido");
+//        if(detenidoPresionandoBotonDesconectar == false){
+//            Intent serviceIntent = new Intent(JPrinterConnectService.this, JPrinterConnectService.class);
+//            serviceIntent.putExtra("address", address);
+//            serviceIntent.putExtra("name", name);
+//            startService(serviceIntent);
+//        }else{
+//            es.submit(new TaskClose());
+//            super.onDestroy();
+//        }
+
+
+        try{
+
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                stopForeground(true);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        super.onDestroy();
+
+    }
+
 
     public void conectarEImprimir(boolean imprimir_o_probar_impresora_este_activa, int original_copia_cancelado_pagado)
     {
@@ -88,7 +163,7 @@ public class PrinterClass {
 //        BluetoothConnectAsyncTask bluetoothConnectAsyncTask = new BluetoothConnectAsyncTask(imprimir_o_probar_impresora_este_activa,original_copia_cancelado_pagado);
         BluetoothConnectAsyncTask bluetoothConnectAsyncTask = new BluetoothConnectAsyncTask();
         bluetoothConnectAsyncTask.execute("");
-        Log.d("PrinterClass", "Ejecutando impresion");
+        Log.d("PrintService", "Ejecutando impresion");
     }
 
     private class BluetoothConnectAsyncTask extends AsyncTask<String, Void, String> {
@@ -98,7 +173,7 @@ public class PrinterClass {
         BluetoothConnectAsyncTask(){
 
         }
-//        BluetoothConnectAsyncTask(boolean imprimir_o_probar_impresora_este_activa, int original_copia_cancelado_pagado){
+        //        BluetoothConnectAsyncTask(boolean imprimir_o_probar_impresora_este_activa, int original_copia_cancelado_pagado){
 //         this.imprimir_o_probar_impresora_este_activa = imprimir_o_probar_impresora_este_activa;
 //         this.original_copia_cancelado_pagado = original_copia_cancelado_pagado;
 //        }
@@ -159,13 +234,13 @@ public class PrinterClass {
             mConnectedThread.start();
             if(result.equals("Success")) {
                 if(imprimir_o_probar_impresora_este_activa == true)
-                    //ticket(original_copia_cancelado_pagado);
-                es.submit(new TaskImprimir(original_copia_cancelado_pagado));
+                    ticket(original_copia_cancelado_pagado);
+//                    es.submit(new TaskImprimir(original_copia_cancelado_pagado));
                 else
                     POS_S_TextOut("**PRUEBA EXISTOSA**\n\n\n", 0, 1, 1, 0, 0x00);
 
-//                mConnectedThread.cancel(true);
-               //closeSocket(mBluetoothSocket, false);
+                mConnectedThread.cancel(true);
+                //closeSocket(mBluetoothSocket, false);
             }
 //            else {
 //                BluetoothConnectAsyncTask bluetoothConnectAsyncTask = new BluetoothConnectAsyncTask();
@@ -212,8 +287,8 @@ public class PrinterClass {
                     }
                     else{
                         intentosDeConeccion = 1;
-                        mostrarDialogErrorImpresion();
-                       // Toast.makeText(mContext, "Ha fallado la impresora, verifique de que la impresora este encendida y con carga suficiente", Toast.LENGTH_LONG).show();
+                       // mostrarDialogErrorImpresion();
+                        // Toast.makeText(mContext, "Ha fallado la impresora, verifique de que la impresora este encendida y con carga suficiente", Toast.LENGTH_LONG).show();
                     }
                     error = true;
                 }
@@ -257,7 +332,7 @@ public class PrinterClass {
                         }
                         else{
                             intentosDeConeccion = 1;
-                            mostrarDialogErrorImpresion();
+//                            mostrarDialogErrorImpresion();
                             //Toast.makeText(mContext, "Ha fallado la impresora, verifique de que la impresora este encendida y con carga suficiente", Toast.LENGTH_LONG).show();
                         }
 //                        conectarEImprimir(imprimir_o_probar_impresora_este_activa, original_copia_cancelado_pagado);
@@ -268,8 +343,6 @@ public class PrinterClass {
                     //connectionLost();
                     break;
                 }
-
-
             }
         }
 
@@ -305,37 +378,6 @@ public class PrinterClass {
         }
     }
 
-    public void mostrarDialogErrorImpresion(){
-
-        try{
-
-
-
-
-            DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    switch (which){
-                        case DialogInterface.BUTTON_POSITIVE:
-                            //Yes button clicked
-                            conectarEImprimir(imprimir_o_probar_impresora_este_activa, original_copia_cancelado_pagado);
-                            break;
-
-                        case DialogInterface.BUTTON_NEGATIVE:
-                            //No button clicked
-                            break;
-                    }
-                }
-            };
-
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-            builder.setMessage("Error de impresion: revise la impresora y asegurese de que tenga suficiente carga y este encendida, desea intentar imprimir nuevamente?").setPositiveButton("Si", dialogClickListener)
-                    .setNegativeButton("No", dialogClickListener).show();
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-    }
 
 
     public void closeSocket(BluetoothSocket nOpenSocket, boolean intentarConectarOtraVez) {
@@ -364,6 +406,9 @@ public class PrinterClass {
             Log.d(TAG, "CouldNotCloseSocket");
         }
     }
+
+
+
 
 
 
@@ -411,55 +456,6 @@ public class PrinterClass {
             byte[] pbString = pszString.getBytes();
             byte[] data = byteArraysToBytes(new byte[][]{Cmd.ESC_dollors_nL_nH, Cmd.GS_exclamationmark_n, tmp_ESC_M_n, Cmd.GS_E_n, Cmd.ESC_line_n, Cmd.FS_line_n, Cmd.ESC_lbracket_n, Cmd.GS_B_n, Cmd.ESC_V_n, Cmd.FS_AND, Cmd.ESC_9_n, pbString});
             os.write(data, 0, data.length);
-            os.flush();
-
-//            InputStream largeDataInputStream = mBluetoothSocket.getInputStream();
-//            int length;
-//            while ((length = largeDataInputStream.read(data)) != -1) {
-//                Log.d("largeDataInputStream", "index:" + length);
-//            }
-        } catch (Exception var15) {
-            Log.i("Pos", var15.toString());
-        }
-
-
-    }
-
-    public void POS_S_TextOut(String pszString, int nOrgx, int nWidthTimes, int nHeightTimes, int nFontType, int nFontStyle, boolean desconectar) {
-
-
-        try {
-            if (nOrgx > 65535 || nOrgx < 0 || nWidthTimes > 7 || nWidthTimes < 0 || nHeightTimes > 7 || nHeightTimes < 0 || nFontType < 0 || nFontType > 4 || pszString.length() == 0) {
-                throw new Exception("invalid args");
-            }
-            OutputStream os = mBluetoothSocket
-                    .getOutputStream();
-
-            Cmd.ESC_dollors_nL_nH[2] = (byte)(nOrgx % 256);
-            Cmd.ESC_dollors_nL_nH[3] = (byte)(nOrgx / 256);
-            byte[] intToWidth = new byte[]{0, 16, 32, 48, 64, 80, 96, 112};
-            byte[] intToHeight = new byte[]{0, 1, 2, 3, 4, 5, 6, 7};
-            Cmd.GS_exclamationmark_n[2] = (byte)(intToWidth[nWidthTimes] + intToHeight[nHeightTimes]);
-            byte[] tmp_ESC_M_n = Cmd.ESC_M_n;
-            if (nFontType != 0 && nFontType != 1) {
-                tmp_ESC_M_n = new byte[0];
-            } else {
-                tmp_ESC_M_n[2] = (byte)nFontType;
-            }
-
-            Cmd.GS_E_n[2] = (byte)(nFontStyle >> 3 & 1);
-            Cmd.ESC_line_n[2] = (byte)(nFontStyle >> 7 & 3);
-            Cmd.FS_line_n[2] = (byte)(nFontStyle >> 7 & 3);
-            Cmd.ESC_lbracket_n[2] = (byte)(nFontStyle >> 9 & 1);
-            Cmd.GS_B_n[2] = (byte)(nFontStyle >> 10 & 1);
-            Cmd.ESC_V_n[2] = (byte)(nFontStyle >> 12 & 1);
-            Cmd.ESC_9_n[2] = 1;
-            byte[] pbString = pszString.getBytes();
-            byte[] data = byteArraysToBytes(new byte[][]{Cmd.ESC_dollors_nL_nH, Cmd.GS_exclamationmark_n, tmp_ESC_M_n, Cmd.GS_E_n, Cmd.ESC_line_n, Cmd.FS_line_n, Cmd.ESC_lbracket_n, Cmd.GS_B_n, Cmd.ESC_V_n, Cmd.FS_AND, Cmd.ESC_9_n, pbString});
-            os.write(data, 0, data.length);
-            os.flush();
-                Log.d("PrinterClass", "POst out:" + pszString);
-            mConnectedThread.cancel(true);
         } catch (Exception var15) {
             Log.i("Pos", var15.toString());
         }
@@ -572,10 +568,7 @@ public class PrinterClass {
     }
 
 
-    public void printTicket()
-    {
 
-    }
     public boolean ticket(int original_copia_cancelado_pagado)
     {
         try {
@@ -605,7 +598,7 @@ public class PrinterClass {
                 POS_S_TextOut("** CANCELADO **\n", 0, 1, 1, 0, 0x00);
 
             POS_S_TextOut(venta.getString("fecha")+"\n", 0, 0, 1, 0, 0x00);
-            POS_S_TextOut("Ticket:"  +Utilidades.toSecuencia(venta.getString("idTicket"), venta.getString("codigo"))+ "\n", 0, 0, 1, 0, 0x00);
+            POS_S_TextOut("Ticket:"  + Utilidades.toSecuencia(venta.getString("idTicket"), venta.getString("codigo"))+ "\n", 0, 0, 1, 0, 0x00);
             POS_S_TextOut("Fecha: " + venta.getString("fecha")+"\n", 0, 0, 1, 0, 0x00);
             if(original_copia_cancelado_pagado == 1)
                 POS_S_TextOut(venta.getString("codigoBarra")+"\n", 1, 1, 1, 0, 0x00);
@@ -685,9 +678,7 @@ public class PrinterClass {
                     POS_S_TextOut(venta.getJSONObject("banca").getString("piepagina4") + "\n", 1, 0, 1, 0, 0x00);
                 if(venta.getJSONObject("banca").getInt("imprimirCodigoQr") == 1)
                     POS_S_SetQRcode(venta.getString("codigoQr"), 8, 0, 3);
-                POS_S_TextOut("\n\n\n", 1, 0, 1, 0, 0x00, true);
-            }else{
-                POS_S_TextOut("\n\n\n", 1, 0, 1, 0, 0x00, true);
+                POS_S_TextOut("\n\n\n", 1, 0, 1, 0, 0x00);
             }
 
 
@@ -742,6 +733,7 @@ public class PrinterClass {
         return total;
     }
 
+
     public class TaskImprimir implements Runnable
     {
         int original_copia_cancelado_pagado = 0;
@@ -751,18 +743,19 @@ public class PrinterClass {
             // TODO Auto-generated method stub
 
             final boolean bPrintResult = ticket(this.original_copia_cancelado_pagado);
-
+            mConnectedThread.cancel(true);
 
             ((Activity)mContext).runOnUiThread(new Runnable(){
                 @Override
                 public void run() {
                     // TODO Auto-generated method stub
                     Log.d("PrinterClass", "TaskImprimir:" + bPrintResult);
-                   // mConnectedThread.cancel(true);
                     //btnPrint.setEnabled(bIsOpened);
                 }
             });
 
         }
     }
+
+
 }

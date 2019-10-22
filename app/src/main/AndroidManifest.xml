@@ -60,6 +60,9 @@
             android:name=".Servicios.PrinterService"
             android:enabled="true" />
         <service
+            android:name=".Servicios.PrintService"
+            android:enabled="true" />
+        <service
             android:name=".Servicios.JPrinterConnectService"
             android:enabled="true" />
         <service
