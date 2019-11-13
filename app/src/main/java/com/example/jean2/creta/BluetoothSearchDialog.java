@@ -308,7 +308,7 @@ public class BluetoothSearchDialog extends AppCompatDialogFragment implements Vi
     {
         boolean existe = false;
         if(dispostivosPareados == null)
-            existe = false;
+            return false;
 
         if(dispostivosPareados.length > 0){
             for(int c = 0; c < dispostivosPareados.length; c++){

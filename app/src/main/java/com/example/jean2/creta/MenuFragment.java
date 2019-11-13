@@ -131,7 +131,7 @@ public class MenuFragment extends Fragment implements DuplicarDialog.DuplicarDia
             @Override
             public void onClick(View view) {
                 Utilidades.eliminarUsuario(getContext());
-                PrincipalFragment.jugadasClase.removeAll();
+                PrincipalFragment.jugadasClase.clear();
                 Intent intent = new Intent(getContext(), LoginActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
@@ -182,7 +182,7 @@ public class MenuFragment extends Fragment implements DuplicarDialog.DuplicarDia
                             String errores = response.getString("errores");
                             if(errores.equals("0")){
                                 JSONArray jsonArray = response.getJSONArray("monitoreo");
-                                PrincipalFragment.jugadasClase.duplicar(jsonArray);
+                                //PrincipalFragment.jugadasClase.duplicar(jsonArray);
                                 Toast.makeText(mContext, "Se ha duplicado", Toast.LENGTH_SHORT).show();
                             }
                             else

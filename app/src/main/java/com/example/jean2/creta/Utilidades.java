@@ -20,13 +20,16 @@ import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.jean2.creta.Clases.JugadaClass;
 import com.example.jean2.creta.Clases.PrinterClass;
+import com.example.jean2.creta.Clases.VentasClass;
 import com.example.jean2.creta.Servicios.JPrinterConnectService;
 import com.example.jean2.creta.Servicios.PrintService;
 
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -414,9 +417,299 @@ public class Utilidades {
 //            e.printStackTrace();
 //        }
 //    }
-    static void imprimir(Context context,JSONObject venta, int original_cancelado_copia)
+    static void imprimir(Context context, VentasClass venta, int original_cancelado_copia)
     {
         PrinterClass printerClass = new PrinterClass(context, venta);
         printerClass.conectarEImprimir(true, original_cancelado_copia);
     }
+
+    public static boolean jugadaExiste(List<JugadaClass> jugadas, String jugada, String idLoteria){
+        boolean existe = false;
+
+
+        if(jugada.length() == 0)
+            return existe;
+
+        jugada = Utilidades.ordenarMenorAMayor(jugada);
+
+
+        for(JugadaClass j:jugadas){
+           if(j.jugada.equals(jugada) && j.idLoteria == Integer.parseInt(idLoteria)){
+               existe = true;
+           }
+        }
+
+
+        return existe;
+    }
+
+
+    public static String jugadaQuitarPunto(String jugada){
+
+
+        return jugada;
+    }
+
+
+    public static double siJugadaExisteRestarMontoDisponible(List<JugadaClass> jugadas, String jugada, String idLoteria, double montoDisponible){
+        boolean existe = false;
+        if(jugada.length() == 0)
+            return montoDisponible;
+
+        for(JugadaClass j:jugadas){
+            if(j.jugada.equals(jugada) && j.idLoteria == Integer.parseInt(idLoteria)){
+                montoDisponible = montoDisponible - j.monto;
+            }
+        }
+
+
+        return montoDisponible;
+    }
+
+
+    public static boolean validarJugadaSeaCorrecta(String jugada){
+        boolean correcta = true;
+        if(jugada.length() > 1 && jugada.length() <= 6){
+
+
+
+
+
+        }
+        else
+            correcta =false;
+
+        return correcta;
+    }
+
+    public static boolean siJugadaExisteActualizar(List<JugadaClass> jugadas, String jugada, String idLoteria, double monto, int cantidadDeJugadasARevisar){
+        boolean existe = false;
+        if(jugada.length() == 0)
+            return existe;
+
+        if(jugadas.size() == 0)
+            return existe;
+
+        jugada = Utilidades.ordenarMenorAMayor(jugada);
+
+
+        if(cantidadDeJugadasARevisar > 0){
+            int contador = 0;
+            for(JugadaClass j:jugadas){
+                if(contador < cantidadDeJugadasARevisar){
+                    contador++;
+                }else{
+                    Log.i("siExisteActualizar", "Salio");
+                    break;
+                }
+                Log.i("siExisteActualizar", "No Salio");
+                if(j.jugada.equals(jugada) && j.idLoteria == Integer.parseInt(idLoteria)){
+                    j.monto = j.monto + monto;
+                    existe = true;
+                }
+            }
+        }
+        else{
+            for(JugadaClass j:jugadas){
+                if(j.jugada.equals(jugada) && j.idLoteria == Integer.parseInt(idLoteria)){
+                    j.monto = j.monto + monto;
+                    existe = true;
+                }
+            }
+        }
+
+
+        if(existe){
+            JugadasFragment.updateTable();
+        }
+
+        return existe;
+    }
+
+    public static float calcularTotal(List<JugadaClass> jugadas){
+        float total = 0;
+
+        for(JugadaClass j:jugadas){
+            float monto = (float)j.monto;
+            total += monto;
+        }
+
+        return total;
+    }
+
+    public static float delete(List<JugadaClass> jugadas){
+        float total = 0;
+
+        for(JugadaClass j:jugadas){
+            float monto = (float)j.monto;
+            total += monto;
+        }
+
+        return total;
+    }
+
+    public static List<JugadaClass> clonarJugadasList(List<JugadaClass> list) {
+        List<JugadaClass> clone = new ArrayList<JugadaClass>(list);
+
+        return clone;
+    }
+
+
+
+    public static String getJsonStringValue(String json, String key)
+    {
+        String retornar = "";
+        key = "\"" + key + "\"";
+        int idx = indexOfJsonString(json, key);
+        Log.e("JSONMANAGER", "getString:" + String.valueOf(idx));
+        if(idx == -1)
+            return retornar;
+
+        int idxFromStart = json.indexOf(":", idx);
+        if(idxFromStart == -1)
+            return retornar;
+
+        //como la variable idxFromStart contiene del index del caracter : entonces le sumamos 1 para que tome el index del siguiente caracter
+        idxFromStart ++;
+
+        boolean primero = true;
+        int contadorCorchetesAbiertos = 0;
+        int contadorCorchetesCerrados = 0;
+        int contadorLlavesAbiertas = 0;
+        int contadorLlavesCerradas = 0;
+        int contadorStringAbiertos = 0;
+        String tipo = null;
+        for(int i=idxFromStart; i < json.length(); i++){
+            char c = json.charAt (i);
+            if(c == ' '){
+                if(tipo != null){
+
+                }
+                else{
+                    continue;
+                }
+            }
+
+
+            if(c == '{'){
+                if(primero == true){
+                    tipo = "objecto";
+                    primero = false;
+                }
+                contadorLlavesAbiertas++;
+            }
+            else if(c == '['){
+                if(primero == true){
+                    tipo = "arreglo";
+                    primero = false;
+                }
+                contadorCorchetesAbiertos++;
+            }
+            else if(c == '"'){
+                if(primero == true){
+                    tipo = "string";
+                    primero = false;
+                }
+                if(json.charAt (i - 1) != '\\')
+                    contadorStringAbiertos++;
+            }
+            else if(c == '}'){
+                contadorLlavesCerradas++;
+            }
+            else if(c == ']'){
+                contadorCorchetesCerrados++;
+            }
+            else{
+                if(primero == true){
+                    tipo = "otro";
+                    primero = false;
+                }
+            }
+
+            if((tipo.equals("otro") && c == ',') || (tipo.equals("otro") && c == '}')){
+                return retornar;
+            }
+            retornar += c;
+            //Si el tipo de dato es string y hay dos comillas dobles abiertas entonces el string se ha cerrado, osea que ya el
+            // valor se ha obtenido por lo tanto se debe retorar
+            if(tipo.equals("string")){
+                if(contadorStringAbiertos == 2)
+                    return retornar;
+            }
+
+            if(tipo.equals("objecto")){
+                if(contadorLlavesAbiertas == contadorLlavesCerradas)
+                    return retornar;
+            }
+
+            if(tipo.equals("arreglo")){
+                if(contadorCorchetesAbiertos == contadorCorchetesCerrados)
+                    return retornar;
+            }
+
+
+        }
+
+        return retornar;
+    }
+
+
+
+    //Se busca coincidencia solo en la rama principal
+    //Cuando la llavesAbiertas es igual a 1 entonces estamos en la rama principal
+    public static int indexOfJsonString(String json, String cadena)
+    {
+
+        int llavesAbiertas = 0;
+        int llavesCerradas = 0;
+        for(int i=0; i < json.length(); i++) {
+            char caracterJson = json.charAt(i);
+
+            if(caracterJson == '{'){
+                llavesAbiertas++;
+            }
+            if(caracterJson == '}'){
+                llavesAbiertas--;
+            }
+            //Cuando la variable llavesAbiertas = 1 eso quiere decir que estamos en la rama principal, de lo contrario sera
+            // otro objecto asi que continuamos con el siguiente index porque es en la rama principal que queremos buscar
+            if(llavesAbiertas != 1){
+                continue;
+            }
+
+            int contadorCaracteresEncontrados =0;
+            boolean salir = false;
+
+            for(int c=0; c < cadena.length() && salir == false; c++) {
+
+
+                char caracterCadena = cadena.charAt(c);
+                if(c > 0)
+                    caracterJson = json.charAt(i + c);
+
+                if(caracterJson == caracterCadena){
+                    contadorCaracteresEncontrados++;
+                    if(contadorCaracteresEncontrados == cadena.length())
+                        return i;
+                }else{
+                    salir = true;
+                }
+            }
+        }
+
+        return -1;
+    }
+
+    public static boolean addJugada(JugadaClass jugadaClass)
+    {
+        try {
+            PrincipalFragment.jugadasClase.add(jugadaClass);
+            JugadasFragment.addRowToTable(jugadaClass);
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 }

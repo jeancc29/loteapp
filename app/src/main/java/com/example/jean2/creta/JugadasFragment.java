@@ -21,7 +21,9 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.jean2.creta.Clases.JugadaClass;
 import com.example.jean2.creta.Clases.PrinterClass;
+import com.example.jean2.creta.Servicios.PrintService;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,7 +35,7 @@ import org.json.JSONObject;
  */
 
 
-public class JugadasFragment extends Fragment implements Updateable{
+public class JugadasFragment extends Fragment{
 
     private static TableLayout tableLayout;
     JSONArray jugadas = PrincipalFragment.jugadas;
@@ -87,9 +89,10 @@ public class JugadasFragment extends Fragment implements Updateable{
         }
         tableLayout.removeAllViews();
         int idRow = 0;
-        for(int i=0; i < PrincipalFragment.jugadas.length(); i++){
+        int i = 0;
+        for(JugadaClass jugada: PrincipalFragment.jugadasClase){
             try {
-                JSONObject jugada = PrincipalFragment.jugadas.getJSONObject(i);
+
                 LinearLayout.LayoutParams tableRowParams = new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
                         LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -117,9 +120,9 @@ public class JugadasFragment extends Fragment implements Updateable{
                 }
                     /* add views to the row */
                 tableRow.setId(idRow);
-                    tableRow.addView(createTv(jugada.getString("descripcion"), false, mContext));
-                    tableRow.addView(createTv(Utilidades.agregarGuion(jugada.getString("jugada")), false, mContext));
-                    tableRow.addView(createTv(jugada.getString("monto"), false, mContext));
+                    tableRow.addView(createTv(jugada.getDescripcion(), false, mContext));
+                    tableRow.addView(createTv(Utilidades.agregarGuion(jugada.getJugada()), false, mContext));
+                    tableRow.addView(createTv(String.valueOf(jugada.getMonto()), false, mContext));
 
                     /* create cell element - button */
                     Button btn = new Button(mContext);
@@ -136,7 +139,9 @@ public class JugadasFragment extends Fragment implements Updateable{
                             t.removeView(r);
                             Log.d("Pariente:" , String.valueOf(id));
 
-                            PrincipalFragment.jugadasClase.deleteFromId(id);
+//                            PrincipalFragment.jugadasClase.deleteFromId(id);
+//                            PrincipalFragment.jugadasClase.remove(id - 1);
+                            PrincipalFragment.jugadasClase.remove(jugada);
                             PrincipalFragment.calcularTotal();
                         }
                     });
@@ -149,6 +154,7 @@ public class JugadasFragment extends Fragment implements Updateable{
                 /* add the row to the table */
                 tableLayout.addView(tableRow);
                 idRow++;
+                i++;
             }catch (Exception e){
                 e.printStackTrace();
             }
@@ -157,30 +163,109 @@ public class JugadasFragment extends Fragment implements Updateable{
 
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
 
-//        LinearLayout.LayoutParams tableRowParams = new LinearLayout.LayoutParams(
-//                LinearLayout.LayoutParams.MATCH_PARENT,
-//                LinearLayout.LayoutParams.WRAP_CONTENT);
-//
-//        /* create a table row */
-//        TableRow tableRow = new TableRow(mContext);
-//        tableRow.setLayoutParams(tableRowParams);
-//        tableRow.addView(createTv("Loteria", false, getActivity()));
-//        tableRow.addView(createTv("Jugada", false, getActivity()));
-//        tableRow.addView(createTv("Monto", false, getActivity()));
-//        tableRow.addView(createTv("Eliminar", false, getActivity()));
-//
-//
-//
-//
-//
-//
-//    /* add the row to the table */
-//                tableLayout.addView(tableRow);
+    public static void addRowToTable(JugadaClass jugada){
+        Log.d("JugadasFragment:", mContext.toString());
+
+
+
+
+
+
+        int idRow = 0;
+        int i = 0;
+        try{
+                LinearLayout.LayoutParams tableRowParams = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT);
+
+                /* create a table row */
+                TableRow tableRow = new TableRow(mContext);
+                tableRow.setLayoutParams(tableRowParams);
+
+
+
+                if(tableLayout.getChildCount() == 0){
+                    /* add views to the row */
+                    TableRow tableRow1 = new TableRow(mContext);
+                    tableRow1.setId(0);
+                    tableRow1.setLayoutParams(tableRowParams);
+
+                    tableRow1.addView(createTv("Loteria", true, mContext));
+                    tableRow1.addView(createTv("Jugada", true, mContext));
+                    tableRow1.addView(createTv("Monto", true, mContext));
+                    tableRow1.addView(createTv("Eliminar", true, mContext));
+                    tableLayout.addView(tableRow1);
+                }
+                /* add views to the row */
+            Log.e("JugadasFragment", "addRowToTable: " + PrincipalFragment.jugadasClase.size());
+                tableRow.setId(PrincipalFragment.jugadasClase.size());
+                tableRow.addView(createTv(jugada.getDescripcion(), false, mContext));
+                tableRow.addView(createTv(Utilidades.agregarGuion(jugada.getJugada()), false, mContext));
+                tableRow.addView(createTv(String.valueOf(jugada.getMonto()), false, mContext));
+
+                /* create cell element - button */
+                Button btn = new Button(mContext);
+                btn.setText("x");
+                btn.setWidth(LinearLayout.LayoutParams.WRAP_CONTENT);
+                btn.setHeight(LinearLayout.LayoutParams.WRAP_CONTENT);
+                //btn.setBackgroundColor(0xff12dd12);
+                btn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        int id = ((View)view.getParent()).getId();
+                        TableRow r = (TableRow)((Activity) mContext).findViewById(id);
+                        TableLayout t = (TableLayout)((Activity) mContext).findViewById(R.id.tableJugadas);
+                        t.removeView(r);
+                        Log.d("Pariente:" , String.valueOf(id));
+
+//                            PrincipalFragment.jugadasClase.deleteFromId(id);
+                        try{
+                            Log.d("Pariente:" , String.valueOf(PrincipalFragment.jugadasClase.remove(jugada)));
+
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+
+                        PrincipalFragment.calcularTotal();
+                    }
+                });
+                tableRow.addView(btn);
+
+                /* add the row to the table */
+                tableLayout.addView(tableRow);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+
+
+
     }
+
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//
+////        LinearLayout.LayoutParams tableRowParams = new LinearLayout.LayoutParams(
+////                LinearLayout.LayoutParams.MATCH_PARENT,
+////                LinearLayout.LayoutParams.WRAP_CONTENT);
+////
+////        /* create a table row */
+////        TableRow tableRow = new TableRow(mContext);
+////        tableRow.setLayoutParams(tableRowParams);
+////        tableRow.addView(createTv("Loteria", false, getActivity()));
+////        tableRow.addView(createTv("Jugada", false, getActivity()));
+////        tableRow.addView(createTv("Monto", false, getActivity()));
+////        tableRow.addView(createTv("Eliminar", false, getActivity()));
+////
+////
+////
+////
+////
+////
+////    /* add the row to the table */
+////                tableLayout.addView(tableRow);
+//    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -201,7 +286,7 @@ public class JugadasFragment extends Fragment implements Updateable{
             @Override
             public void onClick(View view) {
                 tableLayout.removeAllViews();
-                PrincipalFragment.jugadasClase.removeAll();
+                PrincipalFragment.jugadasClase.clear();
                 PrincipalFragment.calcularTotal();
             }
         });
@@ -217,67 +302,9 @@ public class JugadasFragment extends Fragment implements Updateable{
 //        }catch (Exception e){
 //            e.printStackTrace();
 //        }
-        if(PrincipalFragment.jugadas == null){
-            return viewRoot;
-        }
-        for(int i=0; i < PrincipalFragment.jugadas.length(); i++){
-            try {
-                JSONObject jugada = PrincipalFragment.jugadas.getJSONObject(i);
-                LinearLayout.LayoutParams tableRowParams = new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT);
 
-                /* create a table row */
-                TableRow tableRow = new TableRow(getActivity());
-                tableRow.setLayoutParams(tableRowParams);
-                int idRow = i;
-                tableRow.setId(idRow);
-
-
-
-
-                if(i == 0){
-                    /* add views to the row */
-                    tableRow.addView(createTv("Loteria", false, getActivity()));
-                    tableRow.addView(createTv("Jugada", false, getActivity()));
-                    tableRow.addView(createTv("Monto", false, getActivity()));
-                    tableRow.addView(createTv("Eliminar", false, getActivity()));
-                }else{
-                    /* add views to the row */
-                    tableRow.addView(createTv(jugada.getString("descripcion"), false, getActivity()));
-                    tableRow.addView(createTv(jugada.getString("jugada"), false, getActivity()));
-                    tableRow.addView(createTv(jugada.getString("monto"), false, getActivity()));
-
-                    /* create cell element - button */
-                    Button btn = new Button(getActivity());
-                    btn.setText("x");
-                    btn.setWidth(LinearLayout.LayoutParams.WRAP_CONTENT);
-                    btn.setHeight(LinearLayout.LayoutParams.WRAP_CONTENT);
-                    //btn.setBackgroundColor(0xff12dd12);
-                    btn.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            int id = ((View)view.getParent()).getId();
-                            TableRow r = (TableRow)viewRoot.findViewById(id);
-                            TableLayout t = (TableLayout)viewRoot.findViewById(R.id.tableJugadas);
-                            t.removeView(r);
-                            Log.d("Pariente:" , String.valueOf(id));
-                        }
-                    });
-
-                    tableRow.addView(btn);
-                }
-
-
-
-                /* add the row to the table */
-                tableLayout.addView(tableRow);
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-
-        }
-
+        Log.e("JugadasFragment", "onCreateView");
+updateTable();
         return viewRoot;
     }
 

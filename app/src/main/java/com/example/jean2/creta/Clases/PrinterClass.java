@@ -17,6 +17,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -48,7 +50,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class PrinterClass {
-    private JSONObject venta;
+    private VentasClass venta;
     Context mContext;
     protected static final String TAG = "TAG";
     private static final int REQUEST_CONNECT_DEVICE = 1;
@@ -74,7 +76,7 @@ public class PrinterClass {
 
 
     public PrinterClass(Context context){this.mContext = context; this.address = Utilidades.getAddressImpresora(mContext);}
-    public PrinterClass(Context context, JSONObject venta){
+    public PrinterClass(Context context, VentasClass venta){
         this.mContext = context;
         this.venta = venta;
         this.address = Utilidades.getAddressImpresora(mContext);
@@ -585,18 +587,16 @@ public class PrinterClass {
                 pagado = true;
             }
 
-            JSONObject venta = this.venta.getJSONObject("venta");
-            JSONArray jsonArrayLoterias = venta.getJSONArray("loterias");
-            JSONArray jsonArrayJugadas = venta.getJSONArray("jugadas");
 
-            if(jsonArrayLoterias.length() == 0)
+
+            if(venta.getLoterias().size() == 0)
                 return false;
-            if(jsonArrayJugadas.length() == 0)
+            if(venta.getJugadas().size() == 0)
                 return false;
 
 
             POS_S_Align(1);
-            POS_S_TextOut(venta.getJSONObject("banca").getString("descripcion")+"\n", 0, 1, 1, 0, 0x00);
+            POS_S_TextOut(venta.getBanca().descripcion+"\n", 0, 1, 1, 0, 0x00);
             if(original_copia_cancelado_pagado == 1)
                 POS_S_TextOut("** ORIGINAL **\n", 0, 1, 1, 0, 0x00);
             else if(original_copia_cancelado_pagado == 2)
@@ -604,33 +604,33 @@ public class PrinterClass {
             else if(original_copia_cancelado_pagado == 3)
                 POS_S_TextOut("** CANCELADO **\n", 0, 1, 1, 0, 0x00);
 
-            POS_S_TextOut(venta.getString("fecha")+"\n", 0, 0, 1, 0, 0x00);
-            POS_S_TextOut("Ticket:"  +Utilidades.toSecuencia(venta.getString("idTicket"), venta.getString("codigo"))+ "\n", 0, 0, 1, 0, 0x00);
-            POS_S_TextOut("Fecha: " + venta.getString("fecha")+"\n", 0, 0, 1, 0, 0x00);
+            POS_S_TextOut(venta.getFecha()+"\n", 0, 0, 1, 0, 0x00);
+            POS_S_TextOut("Ticket:"  +Utilidades.toSecuencia(venta.getIdTicket().toString(), venta.getCodigo())+ "\n", 0, 0, 1, 0, 0x00);
+            POS_S_TextOut("Fecha: " + venta.getFecha()+"\n", 0, 0, 1, 0, 0x00);
             if(original_copia_cancelado_pagado == 1)
-                POS_S_TextOut(venta.getString("codigoBarra")+"\n", 1, 1, 1, 0, 0x00);
+                POS_S_TextOut(venta.getCodigoBarra()+"\n", 1, 1, 1, 0, 0x00);
 
-            for(int i=0; i < jsonArrayLoterias.length(); i++){
+            for(LoteriaClass loteria : venta.getLoterias()){
 //                        if(!pos.GetIO().IsOpened())
 //                            break;
-                JSONObject loteria = jsonArrayLoterias.getJSONObject(i);
+
                 boolean esPrimeraJugadaAInsertar = true;
-                JSONArray jugadas = jugadasPertenecientesALoteria(loteria.getString("id"), jsonArrayJugadas, pagado);
-                if(jugadas.length() == 0)
+                List<JugadaClass> jugadas = jugadasPertenecientesALoteria(loteria.getId(), pagado);
+                if(jugadas.size() == 0)
                     continue;
-                for (int contadorCicleJugadas =0; contadorCicleJugadas < jugadas.length(); contadorCicleJugadas++){
+                int contadorCicleJugadas = 0;
+                for (JugadaClass jugada : jugadas){
 
 //                            if(!pos.GetIO().IsOpened())
 //                                break;
-                    JSONObject jugada = jugadas.getJSONObject(contadorCicleJugadas);
-                    Log.d("BluetoothSearchDia", "Print: " + jugada.getString("jugada") + " - " + Utilidades.agregarGuionPorSorteo(jugada.getString("jugada"), jugada.getString("sorteo")) +jugada.getString("sorteo"));
+
 
                     if(contadorCicleJugadas == 0){
                         POS_S_TextOut("---------------\n", 1, 1, 1, 0, 0x00);
-                        POS_S_TextOut(loteria.getString("descripcion") + "\n", 1, 0, 1, 0, 0x00);
+                        POS_S_TextOut(loteria.getDescripcion() + "\n", 1, 0, 1, 0, 0x00);
                         POS_S_TextOut("---------------\n", 1, 1, 1, 0, 0x00);
                     }
-                    if(jugada.getString("idLoteria").equals(loteria.getString("id"))){
+                    if(jugada.getIdLoteria() == loteria.getId()){
                         POS_S_Align(0);
                         if(esPrimeraJugadaAInsertar){
                             POS_S_TextOut("JUGADA   MONTO  JUGADA   MONTO\n", 1, 0, 1, 0, 0x00);
@@ -638,34 +638,36 @@ public class PrinterClass {
                         }
                         if(((contadorCicleJugadas + 1) % 2) == 0){
                             Log.d("cjPar", String.valueOf(contadorCicleJugadas));
-                            POS_S_TextOut("                " + Utilidades.agregarGuion(Utilidades.agregarGuionPorSorteo(jugada.getString("jugada"), jugada.getString("sorteo"))), 1, 0, 1, 0, 0x00);
-                            POS_S_TextOut("                         " + jugada.getDouble("monto") + "\n", 1, 0, 1, 0, 0x00);
+                            POS_S_TextOut("                " + Utilidades.agregarGuion(Utilidades.agregarGuionPorSorteo(jugada.getJugada(), jugada.getSorteo())), 1, 0, 1, 0, 0x00);
+                            POS_S_TextOut("                         " + jugada.getMonto() + "\n", 1, 0, 1, 0, 0x00);
                         }else{
                             String saltoLinea = "";
-                            if((contadorCicleJugadas + 1) == jugadas.length())
+                            if((contadorCicleJugadas + 1) == jugadas.size())
                                 saltoLinea = "\n";
-                            POS_S_TextOut(Utilidades.agregarGuion(Utilidades.agregarGuionPorSorteo(jugada.getString("jugada"), jugada.getString("sorteo"))), 0, 0, 1, 0, 0x00);
-                            POS_S_TextOut("         " + jugada.getDouble("monto") + saltoLinea, 0, 0, 1, 0, 0x00);
+                            POS_S_TextOut(Utilidades.agregarGuion(Utilidades.agregarGuionPorSorteo(jugada.getJugada(), jugada.getSorteo())), 0, 0, 1, 0, 0x00);
+                            POS_S_TextOut("         " + jugada.getMonto() + saltoLinea, 0, 0, 1, 0, 0x00);
                         }
 
 //                                pos.POS_S_TextOut("culo23", 0, 0, 1, 0, 0x00);
                         //pos.POS_S_TextOut(" - total: " + getLoteriaTotal(loteria.getInt("id"), jugadas) + "-\n", 1, 0, 1, 0, 0x00);
 
                     }
+                    contadorCicleJugadas++;
                 }
                 POS_S_Align(1);
-                if(jsonArrayLoterias.length() > 1)
-                    POS_S_TextOut("\n total: " + getLoteriaTotal(loteria.getString("id"), jugadas) + "\n\n\n", 1, 0, 1, 0, 0x00);
+                if(venta.getLoterias().size() > 1)
+                    POS_S_TextOut("\n total: " + getLoteriaTotal(loteria.getId(), jugadas) + "\n\n\n", 1, 0, 1, 0, 0x00);
+
             }
 
-            double total = venta.getDouble("total");
-            if(venta.getInt("hayDescuento") == 1){
-                total -= venta.getDouble("descuentoMonto");
-                POS_S_TextOut("subTotal: " + venta.getDouble("total") + "\n", 1, 0, 1, 0, 0x00);
-                POS_S_TextOut("descuento: " + venta.getDouble("descuentoMonto") + "\n", 1, 0, 1, 0, 0x00);
+            double total = venta.getTotal();
+            if(venta.isHayDescuento() == 1){
+                total -= venta.getDescuentoMonto();
+                POS_S_TextOut("subTotal: " + venta.getTotal() + "\n", 1, 0, 1, 0, 0x00);
+                POS_S_TextOut("descuento: " + venta.getDescuentoMonto() + "\n", 1, 0, 1, 0, 0x00);
             }
             String saltoLineaTotal = "\n";
-            if(original_copia_cancelado_pagado != 1 || venta.getJSONObject("banca").getInt("imprimirCodigoQr") == 0){
+            if(original_copia_cancelado_pagado != 1 || venta.getBanca().imprimirCodigoQr == 0){
                 saltoLineaTotal+="\n\n";
             }
             POS_S_TextOut("- TOTAL: " + total + " -" + saltoLineaTotal, 1, 0, 1, 0, 0x00);
@@ -675,16 +677,28 @@ public class PrinterClass {
             }
 
             if(original_copia_cancelado_pagado == 1){
-                if(!venta.getJSONObject("banca").getString("piepagina1").equals("null"))
-                    POS_S_TextOut(venta.getJSONObject("banca").getString("piepagina1") + "\n", 1, 0, 1, 0, 0x00);
-                if(!venta.getJSONObject("banca").getString("piepagina2").equals("null"))
-                    POS_S_TextOut(venta.getJSONObject("banca").getString("piepagina2") + "\n", 1, 0, 1, 0, 0x00);
-                if(!venta.getJSONObject("banca").getString("piepagina3").equals("null"))
-                    POS_S_TextOut(venta.getJSONObject("banca").getString("piepagina3") + "\n", 1, 0, 1, 0, 0x00);
-                if(!venta.getJSONObject("banca").getString("piepagina4").equals("null"))
-                    POS_S_TextOut(venta.getJSONObject("banca").getString("piepagina4") + "\n", 1, 0, 1, 0, 0x00);
-                if(venta.getJSONObject("banca").getInt("imprimirCodigoQr") == 1)
-                    POS_S_SetQRcode(venta.getString("codigoQr"), 8, 0, 3);
+                if(venta.getBanca().piepagina1 != null){
+                    if(!venta.getBanca().piepagina1.equals("null")){
+                        POS_S_TextOut(venta.getBanca().piepagina1 + "\n", 1, 0, 1, 0, 0x00);
+                    }
+                }
+                if(venta.getBanca().piepagina2 != null){
+                    if(!venta.getBanca().piepagina2.equals("null")){
+                        POS_S_TextOut(venta.getBanca().piepagina2 + "\n", 1, 0, 1, 0, 0x00);
+                    }
+                }
+                if(venta.getBanca().piepagina3 != null){
+                    if(!venta.getBanca().piepagina3.equals("null")){
+                        POS_S_TextOut(venta.getBanca().piepagina3 + "\n", 1, 0, 1, 0, 0x00);
+                    }
+                }
+                if(venta.getBanca().piepagina4 != null){
+                    if(!venta.getBanca().piepagina4.equals("null")){
+                        POS_S_TextOut(venta.getBanca().piepagina4 + "\n", 1, 0, 1, 0, 0x00);
+                    }
+                }
+                if(venta.getBanca().imprimirCodigoQr == 1)
+                    POS_S_SetQRcode(venta.getCodigoQr(), 8, 0, 3);
                 POS_S_TextOut("\n\n\n", 1, 0, 1, 0, 0x00, true);
             }else{
                 POS_S_TextOut("\n\n\n", 1, 0, 1, 0, 0x00, true);
@@ -697,6 +711,24 @@ public class PrinterClass {
         }
 
         return true;
+    }
+
+    public  List<JugadaClass> jugadasPertenecientesALoteria(int idLoteria, boolean soloJugadasPendientes) {
+        int contadorJugadas = 0;
+        List<JugadaClass> jugadasListaRetornar = new ArrayList<JugadaClass>();
+
+        for (JugadaClass j: this.venta.getJugadas()) {
+            if(j.getIdLoteria() == idLoteria){
+                if(soloJugadasPendientes){
+                    if(j.status == 0)
+                        jugadasListaRetornar.add(j);
+                }else{
+                    jugadasListaRetornar.add(j);
+                }
+            }
+        }
+
+        return jugadasListaRetornar;
     }
 
     public static JSONArray jugadasPertenecientesALoteria(String idLoteria, JSONArray jsonArrayJugadas, boolean soloJugadasPendientes) {
@@ -725,19 +757,16 @@ public class PrinterClass {
         return jsonArrayJugadasRetornar;
     }
 
-    double getLoteriaTotal(String id, JSONArray jugadas){
+    double getLoteriaTotal(int id, List<JugadaClass> jugadas){
         double total = 0;
-        try {
-            for (int i =0; i < jugadas.length(); i++){
-                JSONObject jugada = jugadas.getJSONObject(i);
 
-                if(jugada.getString("idLoteria").equals(id)){
-                    total += jugada.getDouble("monto");
+            for (JugadaClass jugada : jugadas){
+
+                if(jugada.getIdLoteria() == id){
+                    total += jugada.getMonto();
                 }
             }
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+
 
         return total;
     }

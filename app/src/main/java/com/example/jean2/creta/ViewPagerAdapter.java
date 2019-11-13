@@ -17,7 +17,7 @@ public class ViewPagerAdapter extends FragmentPagerAdapter {
     public Fragment getItem(int position) {
         PrincipalFragment principalFragment = new PrincipalFragment();
         MenuFragment menuFragment = new MenuFragment();
-
+        JugadasFragment jugadasFragment = new JugadasFragment();
 
 
         position = position+1;
@@ -34,8 +34,9 @@ public class ViewPagerAdapter extends FragmentPagerAdapter {
         if(position == 3){
 //            Intent intent = new Intent(principalFragment, new_activity.class);
 //            intent.putExtra("jsonArray", principalFragment.jugadas.toString());
-            JugadasFragment jugadasFragment = new JugadasFragment();
+            jugadasFragment = new JugadasFragment();
             bundle.putString("jugadas", principalFragment.jugadas.toString());
+            Log.d("Dentro view pagaer:", "heyyyy");
             jugadasFragment.setArguments(bundle);
             return jugadasFragment;
         }
@@ -64,11 +65,12 @@ public class ViewPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public int getItemPosition(Object object) {
-        JugadasFragment f = (JugadasFragment ) object;
-        if (f != null) {
-            Log.e("PrincipalFragment:", PrincipalFragment.jugadas.toString());
-            f.update();
-        }
+        Log.e("ViewPagerPrincipalFrag", "hey");
+//        JugadasFragment f = (JugadasFragment ) object;
+//        if (f != null) {
+//            Log.e("ViewPagerPrincipalFrag", PrincipalFragment.jugadas.toString());
+//
+//        }
         return super.getItemPosition(object);
     }
 

@@ -21,16 +21,22 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.example.jean2.creta.Clases.JugadaClass;
+import com.example.jean2.creta.Clases.LoteriaClass;
+import com.example.jean2.creta.Clases.VentasClass;
 import com.itextpdf.text.pdf.parser.Line;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class DuplicarAvanzadoDialog extends AppCompatDialogFragment {
 
     Context mContext;
+    VentasClass ventasClass;
     public static String[] listDescripcionLoterias = new String[PrincipalFragment.listDescripcionLoterias.length + 2];
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -41,11 +47,11 @@ public class DuplicarAvanzadoDialog extends AppCompatDialogFragment {
         LinearLayout linearLayoutPrincipal = (LinearLayout)view.findViewById(R.id.linealLayoutPrincipal);
         llenarListaLoterias();
 
-        JSONArray loterias = obtenerAtributoJsonArrayDuplicar("loterias");
-        JSONArray jsonArrayJugadas = obtenerAtributoJsonArrayDuplicar("jugadas");
+
+//        JSONArray loterias = obtenerAtributoJsonArrayDuplicar("loterias");
+//        JSONArray jsonArrayJugadas = obtenerAtributoJsonArrayDuplicar("jugadas");
         try{
-            for(int contadorLoteria = 0; contadorLoteria < loterias.length(); contadorLoteria++){
-                JSONObject loteria = loterias.getJSONObject(contadorLoteria);
+            for(LoteriaClass loteria : Main2Activity.loteriasLista){
                 LinearLayout linearLayout = createLinealLayout(mContext);
 
                 Spinner spinner = createSpinner(mContext);
@@ -53,16 +59,16 @@ public class DuplicarAvanzadoDialog extends AppCompatDialogFragment {
                 spinner.setAdapter(spinnerArrayAdapter);
 
                 TextView textView;
-                int itemIndex = Arrays.asList(PrincipalFragment.listDescripcionLoterias).indexOf(loteria.getString("descripcion"));
+                int itemIndex = Arrays.asList(PrincipalFragment.listDescripcionLoterias).indexOf(loteria.getDescripcion());
                 if(itemIndex == -1){
-                     textView = createTv(loteria.getString("descripcion"), 2, mContext, true);
+                     textView = createTv(loteria.getDescripcion(), 2, mContext, true);
                 }else{
-                     textView = createTv(loteria.getString("descripcion"), 1, mContext, true);
+                     textView = createTv(loteria.getDescripcion(), 1, mContext, true);
                 }
                 //Log.d("duplicarIndex", String.valueOf(itemIndex));
 //                int idLoteria = Utilidades.toInt(PrincipalFragment.idLoteriasMap.get(itemIndex));
 //                spinner.setId(idLoteria);
-                spinner.setTag(loteria.getString("descripcion"));
+                spinner.setTag(loteria.getDescripcion());
                 linearLayout.addView(textView);
                 linearLayout.addView(spinner);
                 linearLayoutPrincipal.addView(linearLayout);
@@ -86,25 +92,30 @@ public class DuplicarAvanzadoDialog extends AppCompatDialogFragment {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         try{
-                            JSONArray loterias = obtenerAtributoJsonArrayDuplicar("loterias");
-                            JSONArray jsonArrayJugadas = obtenerAtributoJsonArrayDuplicar("jugadas");
-                            for(int contadorLoteria = 0; contadorLoteria < loterias.length(); contadorLoteria++){
+//                            JSONArray loterias = obtenerAtributoJsonArrayDuplicar("loterias");
+//                            JSONArray jsonArrayJugadas = obtenerAtributoJsonArrayDuplicar("jugadas");
+
+                            List<JugadaClass> jugadasQueYaEstabanInsertadasAntesDeDuplicar = new ArrayList<JugadaClass>();
+                            if(PrincipalFragment.jugadasClase.size() > 0){
+                                jugadasQueYaEstabanInsertadasAntesDeDuplicar = Utilidades.clonarJugadasList(PrincipalFragment.jugadasClase);
+                            }
+                            for(LoteriaClass loteria: Main2Activity.loteriasLista){
                                 String descripcion;
                                 int idLoteria = 0;
-                                JSONObject loteria = loterias.getJSONObject(contadorLoteria);
-                                Spinner spinner = (Spinner)view. findViewWithTag(loteria.getString("descripcion"));
+
+                                Spinner spinner = (Spinner)view. findViewWithTag(loteria.getDescripcion());
                                 if(spinner.getSelectedItem().toString().equals("- NO COPIAR -")){
                                     continue;
                                 }
 
-                                int itemIndex = Arrays.asList(PrincipalFragment.listDescripcionLoterias).indexOf(loteria.getString("descripcion"));
+                                int itemIndex = Arrays.asList(PrincipalFragment.listDescripcionLoterias).indexOf(loteria.getDescripcion());
 
                                 if(spinner.getSelectedItem().toString().equals("- NO MOVER -")){
                                     if(itemIndex == -1){
                                         continue;
                                     }else{
-                                        descripcion = loteria.getString("descripcion");
-                                        idLoteria = loteria.getInt("id");
+                                        descripcion = loteria.getDescripcion();
+                                        idLoteria = loteria.getId();
                                     }
                                 }
                                 else{
@@ -113,27 +124,41 @@ public class DuplicarAvanzadoDialog extends AppCompatDialogFragment {
                                     idLoteria = Utilidades.toInt(PrincipalFragment.idLoteriasMap.get(itemIndex));
                                 }
 
-                                JSONArray jugadas = jugadasPertenecientesALoteria(loteria.getString("id"), jsonArrayJugadas);
+                                List<JugadaClass> jugadas = jugadasPertenecientesALoteria(loteria.getId());
 
-                                for(int contadorJugada = 0; contadorJugada < jugadas.length(); contadorJugada++){
+                                for(JugadaClass jugadaClass : jugadas){
                                     JSONObject jugadaObject = new JSONObject();
-                                    String jugada = ((JSONObject) jugadas.get(contadorJugada)).getString("jugada");
+                                    String jugada = jugadaClass.getJugada();
                                     //jugada = Utilidades.ordenarMenorAMayor(jugada);
-                                    jugada = Utilidades.agregarGuionPorSorteo(jugada, ((JSONObject) jugadas.get(contadorJugada)).getString("sorteo"));
+                                    jugada = Utilidades.agregarGuionPorSorteo(jugada, jugadaClass.getSorteo());
+                                    Log.e("Duplicar", String.valueOf(jugadasQueYaEstabanInsertadasAntesDeDuplicar.size()));
 //                                    jugada = Utilidades.agregarGuionPorSorteo(jugada, ((JSONObject) jugadas.get(contadorJugada)).getString("sorteo"));
-                                    if(PrincipalFragment.jugadasClase.jugadaExiste(jugada, String.valueOf(idLoteria))){
-                                        PrincipalFragment.aceptaInsertarJugadaExistente(jugada, String.valueOf(idLoteria), descripcion, String.valueOf(Float.parseFloat(((JSONObject) jugadas.get(contadorJugada)).getString("monto").toString())));
-                                        continue;
+                                    if(jugadasQueYaEstabanInsertadasAntesDeDuplicar.size() > 0){
+                                        if(Utilidades.jugadaExiste(jugadasQueYaEstabanInsertadasAntesDeDuplicar,jugada, String.valueOf(idLoteria))){
+                                            PrincipalFragment.aceptaInsertarJugadaExistente(jugada, String.valueOf(idLoteria), descripcion, String.valueOf(jugadaClass.getMonto()), jugadasQueYaEstabanInsertadasAntesDeDuplicar.size());
+                                            continue;
+                                        }
                                     }
 
-                                    Log.d("duplicarExiste", jugada);
-                                    jugadaObject.put("jugada", jugada);
+//                                    Log.d("duplicarExiste", jugada);
+//                                    jugadaObject.put("jugada", jugada);
+//
+//                                    jugadaObject.put("descripcion", descripcion);
+//                                    jugadaObject.put("idLoteria", idLoteria);
+//                                    jugadaObject.put("monto", Float.parseFloat(((JSONObject) jugadas.get(contadorJugada)).getString("monto").toString()));
+//                                    Log.d("PrincipalFragment", "Duplicar jugada: " + jugadaObject.getString("descripcion") + " " +jugadaObject.getString("jugada"));
+//                                    PrincipalFragment.jugadasClase.add(jugadaObject);
 
-                                    jugadaObject.put("descripcion", descripcion);
-                                    jugadaObject.put("idLoteria", idLoteria);
-                                    jugadaObject.put("monto", Float.parseFloat(((JSONObject) jugadas.get(contadorJugada)).getString("monto").toString()));
-                                    Log.d("PrincipalFragment", "Duplicar jugada: " + jugadaObject.getString("descripcion") + " " +jugadaObject.getString("jugada"));
-                                    PrincipalFragment.jugadasClase.add(jugadaObject);
+                                    JugadaClass jugadaClassInsertar = new JugadaClass();
+                                    jugadaClassInsertar.setIdLoteria(idLoteria);
+                                    jugadaClassInsertar.setDescripcion(descripcion);
+                                    jugadaClassInsertar.setJugada(jugada);
+                                    jugadaClassInsertar.setSorteo("no");
+//                        jugadaClassInsertar.setTam(txtJugada.getText().length());
+                                    jugadaClassInsertar.setMonto(jugadaClass.getMonto());
+                                    jugadaClassInsertar.setIdBanca(Utilidades.getIdBanca(mContext));
+//                                    PrincipalFragment.jugadasClase.add(jugadaClassInsertar);
+                                    Utilidades.addJugada(jugadaClassInsertar);
                                 }
 //                                Toast.makeText(mContext, "spinner: " + spinner.getSelectedItem().toString(), Toast.LENGTH_SHORT).show();
 
@@ -191,24 +216,17 @@ public class DuplicarAvanzadoDialog extends AppCompatDialogFragment {
 
     }
 
-    public static JSONArray jugadasPertenecientesALoteria(String idLoteria, JSONArray jsonArrayJugadas) {
+    public static List<JugadaClass> jugadasPertenecientesALoteria(int idLoteria) {
         int contadorJugadas = 0;
-        JSONArray jsonArrayJugadasRetornar = new JSONArray();
-        for (int contadorCicleJugadas = 0; contadorCicleJugadas < jsonArrayJugadas.length(); contadorCicleJugadas++) {
-            try {
-                JSONObject jugada = jsonArrayJugadas.getJSONObject(contadorCicleJugadas);
+        List<JugadaClass> jugadasListaRetornar = new ArrayList<JugadaClass>();
 
-                if (jugada.getString("idLoteria").equals(idLoteria))
-                    jsonArrayJugadasRetornar.put(jugada);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                return jsonArrayJugadasRetornar;
+        for (JugadaClass j: Main2Activity.jugadasLista) {
+            if(j.getIdLoteria() == idLoteria){
+                jugadasListaRetornar.add(j);
             }
-
         }
 
-        return jsonArrayJugadasRetornar;
+        return jugadasListaRetornar;
     }
 
     private LinearLayout createLinealLayout(Context context){

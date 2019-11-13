@@ -18,8 +18,15 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.jean2.creta.Clases.JugadaClass;
+import com.example.jean2.creta.Clases.LoteriaClass;
+import com.example.jean2.creta.Clases.VentasClass;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class VerTicketPagarDialog extends AppCompatDialogFragment {
     Context mContext;
@@ -28,6 +35,7 @@ public class VerTicketPagarDialog extends AppCompatDialogFragment {
     TextView txtMonto;
     TextView txtPendientePago;
     TextView txtPremioTotal;
+    VentasClass ventasClass;
 
     boolean tienePremios = false;
     boolean tienePendientes = false;
@@ -37,13 +45,15 @@ public class VerTicketPagarDialog extends AppCompatDialogFragment {
 
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_ver_ticket_pagar, null);
+        ventasClass = getArguments().getParcelable("venta");
+
 
         linealLayoutJugadas = (LinearLayout) view.findViewById(R.id.linealLayoutJugadas);
         txtMonto = (TextView) view.findViewById(R.id.txtMonto);
         txtPendientePago = (TextView) view.findViewById(R.id.txtPendientePago);
         txtPremioTotal = (TextView) view.findViewById(R.id.txtPremioTotal);
 
-        updateTableTotalesPorLoteria(Main2Activity.pagarTicketDatos);
+        updateTableTotalesPorLoteria();
         builder.setView(view)
                 .setTitle("Duplicar ticket")
                 .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
@@ -55,7 +65,7 @@ public class VerTicketPagarDialog extends AppCompatDialogFragment {
                 .setPositiveButton("Pagar", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        Main2Activity.pagarTicket(obtenerAtributoJsonObjectTicket("codigoQr"), true);
+                        Main2Activity.pagarTicket(ventasClass.getCodigoQr(), true);
                     }
                 });
 
@@ -82,46 +92,30 @@ public class VerTicketPagarDialog extends AppCompatDialogFragment {
     }
 
 
-    public static JSONArray jugadasPertenecientesALoteria(String idLoteria, JSONArray jsonArrayJugadas) {
+    public List<JugadaClass> jugadasPertenecientesALoteria(int idLoteria) {
         int contadorJugadas = 0;
-        JSONArray jsonArrayJugadasRetornar = new JSONArray();
-        for (int contadorCicleJugadas = 0; contadorCicleJugadas < jsonArrayJugadas.length(); contadorCicleJugadas++) {
-            try {
-                JSONObject jugada = jsonArrayJugadas.getJSONObject(contadorCicleJugadas);
+        List<JugadaClass> jugadasListaRetornar = new ArrayList<JugadaClass>();
 
-                if (jugada.getString("idLoteria").equals(idLoteria))
-                    jsonArrayJugadasRetornar.put(jugada);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                return jsonArrayJugadasRetornar;
+        for (JugadaClass j: ventasClass.getJugadas()) {
+            if(j.getIdLoteria() == idLoteria){
+                jugadasListaRetornar.add(j);
             }
-
         }
 
-        return jsonArrayJugadasRetornar;
+        return jugadasListaRetornar;
     }
 
-    public  void updateTableTotalesPorLoteria(JSONObject datos){
-        JSONArray jsonArrayLoterias;
-        JSONArray jsonArrayJugadas;
-        try{
-            jsonArrayLoterias = datos.getJSONArray("loterias");
-            jsonArrayJugadas = datos.getJSONArray("jugadas");
-        }catch (Exception e){
-            e.printStackTrace();
-            jsonArrayLoterias = new JSONArray();
-            jsonArrayJugadas = new JSONArray();
-        }
+    public  void updateTableTotalesPorLoteria(){
 
 
-        if(datos == null){
+
+        if(ventasClass == null){
             return ;
         }
         linealLayoutJugadas.removeAllViews();
         int idRow = 0;
 
-        if(datos.length() == 0){
+        if(ventasClass.getJugadas().size() == 0){
             linealLayoutJugadas.removeAllViews();
             Toast.makeText(mContext, "No hay datos", Toast.LENGTH_SHORT).show();
             return;
@@ -130,32 +124,28 @@ public class VerTicketPagarDialog extends AppCompatDialogFragment {
 
 
         try{
-            jsonArrayLoterias = datos.getJSONArray("loterias");
-            jsonArrayJugadas = datos.getJSONArray("jugadas");
 
-            txtMonto.setText(datos.getString("total"));
-            txtPendientePago.setText(datos.getString("montoAPagar"));
-            txtPremioTotal.setText(datos.getString("premio"));
 
-            if(datos.getDouble("montoAPagar") > 0 ) {
+            txtMonto.setText(String.valueOf(ventasClass.getTotal()));
+            txtPendientePago.setText(String.valueOf(ventasClass.getMontoAPagar()));
+            txtPremioTotal.setText(String.valueOf(ventasClass.getPremio()));
+
+            if(ventasClass.getMontoAPagar() > 0 ) {
                 txtPendientePago.setTextColor(getResources().getColor(R.color.bgRed));
             }
             else{
                 txtPendientePago.setTextColor(getResources().getColor(R.color.bgInfo));
             }
 
-            for(int i=0; i < jsonArrayLoterias.length(); i++) {
+            for(LoteriaClass loteria : ventasClass.getLoterias()) {
                 TableLayout tableLayout = createTableLayout(mContext);
-                JSONObject loteria = jsonArrayLoterias.getJSONObject(i);
                 boolean esPrimeraJugadaAInsertar = true;
-                JSONArray jugadas = jugadasPertenecientesALoteria(loteria.getString("id"), jsonArrayJugadas);
+                List<JugadaClass> jugadas = jugadasPertenecientesALoteria(loteria.getId());
 
-                TextView txtLoteria = createTv(loteria.getString("descripcion"), 3, mContext, true);
+                TextView txtLoteria = createTv(loteria.getDescripcion(), 3, mContext, true);
                 linealLayoutJugadas.addView(txtLoteria);
-                for (int c = 0; c < jugadas.length(); c++) {
-
-
-                    JSONObject jugada = jugadas.getJSONObject(c);
+                int c=0;
+                for (JugadaClass jugada : jugadas) {
 
 
                     LinearLayout.LayoutParams tableRowParams = new LinearLayout.LayoutParams(
@@ -187,25 +177,25 @@ public class VerTicketPagarDialog extends AppCompatDialogFragment {
                     }
                     /* add views to the row */
                     tableRow.setId(idRow);
-                    tableRow.addView(createTv(jugada.getString("jugada"), 2, mContext, true));
-                    tableRow.addView(createTv(jugada.getString("sorteo"), 2, mContext, true));
-                    tableRow.addView(createTv(jugada.getString("monto"), 2, mContext, true));
-                    tableRow.addView(createTv(jugada.getString("premio"), 2, mContext, true));
+                    tableRow.addView(createTv(jugada.getJugada(), 2, mContext, true));
+                    tableRow.addView(createTv(jugada.getSorteo(), 2, mContext, true));
+                    tableRow.addView(createTv(String.valueOf(jugada.getMonto()), 2, mContext, true));
+                    tableRow.addView(createTv(String.valueOf(jugada.getPremio()), 2, mContext, true));
 //                    tableRow.addView(createTv(jugada.getString("pagado"), 2, mContext, true));
 //                tableRow.addView(createTv(dato.getString("neto"), false, mContext, true));
 
 
-                    if(jugada.getInt("status") == 1 && jugada.getDouble("premio") <= 0) {
+                    if(jugada.getStatus() == 1 && jugada.getPremio() <= 0) {
                         tableRow.setBackgroundColor(getResources().getColor(R.color.bgRosa));
                     }
-                    else if(jugada.getInt("status") == 1 && jugada.getDouble("premio") > 0){
+                    else if(jugada.getStatus() == 1 && jugada.getPremio() > 0){
                         tableRow.setBackgroundColor(getResources().getColor(R.color.bgInfo));
                     }else{
                         tableRow.setBackgroundColor(getResources().getColor(R.color.bgGris));
                     }
                     tableLayout.addView(tableRow);
                     idRow++;
-
+                    c++;
 
                 }
 
@@ -214,8 +204,6 @@ public class VerTicketPagarDialog extends AppCompatDialogFragment {
             }
         }catch (Exception e){
             e.printStackTrace();
-            jsonArrayLoterias = new JSONArray();
-            jsonArrayJugadas = new JSONArray();
         }
 
     }

@@ -49,11 +49,18 @@ import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.jean2.creta.Clases.BancaClass;
+import com.example.jean2.creta.Clases.JugadaClass;
+import com.example.jean2.creta.Clases.LoteriaClass;
 import com.example.jean2.creta.Clases.PrinterClass;
+import com.example.jean2.creta.Clases.VentasClass;
 import com.example.jean2.creta.Servicios.ActualizarService;
 import com.example.jean2.creta.Servicios.JPrinterConnectService;
 import com.example.jean2.creta.Servicios.PrinterService;
 import com.example.jean2.creta.Servicios.VerificarAccesoAlSistemaService;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.stream.JsonToken;
 import com.izettle.html2bitmap.Html2Bitmap;
 import com.izettle.html2bitmap.content.WebViewContent;
 
@@ -63,15 +70,24 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Text;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.jar.JarException;
@@ -86,7 +102,7 @@ import static com.example.jean2.creta.Utilidades.combinarBitmap;
  * A simple {@link Fragment} subclass.
  */
 public class PrincipalFragment extends Fragment implements View.OnClickListener, Main2Activity.DuplicarPrincipalInterface {
-    private String idVenta = null;
+    private static String idVenta = null;
     public static int idBanca = 0;
 
     static Context mContext;
@@ -111,7 +127,13 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
     public static HashMap<Integer,String> idLoteriasMap = new HashMap<Integer, String>();
     HashMap<Integer,String> codigoBarraMap = new HashMap<Integer, String>();
     static JSONArray jsonArrayVentas;
-
+    static VentasClass venta;
+    static List<VentasClass> ventasLista = new ArrayList<VentasClass>();
+    static List<LoteriaClass> loteriasLista = new ArrayList<LoteriaClass>();
+    static List<BancaClass> bancasLista = new ArrayList<BancaClass>();
+    static String imgHtmlTmp;
+    static int errores;
+    static String mensaje;
 
     View view;
     TextView txtBanca;
@@ -126,7 +148,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
     private static CheckBox_Icon ckbSms;
     private static CheckBox_Icon ckbWhatsapp;
     public static JSONArray jugadas = new JSONArray();
-    public static Jugadas jugadasClase = new Jugadas();
+    public static List<JugadaClass> jugadasClase = new ArrayList<JugadaClass>();
     public static WebView webViewImg;
 
     final private int REQUEST_CODE_ASK_PERMISSION = 111;
@@ -145,10 +167,10 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         // Required empty public constructor
     }
 
-    public void getJugadas(){
-        jugadas = jugadasClase.getJsonArrayJugadas();
-        Log.d("getJugadas:", jugadas.toString());
-    }
+//    public void getJugadas(){
+//        jugadas = jugadasClase.getJsonArrayJugadas();
+//        Log.d("getJugadas:", jugadas.toString());
+//    }
 
     public void iniciarServicio(){
         mContext.startService(new Intent(getActivity(), VerificarAccesoAlSistemaService.class));
@@ -189,6 +211,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         comprobarPermisos();
         iconManager = new IconManager();
 
+        Log.e("PrincipalFragment", "onCreateView");
 
 
         // Inflate the layout for this fragment
@@ -814,15 +837,16 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         Log.d("Changefocus2: ", txtMontojugar.getText().toString());
     }
 
-    public void setDescuento(JSONArray bancas){
+    public void setDescuento(){
         int total = 0;
         try {
-            for (int i=0; i < bancas.length(); i++){
-                JSONObject item = (JSONObject)bancas.get(i);
-                String id = item.getString("id").toString();
-                String des = item.getString("descontar").toString();
-                String deC = item.getString("deCada").toString();
+            for (BancaClass banca : bancasLista){
 
+                String id = String.valueOf(banca.id);
+                String des = String.valueOf(banca.descontar);
+                String deC = String.valueOf(banca.deCada);
+
+                Log.e("setDescuento", String.valueOf(banca.descontar));
                 //if(isInteger(id)){
                     if(id.equals(String.valueOf(idBanca))){
 
@@ -864,47 +888,49 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         }
 
 
+        indexPostHttp i = new indexPostHttp(datosObj);
+        i.execute();
         Log.d("PrincipalFragment", datosObj.toString());
 
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, datosObj,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        Main2Activity.progressBarToolbar.setVisibility(View.GONE);
-                        try {
-                            idVenta = response.getString("idVenta");
-                            idBanca = response.getInt("idBanca");
-                            JSONArray jsonArray = response.getJSONArray("loterias");
-                            JSONArray jsonArrayBancas = response.getJSONArray("bancas");
-                            JSONArray jsonArrayVentas = response.getJSONArray("ventas");
-                            setDescuento(jsonArrayBancas);
-                            fillSpinner(jsonArray, jsonArrayVentas);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                            Log.d("Error: ", e.toString());
-                        }
-
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                if(error instanceof NetworkError){
-                    Toast.makeText(mContext, "Verifique coneccion y recargue la pagina", Toast.LENGTH_SHORT).show();
-                }
-                else if(error instanceof ServerError){
-                    Toast.makeText(mContext, "No se puede encontrar el servidor", Toast.LENGTH_SHORT).show();
-                }
-                else if(error instanceof TimeoutError){
-                    Toast.makeText(mContext, "Conexion lenta, verifique conexion y recargue de nuevo", Toast.LENGTH_SHORT).show();
-                }
-                Main2Activity.progressBarToolbar.setVisibility(View.GONE);
-                error.printStackTrace();
-                Log.d("responseerror: ", String.valueOf(error));
-            }
-        });
-
-        //mQueue.add(request);
-        MySingleton.getInstance(mContext).addToRequestQueue(request);
+//        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, datosObj,
+//                new Response.Listener<JSONObject>() {
+//                    @Override
+//                    public void onResponse(JSONObject response) {
+//                        Main2Activity.progressBarToolbar.setVisibility(View.GONE);
+//                        try {
+//                            idVenta = response.getString("idVenta");
+//                            idBanca = response.getInt("idBanca");
+//                            JSONArray jsonArray = response.getJSONArray("loterias");
+//                            JSONArray jsonArrayBancas = response.getJSONArray("bancas");
+//                            JSONArray jsonArrayVentas = response.getJSONArray("ventas");
+//                            setDescuento(jsonArrayBancas);
+//                            fillSpinner();
+//                        } catch (JSONException e) {
+//                            e.printStackTrace();
+//                            Log.d("Error: ", e.toString());
+//                        }
+//
+//                    }
+//                }, new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//                if(error instanceof NetworkError){
+//                    Toast.makeText(mContext, "Verifique coneccion y recargue la pagina", Toast.LENGTH_SHORT).show();
+//                }
+//                else if(error instanceof ServerError){
+//                    Toast.makeText(mContext, "No se puede encontrar el servidor", Toast.LENGTH_SHORT).show();
+//                }
+//                else if(error instanceof TimeoutError){
+//                    Toast.makeText(mContext, "Conexion lenta, verifique conexion y recargue de nuevo", Toast.LENGTH_SHORT).show();
+//                }
+//                Main2Activity.progressBarToolbar.setVisibility(View.GONE);
+//                error.printStackTrace();
+//                Log.d("responseerror: ", String.valueOf(error));
+//            }
+//        });
+//
+//        //mQueue.add(request);
+//        MySingleton.getInstance(mContext).addToRequestQueue(request);
     }
 
     private void getMontoDisponible(){
@@ -965,7 +991,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         JSONObject datosObj = new JSONObject();
 
         try {
-            loteria.put("idLoteria", idLoteriasMap.get(mUserItems.get(0)));
+            loteria.put("idLoteria", loteriasLista.get(mUserItems.get(0)).getId());
             loteria.put("jugada", jugada);
             loteria.put("idBanca", Utilidades.getIdBanca(mContext));
 
@@ -985,7 +1011,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                     public void onResponse(JSONObject response) {
                         Main2Activity.progressBarToolbar.setVisibility(View.GONE);
                         try {
-                            double montoDisponible = jugadasClase.siJugadaExisteRestarMontoDisponible(jugada, idLoteriasMap.get(mUserItems.get(0)), response.getDouble("monto"));
+                            double montoDisponible = Utilidades.siJugadaExisteRestarMontoDisponible(jugadasClase, jugada, String.valueOf(loteriasLista.get(mUserItems.get(0)).getId()), response.getDouble("monto"));
                             if(montoDisponible < 0)
                                 montoDisponible = 0;
 
@@ -1032,8 +1058,9 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         txtMontojugar.setText("");
         mUserItems.clear();
         txtSelected.setText("");
-        jugadasClase.removeAll();
+        jugadasClase.clear();
         calcularTotal();
+        JugadasFragment.updateTable();
     }
 
     private static Bitmap screenshot(WebView webView, String img) {
@@ -1064,10 +1091,10 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
 
     private void guardar(){
-        String url = "https://loterias.ml/api/principal/guardar";
+        String url = "https://loterias.ml/api/principal/guardarMovil";
 
 
-        if(jugadasClase.length() == 0){
+        if(jugadasClase.size() == 0){
             Toast.makeText(mContext, "Debe realizar al menos una jugada", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -1102,8 +1129,11 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
             jugada.put("total", montoTotal);
             jugada.put("subTotal", 0);
             jugada.put("loterias", arregloLoterias);
-            jugada.put("jugadas", jugadasClase.getJsonArrayJugadas());
+            Gson gson = new Gson();
+//            gson.toJson(jugadasClase)
+            jugada.put("jugadas", gson.toJson(jugadasClase));
 
+            Log.e("guardar", gson.toJson(jugadasClase));
 
             datosObj.put("datos", jugada);
 
@@ -1113,180 +1143,331 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         }
 
         String jsonString = datosObj.toString();
-
+        guardarHttp g = new guardarHttp(datosObj);
+        g.execute();
         //Log.d("jsonjugadas:", )
 
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, datosObj,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(final JSONObject response) {
-
-                        try {
-
-                            String errores = response.getString("errores");
-                            Main2Activity.progressBarToolbar.setVisibility(View.GONE);
-                            if(errores.equals("0")){
-                                limpiar();
-                                idVenta = response.getString("idVenta");
-                                JSONArray jsonArray = response.getJSONArray("loterias");
-                                JSONArray jsonArrayBancas = response.getJSONArray("bancas");
-                                JSONArray jsonArrayVentas = response.getJSONArray("ventas");
-                                setDescuento(jsonArrayBancas);
-                                fillSpinner(jsonArray, jsonArrayVentas);
-                                borderChange(true, false);
-
-                               // Bitmap img = screenshot(webViewImg, response.getString("img"));
-                                //Log.d("webImg", String.valueOf(screenshot(webViewImg, response.getString("img"))));
-                               // ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-                                Toast.makeText(getContext(), response.getString("mensaje"), Toast.LENGTH_SHORT).show();
-                                if(ckbPrint.isChecked()){
-//                                    if(JPrinterConnectService.isPrinterConnected() == false){
-//                                        Main2Activity.txtBluetooth.performClick();
-//                                    }
-
-//                                    Bitmap ticketBitmap = Utilidades.toBitmap(response.getString("img"));
-//                                    Intent serviceIntent = new Intent(mContext, PrinterService.class);
-//                                    serviceIntent.putExtra("address", Utilidades.getAddressImpresora(mContext));
-//                                    serviceIntent.putExtra("name", "hola");
+//        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, datosObj,
+//                new Response.Listener<JSONObject>() {
+//                    @Override
+//                    public void onResponse(final JSONObject response) {
 //
-//                                    mContext.startService(serviceIntent);
-                                    //es.submit(new BluetoothSearchDialog.TaskPrint(response, true));
+//                        try {
+//
+//                            String errores = response.getString("errores");
+//                            Main2Activity.progressBarToolbar.setVisibility(View.GONE);
+//                            if(errores.equals("0")){
+//                                limpiar();
+//                                idVenta = response.getString("idVenta");
+//                                JSONArray jsonArray = response.getJSONArray("loterias");
+//                                JSONArray jsonArrayBancas = response.getJSONArray("bancas");
+//                                JSONArray jsonArrayVentas = response.getJSONArray("ventas");
+//                                setDescuento(jsonArrayBancas);
+//                                fillSpinner(jsonArray, jsonArrayVentas);
+//                                borderChange(true, false);
+//
+//                               // Bitmap img = screenshot(webViewImg, response.getString("img"));
+//                                //Log.d("webImg", String.valueOf(screenshot(webViewImg, response.getString("img"))));
+//                               // ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+//                                Toast.makeText(getContext(), response.getString("mensaje"), Toast.LENGTH_SHORT).show();
+//                                if(ckbPrint.isChecked()){
+////                                    if(JPrinterConnectService.isPrinterConnected() == false){
+////                                        Main2Activity.txtBluetooth.performClick();
+////                                    }
+//
+////                                    Bitmap ticketBitmap = Utilidades.toBitmap(response.getString("img"));
+////                                    Intent serviceIntent = new Intent(mContext, PrinterService.class);
+////                                    serviceIntent.putExtra("address", Utilidades.getAddressImpresora(mContext));
+////                                    serviceIntent.putExtra("name", "hola");
+////
+////                                    mContext.startService(serviceIntent);
+//                                    //es.submit(new BluetoothSearchDialog.TaskPrint(response, true));
+//
+//
+//                                    //Utilidades.imprimir(mContext,response, 1);
+//                                }
+//                                else if(ckbSms.isChecked()){
+//                                    new AsyncTask<Void, Void, Bitmap>() {
+//                                        @Override
+//                                        protected Bitmap doInBackground(Void... voids) {
+//                                            Bitmap bitmap;
+//                                            try {
+//                                                bitmap = new Html2Bitmap.Builder().setContext(mContext).setContent(WebViewContent.html(response.getString("img"))).setBitmapWidth(400).build().getBitmap();
+//                                            }catch (Exception e){
+//                                                e.printStackTrace();
+//                                                Log.v("ErrorHtmlWsapp", e.toString());
+//                                                bitmap = null;
+//                                            }
+//
+//                                            return bitmap;
+//
+//                                        }
+//
+//                                        @Override
+//                                        protected void onPostExecute(Bitmap bitmap) {
+//                                            if (bitmap != null) {
+//                                                String codigoQr;
+//                                                try{
+//                                                    JSONObject venta = response.getJSONObject("venta");
+//                                                    codigoQr = venta.getString("codigoQr");
+//                                                }catch (Exception e){
+//                                                    e.printStackTrace();
+//                                                    Log.v("ErrorWhatsappImg", e.toString());
+//                                                    codigoQr = "";
+//                                                }
+//                                                QRGEncoder qrgEncoder = new QRGEncoder(codigoQr, null, QRGContents.Type.TEXT, 150);
+//                                                try {
+//                                                    Bitmap bitmapQR = qrgEncoder.encodeAsBitmap();
+//                                                    bitmapQR = combinarBitmap(bitmap, bitmapQR);
+//                                                    Utilidades.sendSMS(getContext(), bitmapQR, true);
+//                                                }catch (Exception e){
+//                                                    e.printStackTrace();
+//                                                    Log.v("ErrorQr", e.toString());
+//                                                }
+//
+//                                            }
+//                                        }
+//                                    }.execute();
+//                                }
+//                                else if(ckbWhatsapp.isChecked()){
+//
+//                                    new AsyncTask<Void, Void, Bitmap>() {
+//                                        @Override
+//                                        protected Bitmap doInBackground(Void... voids) {
+//                                            Bitmap bitmap;
+//                                            try {
+//                                                bitmap = new Html2Bitmap.Builder().setContext(mContext).setContent(WebViewContent.html(response.getString("img"))).setBitmapWidth(400).build().getBitmap();
+//                                            }catch (Exception e){
+//                                                e.printStackTrace();
+//                                                Log.v("ErrorHtmlWsapp", e.toString());
+//                                                bitmap = null;
+//                                            }
+//
+//                                            return bitmap;
+//
+//                                        }
+//
+//                                        @Override
+//                                        protected void onPostExecute(Bitmap bitmap) {
+//                                            if (bitmap != null) {
+//                                                String codigoQr;
+//                                                try{
+//                                                    JSONObject venta = response.getJSONObject("venta");
+//                                                    codigoQr = venta.getString("codigoQr");
+//                                                }catch (Exception e){
+//                                                    e.printStackTrace();
+//                                                    Log.v("ErrorWhatsappImg", e.toString());
+//                                                    codigoQr = "";
+//                                                }
+//                                                QRGEncoder qrgEncoder = new QRGEncoder(codigoQr, null, QRGContents.Type.TEXT, 150);
+//                                                try {
+//                                                    Bitmap bitmapQR = qrgEncoder.encodeAsBitmap();
+//                                                    bitmapQR = combinarBitmap(bitmap, bitmapQR);
+//                                                    Utilidades.sendSMS(getContext(), bitmapQR, false);
+//                                                }catch (Exception e){
+//                                                    e.printStackTrace();
+//                                                    Log.v("ErrorQr", e.toString());
+//                                                }
+//
+//                                            }
+//                                        }
+//                                    }.execute();
+//                                    //Utilidades.sendSMS(getContext(), response.getString("img"), false);
+//                                }
+//
+//                            }
+//                            else
+//                                Toast.makeText(getContext(), response.getString("mensaje") + " e: " + errores, Toast.LENGTH_SHORT).show();
+//
+////                            txtMontodisponible.setText(response.getString("monto"));
+////                            borderChange(false);
+//                        } catch (Exception e) {
+//                            Log.d("Error: ", e.toString());
+//                            e.printStackTrace();
+//
+//                        }
+//
+//                    }
+//                }, new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//                //Log.d("responseerror: ", String.valueOf(error));
+//                error.printStackTrace();
+//                Main2Activity.progressBarToolbar.setVisibility(View.GONE);
+//                //error.getMessage();
+//                String body;
+//                //get status code here
+//                //String statusCode = String.valueOf(error.networkResponse.statusCode);
+//                //get response body and parse with appropriate encoding
+////                if(error.networkResponse.data!=null) {
+////                    try {
+////                        body = new String(error.networkResponse.data,"UTF-8");
+////                        crearArchivo(body);
+////                        Log.d("responseerror: ", body);
+////                    } catch (UnsupportedEncodingException e) {
+////                        e.printStackTrace();
+////                    }
+////                }
+//
+//                if(error instanceof NetworkError){
+//                    Toast.makeText(mContext, "Verifique coneccion e intente de nuevo", Toast.LENGTH_SHORT).show();
+//                }
+//                else if(error instanceof ServerError){
+//                    Toast.makeText(mContext, "No se puede encontrar el servidor", Toast.LENGTH_SHORT).show();
+//                }
+//                else if(error instanceof TimeoutError){
+//                    Toast.makeText(mContext, "Conexion lenta, verifique conexion e intente de nuevo", Toast.LENGTH_SHORT).show();
+//                    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+//                        @Override
+//                        public void onClick(DialogInterface dialog, int which) {
+//                            switch (which){
+//                                case DialogInterface.BUTTON_POSITIVE:
+//                                    //Yes button clicked
+//                                    guardar();
+//                                    break;
+//
+//                                case DialogInterface.BUTTON_NEGATIVE:
+//                                    //No button clicked
+//                                    break;
+//                            }
+//                        }
+//                    };
+//
+//
+//                    AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+//                    builder.setMessage("Conexion lenta, desea realizar la venta otra vez?").setPositiveButton("Si", dialogClickListener)
+//                            .setNegativeButton("No", dialogClickListener).show();
+//                }
+//
+//            }
+//        });
+//
+////        request.setRetryPolicy(new DefaultRetryPolicy(
+////                0,
+////                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+////                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+////        int socketTimeout = 30000;//30 seconds - change to what you want
+////        RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+////        request.setRetryPolicy(policy);
+////        mQueue.add(request);
+//        MySingleton.getInstance(mContext).addToRequestQueue(request);
+    }
 
 
-                                    Utilidades.imprimir(mContext,response, 1);
-                                }
-                                else if(ckbSms.isChecked()){
-                                    new AsyncTask<Void, Void, Bitmap>() {
-                                        @Override
-                                        protected Bitmap doInBackground(Void... voids) {
-                                            Bitmap bitmap;
-                                            try {
-                                                bitmap = new Html2Bitmap.Builder().setContext(mContext).setContent(WebViewContent.html(response.getString("img"))).setBitmapWidth(400).build().getBitmap();
-                                            }catch (Exception e){
-                                                e.printStackTrace();
-                                                Log.v("ErrorHtmlWsapp", e.toString());
-                                                bitmap = null;
-                                            }
+    public  class guardarHttp extends AsyncTask<String, String, String> {
 
-                                            return bitmap;
+        HttpURLConnection urlConnection;
+        JSONObject data;
 
-                                        }
+        public guardarHttp(JSONObject data) {
+            this.data = data;
+        }
 
-                                        @Override
-                                        protected void onPostExecute(Bitmap bitmap) {
-                                            if (bitmap != null) {
-                                                String codigoQr;
-                                                try{
-                                                    JSONObject venta = response.getJSONObject("venta");
-                                                    codigoQr = venta.getString("codigoQr");
-                                                }catch (Exception e){
-                                                    e.printStackTrace();
-                                                    Log.v("ErrorWhatsappImg", e.toString());
-                                                    codigoQr = "";
-                                                }
-                                                QRGEncoder qrgEncoder = new QRGEncoder(codigoQr, null, QRGContents.Type.TEXT, 150);
-                                                try {
-                                                    Bitmap bitmapQR = qrgEncoder.encodeAsBitmap();
-                                                    bitmapQR = combinarBitmap(bitmap, bitmapQR);
-                                                    Utilidades.sendSMS(getContext(), bitmapQR, true);
-                                                }catch (Exception e){
-                                                    e.printStackTrace();
-                                                    Log.v("ErrorQr", e.toString());
-                                                }
+        @Override
+        protected String doInBackground(String... args) {
 
-                                            }
-                                        }
-                                    }.execute();
-                                }
-                                else if(ckbWhatsapp.isChecked()){
+            StringBuilder result = new StringBuilder();
 
-                                    new AsyncTask<Void, Void, Bitmap>() {
-                                        @Override
-                                        protected Bitmap doInBackground(Void... voids) {
-                                            Bitmap bitmap;
-                                            try {
-                                                bitmap = new Html2Bitmap.Builder().setContext(mContext).setContent(WebViewContent.html(response.getString("img"))).setBitmapWidth(400).build().getBitmap();
-                                            }catch (Exception e){
-                                                e.printStackTrace();
-                                                Log.v("ErrorHtmlWsapp", e.toString());
-                                                bitmap = null;
-                                            }
+            try {
+                //URL url = new URL("https://api.github.com/users/dmnugent80/repos");
+                URL url = new URL("https://loterias.ml/api/principal/guardarMovil");
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+                urlConnection.setRequestProperty("Content-Type", "application/json");
+                urlConnection.setRequestMethod("POST");
 
-                                            return bitmap;
+                //SE ESCRIBEN LOS BYTES QUE SE VAN A ENVIAR
+                DataOutputStream printout = new DataOutputStream(urlConnection.getOutputStream());
+                //printout.writeBytes(URLEncoder.encode(datosObj.toString(),"UTF-8"));
+                printout.writeBytes(data.toString());
+                printout.flush();
+                printout.close();
 
-                                        }
 
-                                        @Override
-                                        protected void onPostExecute(Bitmap bitmap) {
-                                            if (bitmap != null) {
-                                                String codigoQr;
-                                                try{
-                                                    JSONObject venta = response.getJSONObject("venta");
-                                                    codigoQr = venta.getString("codigoQr");
-                                                }catch (Exception e){
-                                                    e.printStackTrace();
-                                                    Log.v("ErrorWhatsappImg", e.toString());
-                                                    codigoQr = "";
-                                                }
-                                                QRGEncoder qrgEncoder = new QRGEncoder(codigoQr, null, QRGContents.Type.TEXT, 150);
-                                                try {
-                                                    Bitmap bitmapQR = qrgEncoder.encodeAsBitmap();
-                                                    bitmapQR = combinarBitmap(bitmap, bitmapQR);
-                                                    Utilidades.sendSMS(getContext(), bitmapQR, false);
-                                                }catch (Exception e){
-                                                    e.printStackTrace();
-                                                    Log.v("ErrorQr", e.toString());
-                                                }
+                if (urlConnection.getResponseCode() != 201){
+                    StringBuffer answer = new StringBuffer();
+                    InputStream inputstream = null;
 
-                                            }
-                                        }
-                                    }.execute();
-                                    //Utilidades.sendSMS(getContext(), response.getString("img"), false);
-                                }
+                    if(urlConnection.getResponseCode() == 500 ) {
 
-                            }
-                            else
-                                Toast.makeText(getContext(), response.getString("mensaje") + " e: " + errores, Toast.LENGTH_SHORT).show();
-
-//                            txtMontodisponible.setText(response.getString("monto"));
-//                            borderChange(false);
-                        } catch (Exception e) {
-                            Log.d("Error: ", e.toString());
-                            e.printStackTrace();
-
+                        inputstream = urlConnection.getErrorStream();
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(inputstream));
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            answer.append(line);
                         }
+                        Log.e("guardarHttpError", answer.toString());
 
                     }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                //Log.d("responseerror: ", String.valueOf(error));
-                error.printStackTrace();
-                Main2Activity.progressBarToolbar.setVisibility(View.GONE);
-                //error.getMessage();
-                String body;
-                //get status code here
-                //String statusCode = String.valueOf(error.networkResponse.statusCode);
-                //get response body and parse with appropriate encoding
-//                if(error.networkResponse.data!=null) {
-//                    try {
-//                        body = new String(error.networkResponse.data,"UTF-8");
-//                        crearArchivo(body);
-//                        Log.d("responseerror: ", body);
-//                    } catch (UnsupportedEncodingException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
+                    Log.e("guardarHttp", urlConnection.getResponseMessage());
+                    return "Error";
+                }
 
-                if(error instanceof NetworkError){
-                    Toast.makeText(mContext, "Verifique coneccion e intente de nuevo", Toast.LENGTH_SHORT).show();
+                //GET THE REQUEST DATA
+                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    result.append(line);
                 }
-                else if(error instanceof ServerError){
-                    Toast.makeText(mContext, "No se puede encontrar el servidor", Toast.LENGTH_SHORT).show();
+
+
+                //SE BUSCA EL INDEX DE LAS JUGADAS EN EL JSONSTRING
+
+
+                //SE LLENAN LAS LISTAS CON LOS JSONSTRING
+                Log.i("cancelarHttp", result.toString());
+//                VentasClass ventasClass = llenarVenta(result.toString());
+//                ImprimirTicketCancelado(ventasClass);
+
+
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                urlConnection.disconnect();
+            }
+
+
+            return result.toString();
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            Main2Activity.progressBarToolbar.setVisibility(View.GONE);
+            if(!result.equals("Error")){
+                if(llenarVentasLoteriasTickets(result) == false)
+                    return;
+
+                if(errores == 1){
+                    Toast.makeText(mContext, "Error: " +mensaje, Toast.LENGTH_SHORT).show();
+                    return;
                 }
-                else if(error instanceof TimeoutError){
-                    Toast.makeText(mContext, "Conexion lenta, verifique conexion e intente de nuevo", Toast.LENGTH_SHORT).show();
-                    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                limpiar();
+                fillSpinner();
+                setDescuento();
+
+                if(ckbPrint.isChecked()){
+                    //Utilidades.imprimir(mContext,response, 1);
+                    Utilidades.imprimir(mContext, venta, 1);
+                }
+                else if(ckbSms.isChecked()){
+                    venta.setImg(imgHtmlTmp);
+                    compartirTicketHttp c = new compartirTicketHttp(venta, true);
+                    c.execute();
+                }
+                else if(ckbWhatsapp.isChecked()){
+                    venta.setImg(imgHtmlTmp);
+                    compartirTicketHttp c = new compartirTicketHttp(venta, false);
+                    c.execute();
+                }
+
+
+            }else{
+                Toast.makeText(mContext, "Error del servidor", Toast.LENGTH_SHORT).show();
+                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             switch (which){
@@ -1304,22 +1485,378 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                    builder.setMessage("Conexion lenta, desea realizar la venta otra vez?").setPositiveButton("Si", dialogClickListener)
+                    builder.setMessage("Ha ocurrido un error de conexion, desea realizar la venta otra vez?").setPositiveButton("Si", dialogClickListener)
                             .setNegativeButton("No", dialogClickListener).show();
+            }
+        }
+    }
+
+
+    //IndexPostHttp
+
+    public  class indexPostHttp extends AsyncTask<String, String, String> {
+
+        HttpURLConnection urlConnection;
+        JSONObject data;
+
+        public indexPostHttp(JSONObject data) {
+            this.data = data;
+        }
+
+        @Override
+        protected String doInBackground(String... args) {
+
+            StringBuilder result = new StringBuilder();
+
+            try {
+                //URL url = new URL("https://api.github.com/users/dmnugent80/repos");
+                URL url = new URL("https://loterias.ml/api/principal/indexPost");
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+                urlConnection.setRequestProperty("Content-Type", "application/json");
+                urlConnection.setRequestMethod("POST");
+
+                //SE ESCRIBEN LOS BYTES QUE SE VAN A ENVIAR
+                DataOutputStream printout = new DataOutputStream(urlConnection.getOutputStream());
+                //printout.writeBytes(URLEncoder.encode(datosObj.toString(),"UTF-8"));
+                printout.writeBytes(data.toString());
+                printout.flush();
+                printout.close();
+
+
+                if (urlConnection.getResponseCode() != 201){
+                    StringBuffer answer = new StringBuffer();
+                    InputStream inputstream = null;
+
+                    if(urlConnection.getResponseCode() == 500 ) {
+
+                        inputstream = urlConnection.getErrorStream();
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(inputstream));
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            answer.append(line);
+                        }
+                        Log.e("guardarHttpError", answer.toString());
+
+                    }
+                    Log.e("guardarHttp", urlConnection.getResponseMessage());
+                    return "Error";
+                }
+
+                //GET THE REQUEST DATA
+                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    result.append(line);
+                }
+
+
+                //SE BUSCA EL INDEX DE LAS JUGADAS EN EL JSONSTRING
+
+
+                //SE LLENAN LAS LISTAS CON LOS JSONSTRING
+                Log.i("cancelarHttp", result.toString());
+//                VentasClass ventasClass = llenarVenta(result.toString());
+//                ImprimirTicketCancelado(ventasClass);
+
+
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                urlConnection.disconnect();
+            }
+
+
+            return result.toString();
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+
+            Main2Activity.progressBarToolbar.setVisibility(View.GONE);
+            if(!result.equals("Error")){
+                if(llenarVentasLoteriasTickets(result) == false)
+                    return;
+
+                if(errores == 1){
+                    Toast.makeText(mContext, "Error: " + mensaje, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                fillSpinner();
+                setDescuento();
+            }else{
+                Toast.makeText(mContext, "Error del servidor", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    public static boolean llenarVentasLoteriasTickets(String result)
+    {
+
+        venta = null;
+        ventasLista.clear();
+        loteriasLista.clear();
+        bancasLista.clear();
+//
+//        idVenta = response.getString("idVenta");
+//        idBanca = response.getInt("idBanca");
+//        JSONArray jsonArray = response.getJSONArray("loterias");
+//        JSONArray jsonArrayBancas = response.getJSONArray("bancas");
+//        JSONArray jsonArrayVentas = response.getJSONArray("ventas");
+//        setDescuento(jsonArrayBancas);
+
+
+        Log.e("llenarJugadaLoterias", "prueba: " + result);
+        Gson gson = new GsonBuilder().create();
+        try (com.google.gson.stream.JsonReader reader1 = new com.google.gson.stream.JsonReader(new StringReader(result))){
+            reader1.beginObject();
+
+            int c=0;
+            String nombre = "";
+            boolean hasNext = true;
+            while (reader1.hasNext()){
+//                JsonToken nextToken = reader1.peek();
+
+
+                Log.e("llenarJugadaLoterias", "nombre:" + nombre +" token:" + reader1.peek());
+                if (JsonToken.BEGIN_ARRAY.equals(reader1.peek())) {
+
+
+                    reader1.beginArray();
+
+                }
+
+                if (JsonToken.BEGIN_OBJECT.equals(reader1.peek())) {
+                    if(nombre.equals("venta") || nombre.equals("ventas") || nombre.equals("loterias") || nombre.equals("bancas")){
+                        if(nombre.equals("venta")){
+                             venta = gson.fromJson(reader1, VentasClass.class);
+                            Log.i("llenarVentasLoterias", "venta:" + venta.getCodigoBarra());
+                        }
+
+                        if(nombre.equals("loterias")){
+                            LoteriaClass loteriaClass  = gson.fromJson(reader1, LoteriaClass.class);
+                            loteriasLista.add(loteriaClass);
+                            Log.i("llenarJugadaLoterias", "loterias:" + loteriaClass.getDescripcion());
+                        }
+                        if(nombre.equals("ventas")){
+                            VentasClass ventasClass  = gson.fromJson(reader1, VentasClass.class);
+                            ventasLista.add(ventasClass);
+//                            Log.i("llenarJugadaLoterias", "ventas:" + ventasClass.getDescripcion());
+                        }
+                        if(nombre.equals("bancas")){
+                            BancaClass bancaClass  = gson.fromJson(reader1, BancaClass.class);
+                            bancasLista.add(bancaClass);
+//                            Log.i("llenarJugadaLoterias", "ventas:" + ventasClass.getDescripcion());
+                        }
+                    }else{
+                        reader1.beginObject();
+                    }
+
+
+                }
+                if (JsonToken.NAME.equals(reader1.peek())) {
+
+                    nombre = reader1.nextName();
+                    System.out.println("Token KEY >>>> " + nombre);
+
+                }
+                if (JsonToken.STRING.equals(reader1.peek())) {
+
+                    String value = reader1.nextString();
+                    System.out.println("Token Value >>>> " + value);
+
+                    if(nombre.equals("idVenta")){
+                        idVenta = value;
+                        Log.i("llenarJugadaLoterias", "idVenta:" + idVenta);
+                    }
+                    if(nombre.equals("img")){
+                        imgHtmlTmp = value;
+                        Log.i("llenarJugadaLoterias", "img:" + imgHtmlTmp);
+                    }
+
+                    if(nombre.equals("mensaje")){
+                        mensaje = value;
+                        Log.i("llenarJugadaLoterias", "mensaje:" + mensaje);
+                    }
+
+                }
+                if (JsonToken.NUMBER.equals(reader1.peek())) {
+
+                    long value = reader1.nextLong();
+                    System.out.println("Token Value >>>> " + value);
+
+                    if(nombre.equals("idBanca")){
+                        idBanca = (int)value;
+                        Log.i("llenarJugadaLoterias", "idVenta:" + idBanca);
+                    }
+
+                    if(nombre.equals("errores")){
+                        errores = (int)value;
+                        Log.i("llenarJugadaLoterias", "errores:" + errores);
+                    }
+                }
+                if (JsonToken.NULL.equals(reader1.peek())) {
+
+                    reader1.nextNull();
+                    System.out.println("Token Value >>>> null");
+
+                }
+                if (JsonToken.END_OBJECT.equals(reader1.peek())) {
+
+                    reader1.endObject();
+//                    JsonToken nextToken1 = reader1.peek();
+                    if (JsonToken.END_ARRAY.equals(reader1.peek())) {
+                        reader1.endArray();
+                        hasNext = reader1.hasNext();
+                    }
+//                    Log.e("culo", "nombre:" + reader1.hasNext() +" token:" + nextToken1);
+
+                }
+                if (JsonToken.END_ARRAY.equals(reader1.peek())) {
+
+                    reader1.endArray();
+
+                }
+                if (JsonToken.END_DOCUMENT.equals(reader1.peek())) {
+
+                    return true;
+
+                }
+
+
+                c++;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+
+        return true;
+    }
+
+    //AQUI ES PARA COMPARTIR TICKET
+    public  class compartirTicketHttp extends AsyncTask<Void, Void, Bitmap> {
+
+        HttpURLConnection urlConnection;
+        VentasClass ventasClass;
+        boolean sms_o_whatsapp;
+
+        public compartirTicketHttp(VentasClass ventasClass, boolean sms_o_whatsapp) {
+            this.ventasClass = ventasClass;
+            this.sms_o_whatsapp = sms_o_whatsapp;
+        }
+
+        @Override
+        protected Bitmap doInBackground(Void... voids) {
+            Bitmap bitmap;
+            try {
+                bitmap = new Html2Bitmap.Builder().setContext(mContext).setContent(WebViewContent.html(ventasClass.getImg())).setBitmapWidth(400).build().getBitmap();
+            }catch (Exception e){
+                e.printStackTrace();
+                Log.v("ErrorHtmlWsapp", e.toString());
+                bitmap = null;
+            }
+
+            return bitmap;
+
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            if (bitmap != null) {
+                String codigoQr;
+                try{
+                    codigoQr = ventasClass.getCodigoQr();
+                }catch (Exception e){
+                    e.printStackTrace();
+                    Log.v("ErrorWhatsappImg", e.toString());
+                    codigoQr = "";
+                }
+                QRGEncoder qrgEncoder = new QRGEncoder(codigoQr, null, QRGContents.Type.TEXT, 150);
+                try {
+                    Bitmap bitmapQR = qrgEncoder.encodeAsBitmap();
+                    bitmapQR = combinarBitmap(bitmap, bitmapQR);
+                    if(this.sms_o_whatsapp){
+                        Utilidades.sendSMS(getContext(), bitmapQR, true);
+                    }else{
+                        Utilidades.sendSMS(getContext(), bitmapQR, false);
+                    }
+                }catch (Exception e){
+                    e.printStackTrace();
+                    Log.v("ErrorQr", e.toString());
                 }
 
             }
-        });
+        }
+    }
 
-//        request.setRetryPolicy(new DefaultRetryPolicy(
-//                0,
-//                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-//                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-//        int socketTimeout = 30000;//30 seconds - change to what you want
-//        RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
-//        request.setRetryPolicy(policy);
-//        mQueue.add(request);
-        MySingleton.getInstance(mContext).addToRequestQueue(request);
+    public VentasClass llenarVenta(String ventasJsonString, String path) {
+//        if(jugadasLista != null)
+//            jugadasLista.clear();
+        VentasClass ventasClass = null;
+        Gson gson = new GsonBuilder().create();
+        try (com.google.gson.stream.JsonReader reader1 = new com.google.gson.stream.JsonReader(new StringReader(ventasJsonString))) {
+            //reader1.beginObject();
+
+            int c = 0;
+            while (reader1.hasNext()) {
+
+                if (JsonToken.BEGIN_OBJECT.equals(reader1.peek()))
+                    reader1.beginObject();
+
+                if(JsonToken.NUMBER.equals(reader1.peek())){
+                    reader1.nextDouble();
+                }
+
+                if(JsonToken.STRING.equals(reader1.peek())){
+                    reader1.nextString();
+                }
+
+                Log.i("DuplicarGsonPeek", reader1.peek().toString());
+                Log.i("DuplicarGsonPath", reader1.getPath());
+                if (JsonToken.NAME.equals(reader1.peek())) {
+                    reader1.nextName();
+
+                    //reader1.getPath().equals("$.ticket") path: "$.ticket"
+                    if (reader1.getPath().equals(path)) {
+
+                        ventasClass = gson.fromJson(reader1, VentasClass.class);
+                        Log.i("llenarVenta", ventasClass.getCodigo());
+                        reader1.close();
+                        return ventasClass;
+                    }
+                }
+
+                //VIEJO
+//                if (JsonToken.BEGIN_OBJECT.equals(reader1.peek())) {
+//                    reader1.beginObject();
+//
+//
+//                    Log.i("DuplicarGsonPeek", reader1.peek().toString());
+//                    if (JsonToken.NAME.equals(reader1.peek())) {
+//                        reader1.nextName();
+//                        Log.i("DuplicarGsonPath", reader1.getPath());
+//                        if (reader1.getPath().equals("$.ticket")) {
+//
+//                            ventasClass = gson.fromJson(reader1, VentasClass.class);
+//                            Log.i("llenarVenta", ventasClass.getCodigo());
+//                            reader1.close();
+//                            return ventasClass;
+//                        }
+//                    }
+//                }
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ventasClass;
+        }
+        return ventasClass;
     }
 
     public void crearArchivo(String texto){
@@ -1346,46 +1883,49 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         }
     }
 
-    public void fillSpinner(JSONArray array, JSONArray jsonArrayVentas2){
+    public void fillSpinner(){
         /********* Prepare value for spinner *************/
-        jsonArrayVentas = jsonArrayVentas2;
-        String[] spinnerArray = new String[array.length()];
-        String[] ventasSpinner = new String[jsonArrayVentas.length()];
-        String[] ventasIdTicketSecuenciaSpinner = new String[jsonArrayVentas.length()];
+       // jsonArrayVentas = jsonArrayVentas2;
+        String[] spinnerArray = new String[loteriasLista.size()];
+        String[] ventasSpinner = new String[ventasLista.size()];
+        String[] ventasIdTicketSecuenciaSpinner = new String[ventasLista.size()];
         HashMap<Integer,String> spinnerMap = new HashMap<Integer, String>();
-        for (int i = 0; i < array.length(); i++)
+        int contador = 0;
+        for (LoteriaClass loteria : loteriasLista)
         {
-            try {
-                JSONObject dataobj = array.getJSONObject(i);
+            //try {
+                //JSONObject dataobj = array.getJSONObject(i);
                 //spinnerMap.put(i,dataobj.getString("id"));
-                idLoteriasMap.put(i,dataobj.getString("id"));
-                spinnerArray[i] = dataobj.getString("descripcion");
-                Log.d("loterias: ", spinnerArray[i]);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+                //idLoteriasMap.put(i,dataobj.getString("id"));
+                spinnerArray[contador] = loteria.getDescripcion();
+                contador++;
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
 
         }
 
-        if(jsonArrayVentas.length() == 0){
+        if(ventasLista.size() == 0){
             ventasIdTicketSecuenciaSpinner = new String[1];
             ventasIdTicketSecuenciaSpinner[0] = "No hay ventas";
         }
 
-        for (int i = 0; i < jsonArrayVentas.length(); i++)
+        contador = 0;
+        for (VentasClass venta : ventasLista)
         {
-            try {
-                JSONObject dataobj = jsonArrayVentas.getJSONObject(i);
+//            try {
+//                JSONObject dataobj = jsonArrayVentas.getJSONObject(i);
 
                 //spinnerMap.put(i,dataobj.getString("id"));
-                codigoBarraMap.put(i,dataobj.getString("id"));
-                ventasSpinner[i] = dataobj.getString("codigoBarra");
-                ventasIdTicketSecuenciaSpinner[i] = toSecuencia(dataobj.getString("idTicket"), dataobj.getString("total"));
+//                codigoBarraMap.put(i,dataobj.getString("id"));
+                ventasSpinner[contador] = venta.getCodigoBarra();
+                ventasIdTicketSecuenciaSpinner[contador] = toSecuencia(String.valueOf(venta.idTicket), String.valueOf(venta.getTotal()));
 
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
 
+            contador++;
         }
 
         /********** LLenamos el listDescripcionLoterias para el multiselect ***********/
@@ -1453,68 +1993,255 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         JSONObject datosObj = new JSONObject();
 
         try {
-            JSONObject ticket  = jsonArrayVentas.getJSONObject((int)spinnerTicket.getSelectedItemId());
+            VentasClass ticket  = ventasLista.get((int)spinnerTicket.getSelectedItemId());
             dato.put("idUsuario", Utilidades.getIdUsuario(mContext));
-            dato.put("idTicket", ticket.getString("idTicket"));
+            dato.put("idTicket", ticket.getIdTicket());
             datosObj.put("datos", dato);
-
         } catch (JSONException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
         String jsonString = datosObj.toString();
-
-
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, datosObj,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        //progressBar.setVisibility(View.GONE);
-                        try {
-
-
-                            JSONObject venta = new JSONObject();
-                            venta.put("venta", response.getJSONObject("ticket"));
-                            Utilidades.imprimir(mContext, venta, 2);
-//                            es.submit(new BluetoothSearchDialog.TaskPrint(venta, false));
-
-
-                            //getDialog().dismiss();
-                            //updateTable(jsonArray);
-                        } catch (JSONException e) {
-                            Log.d("Error: ", e.toString());
-                            e.printStackTrace();
+        imprimirTicketHttp i = new imprimirTicketHttp(datosObj);
+        i.execute();
 
 
 
 
-                        }
+//        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, datosObj,
+//                new Response.Listener<JSONObject>() {
+//                    @Override
+//                    public void onResponse(JSONObject response) {
+//                        //progressBar.setVisibility(View.GONE);
+//                        try {
+//
+//
+//                            JSONObject venta = new JSONObject();
+//                            venta.put("venta", response.getJSONObject("ticket"));
+//                            //Utilidades.imprimir(mContext, venta, 2);
+////                            es.submit(new BluetoothSearchDialog.TaskPrint(venta, false));
+//
+//
+//                            //getDialog().dismiss();
+//                            //updateTable(jsonArray);
+//                        } catch (JSONException e) {
+//                            Log.d("Error: ", e.toString());
+//                            e.printStackTrace();
+//
+//
+//
+//
+//                        }
+//
+//                    }
+//                }, new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//                Log.d("responseerror: ", String.valueOf(error));
+//                // progressBar.setVisibility(View.GONE);
+//                error.printStackTrace();
+//                if(error instanceof NetworkError){
+//                    Toast.makeText(mContext, "Verifique coneccion e intente de nuevo", Toast.LENGTH_SHORT).show();
+//                }
+//                else if(error instanceof ServerError){
+//                    Toast.makeText(mContext, "No se puede encontrar el servidor", Toast.LENGTH_SHORT).show();
+//                }
+//                else if(error instanceof TimeoutError){
+//                    Toast.makeText(mContext, "Conexion lenta, verifique conexion e intente de nuevo", Toast.LENGTH_SHORT).show();
+//                }
+//
+//
+//
+//            }
+//        });
+//
+////        mQueue.add(request);
+//        MySingleton.getInstance(mContext).addToRequestQueue(request);
+    }
 
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d("responseerror: ", String.valueOf(error));
-                // progressBar.setVisibility(View.GONE);
-                error.printStackTrace();
-                if(error instanceof NetworkError){
-                    Toast.makeText(mContext, "Verifique coneccion e intente de nuevo", Toast.LENGTH_SHORT).show();
+    public static class imprimirTicketHttp extends AsyncTask<String, String, String> {
+
+        HttpURLConnection urlConnection;
+        JSONObject data;
+        public imprimirTicketHttp(JSONObject data){
+            this.data = data;
+        }
+
+        @Override
+        protected String doInBackground(String... args) {
+
+            StringBuilder result = new StringBuilder();
+
+            try {
+                //URL url = new URL("https://api.github.com/users/dmnugent80/repos");
+                URL url = new URL("https://loterias.ml/api/reportes/getTicketById");
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+                urlConnection.setRequestProperty("Content-Type", "application/json");
+                urlConnection.setRequestMethod("POST");
+
+                //SE ESCRIBEN LOS BYTES QUE SE VAN A ENVIAR
+                DataOutputStream printout = new DataOutputStream(urlConnection.getOutputStream ());
+                //printout.writeBytes(URLEncoder.encode(datosObj.toString(),"UTF-8"));
+                printout.writeBytes(data.toString());
+                printout.flush ();
+                printout.close ();
+
+
+                if(urlConnection.getResponseCode() != 201)
+                    return "Error";
+
+                //GET THE REQUEST DATA
+                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    result.append(line);
                 }
-                else if(error instanceof ServerError){
-                    Toast.makeText(mContext, "No se puede encontrar el servidor", Toast.LENGTH_SHORT).show();
-                }
-                else if(error instanceof TimeoutError){
-                    Toast.makeText(mContext, "Conexion lenta, verifique conexion e intente de nuevo", Toast.LENGTH_SHORT).show();
-                }
+
+                Log.i("imprimirTicketHttp", result.toString());
+                //SE BUSCA EL INDEX DE LAS JUGADAS EN EL JSONSTRING
 
 
 
+
+
+            }catch( Exception e) {
+                e.printStackTrace();
             }
-        });
+            finally {
+                urlConnection.disconnect();
+            }
 
-//        mQueue.add(request);
-        MySingleton.getInstance(mContext).addToRequestQueue(request);
+
+            return result.toString();
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+
+            //Do something with the JSON string
+            if(!result.equals("Error")) {
+
+                //SE LLENAN LAS LISTAS CON LOS JSONSTRING
+                VentasClass ventasClass = llenarVenta(result.toString());
+                if (errores == 1) {
+                    Toast.makeText(mContext, "Error: " + mensaje, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+
+                Utilidades.imprimir(mContext, ventasClass, 2);
+            }else{
+                Toast.makeText(mContext, "Error del servidor", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+    }
+
+    public static VentasClass llenarVenta(String result)
+    {
+
+
+        Log.e("llenarJugadaLoterias", "prueba: " + result);
+        VentasClass ventasClass = null;
+        Gson gson = new GsonBuilder().create();
+        try (com.google.gson.stream.JsonReader reader1 = new com.google.gson.stream.JsonReader(new StringReader(result))){
+            reader1.beginObject();
+
+            int c=0;
+            String nombre = "";
+            boolean hasNext = true;
+            while (reader1.hasNext()){
+//                JsonToken nextToken = reader1.peek();
+
+
+                Log.e("llenarJugadaLoterias", "nombre:" + nombre +" token:" + reader1.peek());
+                if (JsonToken.BEGIN_ARRAY.equals(reader1.peek())) {
+
+
+                    reader1.beginArray();
+
+                }
+
+                if (JsonToken.BEGIN_OBJECT.equals(reader1.peek())) {
+
+                    if(nombre.equals("ticket")){
+                        ventasClass = gson.fromJson(reader1, VentasClass.class);
+                        return ventasClass;
+                    }
+                    else{
+                        reader1.beginObject();
+                    }
+
+
+                }
+                if (JsonToken.NAME.equals(reader1.peek())) {
+
+                    nombre = reader1.nextName();
+                    System.out.println("Token KEY >>>> " + nombre);
+
+                }
+                if (JsonToken.STRING.equals(reader1.peek())) {
+
+                    String value = reader1.nextString();
+                    if(nombre.equals("mensaje")){
+                        mensaje = value;
+                        Log.i("llenarJugadaLoterias", "mensaje:" + mensaje);
+                    }
+
+                    System.out.println("Token Value >>>> " + value);
+
+                }
+                if (JsonToken.NUMBER.equals(reader1.peek())) {
+
+                    long value = reader1.nextLong();
+                    if(nombre.equals("errores")){
+                        errores = (int)value;
+                        Log.i("llenarJugadaLoterias", "errores:" + errores);
+                    }
+                    System.out.println("Token Value >>>> " + value);
+
+                }
+                if (JsonToken.NULL.equals(reader1.peek())) {
+
+                    reader1.nextNull();
+                    System.out.println("Token Value >>>> null");
+
+                }
+                if (JsonToken.END_OBJECT.equals(reader1.peek())) {
+
+                    reader1.endObject();
+//                    JsonToken nextToken1 = reader1.peek();
+                    if (JsonToken.END_ARRAY.equals(reader1.peek())) {
+                        reader1.endArray();
+                        hasNext = reader1.hasNext();
+                    }
+//                    Log.e("culo", "nombre:" + reader1.hasNext() +" token:" + nextToken1);
+
+                }
+                if (JsonToken.END_ARRAY.equals(reader1.peek())) {
+
+                    reader1.endArray();
+
+                }
+                if (JsonToken.END_DOCUMENT.equals(reader1.peek())) {
+
+                    return ventasClass;
+
+                }
+
+
+                c++;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            return ventasClass;
+        }
+
+        return ventasClass;
     }
 
     public void fillSpinnerWithoutInternetTest(){
@@ -1523,11 +2250,11 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         String [] arrayLoteriasDescripcion = getResources().getStringArray(R.array.descripcionesLoterias);
         String [] arrayLoteriasIds = getResources().getStringArray(R.array.idLoterias);
 
-        for (int i = 0; i < arrayLoteriasDescripcion.length; i++)
-        {
-                idLoteriasMap.put(i,arrayLoteriasIds[i]);
-
-        }
+//        for (int i = 0; i < arrayLoteriasDescripcion.length; i++)
+//        {
+//                idLoteriasMap.put(i,arrayLoteriasIds[i]);
+//
+//        }
 
         /********** LLenamos el listDescripcionLoterias para el multiselect ***********/
         listDescripcionLoterias = arrayLoteriasDescripcion;
@@ -1657,7 +2384,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         String montoDisponible = String.valueOf(txtMontodisponible.getText());
         String jugada = String.valueOf(txtJugada.getText());
         jugada = Utilidades.ordenarMenorAMayor(jugada);
-        getJugadas();
+        //getJugadas();
 
         if(mUserItems.size() == 0){
             Toast.makeText(getContext(), "Debe seleccionar una loteria", Toast.LENGTH_SHORT).show();
@@ -1683,7 +2410,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
             return;
 
         //validarJugadaSeaNumerica contenera la jugada numerica, osea, sin puntos ni signos de mas, etc..
-        if(!jugadasClase.validarJugadaSeaCorrecta(jugada)){
+        if(!Utilidades.validarJugadaSeaCorrecta(jugada)){
             Toast.makeText(getContext(), "La jugada no es correcta", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -1701,28 +2428,37 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
             if(mUserItems.size() == 1){
                 try {
                     boolean existe = false, existeInvertida = false;
-                    if(jugadasClase.jugadaExiste(jugadasClase.jugadaQuitarPunto(jugada), idLoteriasMap.get(mUserItems.get(0))))
-                        aceptaInsertarJugadaExistente(jugadasClase.jugadaQuitarPunto(jugada), idLoteriasMap.get(mUserItems.get(0)), listDescripcionLoterias[mUserItems.get(0)], monto);
+                    if(Utilidades.jugadaExiste(jugadasClase,Utilidades.jugadaQuitarPunto(jugada), String.valueOf(loteriasLista.get(mUserItems.get(0)).getId())))
+                        aceptaInsertarJugadaExistente(Utilidades.jugadaQuitarPunto(jugada), String.valueOf(loteriasLista.get(mUserItems.get(0)).getId()), listDescripcionLoterias[mUserItems.get(0)], monto, 0);
 //                    existe = jugadasClase.siJugadaExisteActualizar(jugadasClase.jugadaQuitarPunto(jugada), idLoteriasMap.get(mUserItems.get(0)), monto);
 //                    if(jugada.length() == 3)
 //                        existeInvertida = jugadasClase.siJugadaExisteActualizar(jugadasClase.jugadaInvertir(jugadasClase.jugadaQuitarPunto(jugada)), idLoteriasMap.get(mUserItems.get(0)), monto);
 
 
 
-                    if(!jugadasClase.jugadaExiste(jugadasClase.jugadaQuitarPunto(jugada), idLoteriasMap.get(mUserItems.get(0)))){
+                    if(!Utilidades.jugadaExiste(jugadasClase, Utilidades.jugadaQuitarPunto(jugada), String.valueOf(loteriasLista.get(mUserItems.get(0)).getId()))){
 
-                        jugadaObject = new JSONObject();
-                        jugadaObject.put("idLoteria", idLoteriasMap.get(mUserItems.get(0)));
-                        jugadaObject.put("descripcion", listDescripcionLoterias[mUserItems.get(0)]);
-                        jugadaObject.put("jugada", jugada);
-                        jugadaObject.put("sorteo", "no");
+//                        jugadaObject = new JSONObject();
+//                        jugadaObject.put("idLoteria", idLoteriasMap.get(mUserItems.get(0)));
+//                        jugadaObject.put("descripcion", listDescripcionLoterias[mUserItems.get(0)]);
+//                        jugadaObject.put("jugada", jugada);
+//                        jugadaObject.put("sorteo", "no");
+//
+//                        jugadaObject.put("tam", txtJugada.getText().length());
+//                        jugadaObject.put("monto", txtMontojugar.getText());
+//                        jugadaObject.put("idBanca", Utilidades.getIdBanca(mContext));
+//                        jugadasClase.add(jugadaObject);
 
-                        jugadaObject.put("tam", txtJugada.getText().length());
-                        jugadaObject.put("monto", txtMontojugar.getText());
-                        jugadaObject.put("idBanca", Utilidades.getIdBanca(mContext));
-                        jugadasClase.add(jugadaObject);
-
-
+                        JugadaClass jugadaClass = new JugadaClass();
+                        jugadaClass.setIdLoteria(loteriasLista.get(mUserItems.get(0)).getId());
+                        jugadaClass.setDescripcion(listDescripcionLoterias[mUserItems.get(0)]);
+                        jugadaClass.setJugada(jugada);
+                        jugadaClass.setSorteo("no");
+//                        jugadaClass.setTam(txtJugada.getText().length());
+                        jugadaClass.setMonto(Double.parseDouble(txtMontojugar.getText().toString()));
+                        jugadaClass.setIdBanca(Utilidades.getIdBanca(mContext));
+                        //jugadasClase.add(jugadaClass);
+                        Utilidades.addJugada(jugadaClass);
                     }
 
                     //jugada.length() == 3 && existeInvertida == false
@@ -1753,25 +2489,35 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                     try {
                         boolean existe = false, existeInvertida = false;
 
-                        if(jugadasClase.jugadaExiste(jugadasClase.jugadaQuitarPunto(jugada), idLoteriasMap.get(mUserItems.get(contadorLoteria))))
-                            aceptaInsertarJugadaExistente(jugadasClase.jugadaQuitarPunto(jugada), idLoteriasMap.get(mUserItems.get(contadorLoteria)), listDescripcionLoterias[contadorLoteria], monto);
+                        if(Utilidades.jugadaExiste(jugadasClase, Utilidades.jugadaQuitarPunto(jugada), String.valueOf(loteriasLista.get(mUserItems.get(contadorLoteria)).getId())))
+                            aceptaInsertarJugadaExistente(Utilidades.jugadaQuitarPunto(jugada), String.valueOf(loteriasLista.get(mUserItems.get(contadorLoteria)).getId()), listDescripcionLoterias[contadorLoteria], monto, 0);
 
 //                        existe = jugadasClase.siJugadaExisteActualizar(jugadasClase.jugadaQuitarPunto(jugada), idLoteriasMap.get(mUserItems.get(contadorLoteria)), monto);
 //                        if(jugada.length() == 3)
 //                            existeInvertida = jugadasClase.siJugadaExisteActualizar(jugadasClase.jugadaInvertir(jugadasClase.jugadaQuitarPunto(jugada)), idLoteriasMap.get(mUserItems.get(contadorLoteria)), monto);
 
-                        if(!jugadasClase.jugadaExiste(jugadasClase.jugadaQuitarPunto(jugada), idLoteriasMap.get(mUserItems.get(contadorLoteria)))){
+                        if(!Utilidades.jugadaExiste(jugadasClase, Utilidades.jugadaQuitarPunto(jugada), String.valueOf(loteriasLista.get(mUserItems.get(contadorLoteria)).getId()))){
 
-                            jugadaObject = new JSONObject();
-                            jugadaObject.put("idLoteria", idLoteriasMap.get(mUserItems.get(contadorLoteria)));
-                            jugadaObject.put("descripcion", listDescripcionLoterias[mUserItems.get(contadorLoteria)]);
-                            jugadaObject.put("jugada", jugada);
-                            jugadaObject.put("sorteo", "no");
-                            jugadaObject.put("tam", txtJugada.getText().length());
-                            jugadaObject.put("monto", txtMontojugar.getText());
-                            jugadaObject.put("idBanca", Utilidades.getIdBanca(mContext));
-                            jugadasClase.add(jugadaObject);
+//                            jugadaObject = new JSONObject();
+////                            jugadaObject.put("idLoteria", idLoteriasMap.get(mUserItems.get(contadorLoteria)));
+////                            jugadaObject.put("descripcion", listDescripcionLoterias[mUserItems.get(contadorLoteria)]);
+////                            jugadaObject.put("jugada", jugada);
+////                            jugadaObject.put("sorteo", "no");
+////                            jugadaObject.put("tam", txtJugada.getText().length());
+////                            jugadaObject.put("monto", txtMontojugar.getText());
+////                            jugadaObject.put("idBanca", Utilidades.getIdBanca(mContext));
+////                            jugadasClase.add(jugadaObject);
 
+                            JugadaClass jugadaClass = new JugadaClass();
+                            jugadaClass.setIdLoteria(loteriasLista.get(mUserItems.get(contadorLoteria)).getId());
+                            jugadaClass.setDescripcion(listDescripcionLoterias[mUserItems.get(contadorLoteria)]);
+                            jugadaClass.setJugada(jugada);
+                            jugadaClass.setSorteo("no");
+//                        jugadaClass.setTam(txtJugada.getText().length());
+                            jugadaClass.setMonto(Double.parseDouble(txtMontojugar.getText().toString()));
+                            jugadaClass.setIdBanca(Utilidades.getIdBanca(mContext));
+                            //jugadasClase.add(jugadaClass);
+                            Utilidades.addJugada(jugadaClass);
                             //Toast.makeText(getContext(), "lot:"+listDescripcionLoterias[contadorLoteria] + " id:" + idLoteriasMap.get(contadorLoteria), Toast.LENGTH_SHORT).show();
                         }
 
@@ -1802,14 +2548,14 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         //Log.d("jugadas:", jugadas.toString());
 //        txtMontojugar.setText("");
         calcularTotal();
-        getJugadas();
+//        getJugadas();
         borderChange(true, false);
 
     } //End jugadasAdd
 
 
     public static void calcularTotal(){
-        montoTotal = jugadasClase.calcularTotal();
+        montoTotal = Utilidades.calcularTotal(jugadasClase);
         Log.d("PrincipalFragment", "calcularTotal: " + String.valueOf(montoTotal));
         txtTotal.setText("Tot: $"+String.valueOf(montoTotal));
         if(ckbDescuento.isChecked() && montoTotal > 0){
@@ -1848,7 +2594,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         try{
 
 
-            final JSONObject venta  = jsonArrayVentas.getJSONObject((int)spinnerTicket.getSelectedItemId());
+            final VentasClass venta  = ventasLista.get((int)spinnerTicket.getSelectedItemId());
 
 
             DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
@@ -1869,7 +2615,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
 
             AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-            builder.setMessage("Esta seguro de cancelar el ticket " + Utilidades.toSecuencia(venta.getString("idTicket"), venta.getString("codigo")) + " ?").setPositiveButton("Si", dialogClickListener)
+            builder.setMessage("Esta seguro de cancelar el ticket " + Utilidades.toSecuencia(String.valueOf(venta.getIdTicket()), venta.getCodigo()) + " ?").setPositiveButton("Si", dialogClickListener)
                     .setNegativeButton("No", dialogClickListener).show();
         }catch (Exception e){
             e.printStackTrace();
@@ -1895,7 +2641,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
             v.put("venta", venta);
             Log.d("MonitoreoCancelado", v.toString());
             //es.submit(new BluetoothSearchDialog.TaskPrint(v, 1));
-            Utilidades.imprimir(mContext, v, 3);
+           // Utilidades.imprimir(mContext, v, 3);
 
         }catch(Exception e){
             e.printStackTrace();
@@ -1904,14 +2650,15 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
     }
 
 
-    public static void aceptaInsertarJugadaExistente(final String jugada, final String idLoteria, final String descripcion, final String monto){
+    public static void aceptaInsertarJugadaExistente(final String jugada, final String idLoteria, final String descripcion, final String monto, final int cantidadDeJugadasARevisar){
         DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 switch (which){
                     case DialogInterface.BUTTON_POSITIVE:
                         //Yes button clicked
-                         jugadasClase.siJugadaExisteActualizar(jugada, idLoteria, monto);
+
+                         Utilidades.siJugadaExisteActualizar(jugadasClase, jugada, idLoteria, Double.parseDouble(monto), cantidadDeJugadasARevisar);
                         calcularTotal();
                         break;
 
@@ -1932,14 +2679,14 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
 
 
-    private void cancelarTicket(JSONObject jsonObject){
+    private void cancelarTicket(VentasClass venta){
         String url = "https://loterias.ml/api/principal/cancelarMovil";
 
         JSONObject loteria = new JSONObject();
         JSONObject datosObj = new JSONObject();
 
         try {
-            loteria.put("codigoBarra", jsonObject.getString("codigoBarra"));
+            loteria.put("codigoBarra", venta.getCodigoBarra());
             loteria.put("razon", "Cancelado desde movil");
             loteria.put("idUsuario", Utilidades.getIdUsuario(mContext));
             loteria.put("idBanca", Utilidades.getIdBanca(mContext));
@@ -1952,62 +2699,146 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         }
 
         String jsonString = datosObj.toString();
+        cancelarHttp c = new cancelarHttp(datosObj);
+        c.execute();
 
-        final JSONObject venta = new JSONObject();
+//        final JSONObject venta = new JSONObject();
+//
+//        try {
+//            venta.put("venta", jsonObject);
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
 
-        try {
-            venta.put("venta", jsonObject);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, datosObj,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        try {
-                            String errores = response.getString("errores");
-                            if(errores.equals("0")){
-
-                                JSONObject venta2 = new JSONObject();
-                                venta2.put("venta", response.getJSONObject("ticket"));
-                                Log.d("CancelarTicketDo", venta2.toString());
-                                jsonParse();
-                                ImprimirTicketCancelado(response.getJSONObject("ticket"));
-                                Toast.makeText(mContext, response.getString("mensaje"), Toast.LENGTH_SHORT).show();
-                            }
-                            else
-                                Toast.makeText(mContext, response.getString("mensaje") + " e: " + errores, Toast.LENGTH_SHORT).show();
-
-                        } catch (JSONException e) {
-                            Log.d("Error: ", e.toString());
-                            e.printStackTrace();
-
-                        }
-
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d("responseerror: ", String.valueOf(error));
-                error.printStackTrace();
-                if(error instanceof NetworkError){
-                    Toast.makeText(mContext, "Verifique coneccion e intente de nuevo", Toast.LENGTH_SHORT).show();
-                }
-                else if(error instanceof ServerError){
-                    Toast.makeText(mContext, "No se puede encontrar el servidor", Toast.LENGTH_SHORT).show();
-                }
-                else if(error instanceof TimeoutError){
-                    Toast.makeText(mContext, "Conexion lenta, verifique conexion e intente de nuevo", Toast.LENGTH_SHORT).show();
-                }
-
-            }
-        });
-
-//        mQueue.add(request);
-        MySingleton.getInstance(mContext).addToRequestQueue(request);
+//        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, datosObj,
+//                new Response.Listener<JSONObject>() {
+//                    @Override
+//                    public void onResponse(JSONObject response) {
+//                        try {
+//                            String errores = response.getString("errores");
+//                            if(errores.equals("0")){
+//
+//                                JSONObject venta2 = new JSONObject();
+//                                venta2.put("venta", response.getJSONObject("ticket"));
+//                                Log.d("CancelarTicketDo", venta2.toString());
+//                                jsonParse();
+//                                ImprimirTicketCancelado(response.getJSONObject("ticket"));
+//                                Toast.makeText(mContext, response.getString("mensaje"), Toast.LENGTH_SHORT).show();
+//                            }
+//                            else
+//                                Toast.makeText(mContext, response.getString("mensaje") + " e: " + errores, Toast.LENGTH_SHORT).show();
+//
+//                        } catch (JSONException e) {
+//                            Log.d("Error: ", e.toString());
+//                            e.printStackTrace();
+//
+//                        }
+//
+//                    }
+//                }, new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//                Log.d("responseerror: ", String.valueOf(error));
+//                error.printStackTrace();
+//                if(error instanceof NetworkError){
+//                    Toast.makeText(mContext, "Verifique coneccion e intente de nuevo", Toast.LENGTH_SHORT).show();
+//                }
+//                else if(error instanceof ServerError){
+//                    Toast.makeText(mContext, "No se puede encontrar el servidor", Toast.LENGTH_SHORT).show();
+//                }
+//                else if(error instanceof TimeoutError){
+//                    Toast.makeText(mContext, "Conexion lenta, verifique conexion e intente de nuevo", Toast.LENGTH_SHORT).show();
+//                }
+//
+//            }
+//        });
+//
+////        mQueue.add(request);
+//        MySingleton.getInstance(mContext).addToRequestQueue(request);
     }
 
+
+    public  class cancelarHttp extends AsyncTask<String, String, String> {
+
+        HttpURLConnection urlConnection;
+        JSONObject data;
+
+        public cancelarHttp(JSONObject data) {
+            this.data = data;
+        }
+
+        @Override
+        protected String doInBackground(String... args) {
+
+            StringBuilder result = new StringBuilder();
+
+            try {
+                //URL url = new URL("https://api.github.com/users/dmnugent80/repos");
+                URL url = new URL("https://loterias.ml/api/principal/cancelarMovil");
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+                urlConnection.setRequestProperty("Content-Type", "application/json");
+                urlConnection.setRequestMethod("POST");
+
+                //SE ESCRIBEN LOS BYTES QUE SE VAN A ENVIAR
+                DataOutputStream printout = new DataOutputStream(urlConnection.getOutputStream());
+                //printout.writeBytes(URLEncoder.encode(datosObj.toString(),"UTF-8"));
+                printout.writeBytes(data.toString());
+                printout.flush();
+                printout.close();
+
+
+                if (urlConnection.getResponseCode() != 201)
+                    return "Error";
+
+                //GET THE REQUEST DATA
+                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    result.append(line);
+                }
+
+
+                //SE BUSCA EL INDEX DE LAS JUGADAS EN EL JSONSTRING
+
+
+                //SE LLENAN LAS LISTAS CON LOS JSONSTRING
+                Log.i("cancelarHttp", result.toString());
+//                VentasClass ventasClass = llenarVenta(result.toString());
+//                ImprimirTicketCancelado(ventasClass);
+
+
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                urlConnection.disconnect();
+            }
+
+
+            return result.toString();
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+
+            if(!result.equals("Error")){
+                VentasClass ventasClass = llenarVenta(result.toString());
+                if(errores == 1){
+                    Toast.makeText(mContext, "Error: " + mensaje, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                Utilidades.imprimir(mContext, ventasClass, 3);
+                jsonParse();
+            }else{
+                Toast.makeText(mContext, "Error del servidor", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
 
 
 
