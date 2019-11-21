@@ -163,8 +163,9 @@ public class PrinterClass {
                 if(imprimir_o_probar_impresora_este_activa == true)
                     //ticket(original_copia_cancelado_pagado);
                 es.submit(new TaskImprimir(original_copia_cancelado_pagado));
-                else
+                else{
                     POS_S_TextOut("**PRUEBA EXISTOSA**\n\n\n", 0, 1, 1, 0, 0x00);
+                }
 
 //                mConnectedThread.cancel(true);
                //closeSocket(mBluetoothSocket, false);

@@ -870,7 +870,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
     }
 
     private void jsonParse(){
-        String url = "https://loterias.ml/api/principal/indexPost";
+        String url = Utilidades.URL +"/api/principal/indexPost";
 //        progressBar.setVisibility(View.VISIBLE);
         Main2Activity.progressBarToolbar.setVisibility(View.VISIBLE);
 
@@ -934,7 +934,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
     }
 
     private void getMontoDisponible(){
-        String url = "https://loterias.ml/api/principal/montodisponible";
+        String url = Utilidades.URL +"/api/principal/montodisponible";
         monto = "0";
         Log.d("Arreglo loteria size: ", String.valueOf(mUserItems.size()));
         final String jugada = Utilidades.ordenarMenorAMayor(String.valueOf(txtJugada.getText()));
@@ -1091,7 +1091,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
 
     private void guardar(){
-        String url = "https://loterias.ml/api/principal/guardarMovil";
+        String url = Utilidades.URL +"/api/principal/guardarMovil";
 
 
         if(jugadasClase.size() == 0){
@@ -1370,7 +1370,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
             try {
                 //URL url = new URL("https://api.github.com/users/dmnugent80/repos");
-                URL url = new URL("https://loterias.ml/api/principal/guardarMovil");
+                URL url = new URL(Utilidades.URL + "/api/principal/guardarMovil");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
@@ -1510,7 +1510,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
             try {
                 //URL url = new URL("https://api.github.com/users/dmnugent80/repos");
-                URL url = new URL("https://loterias.ml/api/principal/indexPost");
+                URL url = new URL(Utilidades.URL +"/api/principal/indexPost");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
@@ -1985,7 +1985,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         }
 
 
-        String url = "https://loterias.ml/api/reportes/getTicketById";
+        String url = Utilidades.URL +"/api/reportes/getTicketById";
         //progressBar.setVisibility(View.VISIBLE);
 
 
@@ -2075,7 +2075,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
             try {
                 //URL url = new URL("https://api.github.com/users/dmnugent80/repos");
-                URL url = new URL("https://loterias.ml/api/reportes/getTicketById");
+                URL url = new URL(Utilidades.URL +"/api/reportes/getTicketById");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
@@ -2680,7 +2680,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
 
     private void cancelarTicket(VentasClass venta){
-        String url = "https://loterias.ml/api/principal/cancelarMovil";
+        String url = Utilidades.URL +"/api/principal/cancelarMovil";
 
         JSONObject loteria = new JSONObject();
         JSONObject datosObj = new JSONObject();
@@ -2774,7 +2774,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
             try {
                 //URL url = new URL("https://api.github.com/users/dmnugent80/repos");
-                URL url = new URL("https://loterias.ml/api/principal/cancelarMovil");
+                URL url = new URL(Utilidades.URL +"/api/principal/cancelarMovil");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
@@ -2845,7 +2845,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
     private void cancelarTicketViejo(final JSONObject venta){
 
-        String url = "https://loterias.ml/api/principal/cancelar";
+        String url = Utilidades.URL +"/api/principal/cancelar";
 
         JSONObject loteria = new JSONObject();
         JSONObject datosObj = new JSONObject();

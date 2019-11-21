@@ -329,7 +329,7 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
 
             try {
                 //URL url = new URL("https://api.github.com/users/dmnugent80/repos");
-                URL url = new URL("https://loterias.ml/api/principal/duplicar");
+                URL url = new URL(Utilidades.URL +"/api/principal/duplicar");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
@@ -656,7 +656,7 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
 
 
     public static void duplicarTicket(String codigoBarraQR, boolean esQR){
-//        String url = "https://loterias.ml/api/principal/duplicar";
+//        String url = Utilidades.URL +"/api/principal/duplicar";
 
         JSONObject loteria = new JSONObject();
         JSONObject datosObj = new JSONObject();
@@ -687,7 +687,7 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
 
 //        HttpURLConnection client = null;
 //        try {
-//            URL url = new URL("https://loterias.ml/api/principal/duplicar");
+//            URL url = new URL(Utilidades.URL +"/api/principal/duplicar");
 //            client = (HttpURLConnection) url.openConnection();
 //            client.setRequestMethod("POST");
 //            client.setRequestProperty("datos",loteria.toString());
@@ -717,7 +717,7 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
 
 
     public static void duplicarTicketViejo(String codigoBarraQR, boolean esQR){
-        String url = "https://loterias.ml/api/principal/duplicar";
+        String url = Utilidades.URL +"/api/principal/duplicar";
 
         JSONObject loteria = new JSONObject();
         JSONObject datosObj = new JSONObject();
@@ -824,7 +824,7 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
     }
 
     public static void duplicarTicketPrueba(String codigoBarraQR, boolean esQR){
-        String url = "https://loterias.ml/api/principal/duplicar";
+        String url = Utilidades.URL +"/api/principal/duplicar";
 
         JSONObject loteria = new JSONObject();
         JSONObject datosObj = new JSONObject();
@@ -929,7 +929,7 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
     }
 
     public static void pagarTicket(String codigoBarraQR, boolean esQR){
-        String url = "https://loterias.ml/api/principal/pagar";
+        String url = Utilidades.URL +"/api/principal/pagar";
         boolean tienePremioYtienePendiente = false;
 
         double montoAPagar = ventasClasses.getMontoAPagar();
@@ -1045,7 +1045,7 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
 
             try {
                 //URL url = new URL("https://api.github.com/users/dmnugent80/repos");
-                URL url = new URL("https://loterias.ml/api/principal/pagar");
+                URL url = new URL(Utilidades.URL +"/api/principal/pagar");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
@@ -1225,7 +1225,7 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
 
 
     public static void buscarTicketAPagar(String codigoBarraQR, boolean esQR){
-        String url = "https://loterias.ml/api/principal/buscarTicketAPagar";
+        String url = Utilidades.URL +"/api/principal/buscarTicketAPagar";
 
         JSONObject loteria = new JSONObject();
         JSONObject datosObj = new JSONObject();
@@ -1314,7 +1314,7 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
 
                 try {
                     //URL url = new URL("https://api.github.com/users/dmnugent80/repos");
-                    URL url = new URL("https://loterias.ml/api/principal/buscarTicketAPagar");
+                    URL url = new URL(Utilidades.URL +"/api/principal/buscarTicketAPagar");
                     urlConnection = (HttpURLConnection) url.openConnection();
                     urlConnection.setDoOutput(true);
                     urlConnection.setDoInput(true);

@@ -50,7 +50,7 @@ public class VerificarAccesoAlSistemaService extends Service {
     }
 
     private void verificarSesion(){
-        String url = "https://loterias.ml/api/acceder";
+        String url = Utilidades.URL +"/api/acceder";
 
 
         JSONObject loteria = new JSONObject();

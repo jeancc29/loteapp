@@ -202,7 +202,7 @@ public class PendientesDePago extends AppCompatActivity {
 
 
     private void getPendientesDePagoIndex(){
-        String url = "https://loterias.ml/api/reportes/ticketsPendientesDePagoIndex";
+        String url = Utilidades.URL +"/api/reportes/ticketsPendientesDePagoIndex";
         progressBarToolbar.setVisibility(View.VISIBLE);
 
 
@@ -266,7 +266,7 @@ public class PendientesDePago extends AppCompatActivity {
 
 
     private void getPendientesDePago(){
-        String url = "https://loterias.ml/api/reportes/ticketsPendientesDePago";
+        String url = Utilidades.URL +"/api/reportes/ticketsPendientesDePago";
         progressBarToolbar.setVisibility(View.VISIBLE);
 
 

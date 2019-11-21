@@ -94,7 +94,7 @@ public class LoginActivity extends AppCompatActivity {
 
     }
     private void jsonParse(String usuario, String password){
-        String url = "https://loterias.ml/api/acceder";
+        String url = Utilidades.URL +"/api/acceder";
 
 
         JSONObject loteria = new JSONObject();

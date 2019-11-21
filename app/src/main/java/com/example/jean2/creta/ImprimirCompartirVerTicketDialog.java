@@ -164,7 +164,7 @@ public class ImprimirCompartirVerTicketDialog extends AppCompatDialogFragment {
 
 
 
-        String url = "https://loterias.ml/api/reportes/getTicketById";
+        String url = Utilidades.URL +"/api/reportes/getTicketById";
         //progressBar.setVisibility(View.VISIBLE);
 
 
@@ -252,7 +252,7 @@ public class ImprimirCompartirVerTicketDialog extends AppCompatDialogFragment {
 
             try {
                 //URL url = new URL("https://api.github.com/users/dmnugent80/repos");
-                URL url = new URL("https://loterias.ml/api/reportes/getTicketById");
+                URL url = new URL(Utilidades.URL +"/api/reportes/getTicketById");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
@@ -370,7 +370,7 @@ public class ImprimirCompartirVerTicketDialog extends AppCompatDialogFragment {
 
 
 
-        String url = "https://loterias.ml/api/reportes/getTicketById";
+        String url = Utilidades.URL +"/api/reportes/getTicketById";
         //progressBar.setVisibility(View.VISIBLE);
 
 
@@ -491,7 +491,7 @@ public class ImprimirCompartirVerTicketDialog extends AppCompatDialogFragment {
 
             try {
                 //URL url = new URL("https://api.github.com/users/dmnugent80/repos");
-                URL url = new URL("https://loterias.ml/api/reportes/getTicketById");
+                URL url = new URL(Utilidades.URL +"/api/reportes/getTicketById");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
@@ -600,7 +600,7 @@ public class ImprimirCompartirVerTicketDialog extends AppCompatDialogFragment {
 
 
 
-        String url = "https://loterias.ml/api/reportes/getTicketById";
+        String url = Utilidades.URL +"/api/reportes/getTicketById";
         //progressBar.setVisibility(View.VISIBLE);
 
 
@@ -688,7 +688,7 @@ public class ImprimirCompartirVerTicketDialog extends AppCompatDialogFragment {
 
             try {
                 //URL url = new URL("https://api.github.com/users/dmnugent80/repos");
-                URL url = new URL("https://loterias.ml/api/reportes/getTicketById");
+                URL url = new URL(Utilidades.URL +"/api/reportes/getTicketById");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
