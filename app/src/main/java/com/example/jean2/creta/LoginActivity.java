@@ -13,6 +13,7 @@ import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ProgressBar;
@@ -27,10 +28,14 @@ import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.jean2.creta.Clases.BancaClass;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class LoginActivity extends AppCompatActivity {
@@ -42,6 +47,7 @@ public class LoginActivity extends AppCompatActivity {
     ProgressBar progressBar;
     public static int idUsuario = 0;
     final private int REQUEST_CODE_ASK_PERMISSION = 111;
+    List<BancaClass> bancas = new ArrayList<>();
 
     //private RequestQueue mQueue;
 
@@ -168,4 +174,6 @@ public class LoginActivity extends AppCompatActivity {
 
         MySingleton.getInstance(LoginActivity.this).addToRequestQueue(request);
     }
+
+
 }

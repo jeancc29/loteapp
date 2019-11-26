@@ -164,7 +164,7 @@ public class PrinterClass {
                     //ticket(original_copia_cancelado_pagado);
                 es.submit(new TaskImprimir(original_copia_cancelado_pagado));
                 else{
-                    POS_S_TextOut("**PRUEBA EXISTOSA**\n\n\n", 0, 1, 1, 0, 0x00);
+                    POS_S_TextOut("**PRUEBA EXISTOSA**\n\n\n", 0, 1, 1, 0, 0x00, true);
                 }
 
 //                mConnectedThread.cancel(true);

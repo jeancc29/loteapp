@@ -11,6 +11,8 @@ public class BancaClass {
     public double descontar;
     public double deCada;
 
+    public BancaClass(){}
+
     public BancaClass(int id, String descripcion, String piepagina1, String piepagina2, String piepagina3, String piepagina4, int imprimirCodigoQr, double descontar, double deCada) {
         this.id = id;
         this.descripcion = descripcion;

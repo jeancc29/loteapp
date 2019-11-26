@@ -460,6 +460,7 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
         if(jugadasLista != null)
             jugadasLista.clear();
         Log.e("llenarJugadaLoterias", "prueba: " + result);
+        errores = 0;
         Gson gson = new GsonBuilder().create();
         try (com.google.gson.stream.JsonReader reader1 = new com.google.gson.stream.JsonReader(new StringReader(result))){
             reader1.beginObject();
@@ -1132,6 +1133,7 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
 //            jugadasLista.clear();
             VentasClass ventasClass = null;
             Gson gson = new GsonBuilder().create();
+            errores = 0;
             try (com.google.gson.stream.JsonReader reader1 = new com.google.gson.stream.JsonReader(new StringReader(ventasJsonString))) {
                 //reader1.beginObject();
 

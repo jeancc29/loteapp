@@ -27,6 +27,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -131,6 +132,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
     static List<VentasClass> ventasLista = new ArrayList<VentasClass>();
     static List<LoteriaClass> loteriasLista = new ArrayList<LoteriaClass>();
     static List<BancaClass> bancasLista = new ArrayList<BancaClass>();
+    boolean seleccionarBancaPertenecienteAUsuarioListo = false;
     static String imgHtmlTmp;
     static int errores;
     static String mensaje;
@@ -150,6 +152,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
     public static JSONArray jugadas = new JSONArray();
     public static List<JugadaClass> jugadasClase = new ArrayList<JugadaClass>();
     public static WebView webViewImg;
+    Spinner spinnerBanca;
 
     final private int REQUEST_CODE_ASK_PERMISSION = 111;
     private boolean cambioCursorDesdeElBotonEnter = false;
@@ -240,6 +243,34 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         ckbPrint.setChecked(true);
         ckbSms = (CheckBox_Icon)view.findViewById(R.id.ckbSms);
         ckbWhatsapp = (CheckBox_Icon)view.findViewById(R.id.ckbWhatsapp);
+        spinnerBanca = (Spinner)view.findViewById(R.id.spinnerBancas);
+        if(Utilidades.getAdministrador(mContext) == true){
+            spinnerBanca.setVisibility(View.VISIBLE);
+            txtBanca.setVisibility(View.GONE);
+        }else{
+            spinnerBanca.setVisibility(View.GONE);
+            txtBanca.setVisibility(View.VISIBLE);
+        }
+        spinnerBanca.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                // Get the spinner selected item text
+                //String selectedItemText = (String) adapterView.getItemAtPosition(i);
+                // Display the selected item into the TextView
+                //mTextView.setText("Selected : " + selectedItemText);
+                if(seleccionarBancaPertenecienteAUsuarioListo == true)
+                    jsonParse();
+            }
+
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                Toast.makeText(mContext,"No selection",Toast.LENGTH_LONG).show();
+            }
+        });
+
+
 
         ckbPrint.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -272,8 +303,16 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
         txtBanca.setText(Utilidades.getBanca(getContext()));
         if(estoyProbando)
             fillSpinnerWithoutInternetTest();
-        else
-            jsonParse();
+        else{
+
+            if(Utilidades.getAdministrador(mContext) == true){
+                spinnerBanca.setVisibility(View.VISIBLE);
+                jsonParse();
+            }else{
+                spinnerBanca.setVisibility(View.GONE);
+                jsonParse();
+            }
+        }
 
 
 
@@ -879,6 +918,11 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
         try {
             loteria.put("idUsuario", Utilidades.getIdUsuario(mContext));
+            if(Utilidades.getAdministrador(mContext) == true){
+                if(bancasLista.size() > 0)
+                    loteria.put("idBanca", bancasLista.get((int)spinnerBanca.getSelectedItemId()).getId());
+            }
+
 
             datosObj.put("datos", loteria);
 
@@ -931,6 +975,21 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 //
 //        //mQueue.add(request);
 //        MySingleton.getInstance(mContext).addToRequestQueue(request);
+    }
+
+    public void seleccionarBancaPertenecienteAUsuario(){
+        int idBanca = Utilidades.getIdBanca(mContext);
+        int contador = 0;
+        for (BancaClass banca : bancasLista)
+        {
+            if(idBanca == banca.getId()){
+                break;
+            }
+            contador++;
+        }
+//        bancas.get((int)spinnerBanca.getSelectedItemId());
+        spinnerBanca.setSelection(contador);
+        seleccionarBancaPertenecienteAUsuarioListo = true;
     }
 
     private void getMontoDisponible(){
@@ -1123,7 +1182,13 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
             jugada.put("idVenta", idVenta);
             jugada.put("compartido", compartido);
             jugada.put("idUsuario", Utilidades.getIdUsuario(mContext));
-            jugada.put("idBanca", Utilidades.getIdBanca(mContext));
+            if(Utilidades.getAdministrador(mContext) == true){
+                if(bancasLista.size() > 0)
+                    jugada.put("idBanca", bancasLista.get((int)spinnerBanca.getSelectedItemId()).getId());
+            }
+            else{
+                jugada.put("idBanca", Utilidades.getIdBanca(mContext));
+            }
             jugada.put("descuentoMonto", montoDescuento);
             jugada.put("hayDescuento", (ckbDescuento.isChecked()) ? 1 : 0);
             jugada.put("total", montoTotal);
@@ -1417,7 +1482,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
 
                 //SE LLENAN LAS LISTAS CON LOS JSONSTRING
-                Log.i("cancelarHttp", result.toString());
+                Log.i("guardarHttp", result.toString());
 //                VentasClass ventasClass = llenarVenta(result.toString());
 //                ImprimirTicketCancelado(ventasClass);
 
@@ -1598,10 +1663,13 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
     public static boolean llenarVentasLoteriasTickets(String result)
     {
 
+        idVenta = null;
         venta = null;
         ventasLista.clear();
         loteriasLista.clear();
         bancasLista.clear();
+        errores = 0;
+        mensaje = null;
 //
 //        idVenta = response.getString("idVenta");
 //        idBanca = response.getInt("idBanca");
@@ -1888,6 +1956,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
        // jsonArrayVentas = jsonArrayVentas2;
         String[] spinnerArray = new String[loteriasLista.size()];
         String[] ventasSpinner = new String[ventasLista.size()];
+        String[] bancasSpinner = new String[bancasLista.size()];
         String[] ventasIdTicketSecuenciaSpinner = new String[ventasLista.size()];
         HashMap<Integer,String> spinnerMap = new HashMap<Integer, String>();
         int contador = 0;
@@ -1928,6 +1997,24 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
             contador++;
         }
 
+
+       if(Utilidades.getAdministrador(mContext) == true && seleccionarBancaPertenecienteAUsuarioListo == false){
+           contador =0;
+           for (BancaClass banca : bancasLista)
+           {
+               //try {
+               //JSONObject dataobj = array.getJSONObject(i);
+               //spinnerMap.put(i,dataobj.getString("id"));
+               //idLoteriasMap.put(i,dataobj.getString("id"));
+               bancasSpinner[contador] = banca.getDescripcion();
+               contador++;
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
+
+           }
+       }
+
         /********** LLenamos el listDescripcionLoterias para el multiselect ***********/
         listDescripcionLoterias = spinnerArray;
         ventasItems = ventasSpinner;
@@ -1942,11 +2029,20 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
            ArrayAdapter<String> adapter =new ArrayAdapter<String>(getActivity(),android.R.layout.simple_spinner_item, ventasIdTicketSecuenciaSpinner);
            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
            spinnerTicket.setAdapter(adapter);
+
+            if(Utilidades.getAdministrador(mContext) == true && seleccionarBancaPertenecienteAUsuarioListo == false){
+                ArrayAdapter<String> adapterBanca =new ArrayAdapter<String>(getActivity(),android.R.layout.simple_spinner_item, bancasSpinner);
+                adapterBanca.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                spinnerBanca.setAdapter(adapterBanca);
+                seleccionarBancaPertenecienteAUsuario();
+            }
+
        }catch (Exception e){
            e.printStackTrace();
        }
 
         seleccionarLoteriasMultiSelect(null, true);
+
     }
 
     static void print(){
@@ -2147,6 +2243,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
         Log.e("llenarJugadaLoterias", "prueba: " + result);
         VentasClass ventasClass = null;
+        errores = 0;
         Gson gson = new GsonBuilder().create();
         try (com.google.gson.stream.JsonReader reader1 = new com.google.gson.stream.JsonReader(new StringReader(result))){
             reader1.beginObject();
@@ -2698,6 +2795,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
             e.printStackTrace();
         }
 
+        Log.e("cancelarTicket", "Esta entrando a cancelar ticket");
         String jsonString = datosObj.toString();
         cancelarHttp c = new cancelarHttp(datosObj);
         c.execute();

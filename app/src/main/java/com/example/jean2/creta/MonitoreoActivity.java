@@ -8,18 +8,25 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
+import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -35,6 +42,7 @@ import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.jean2.creta.Clases.BancaClass;
 import com.example.jean2.creta.Clases.VentasClass;
 import com.example.jean2.creta.Servicios.JPrinterConnectService;
 import com.google.gson.Gson;
@@ -55,7 +63,9 @@ import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -71,10 +81,15 @@ public class MonitoreoActivity extends AppCompatActivity {
     private TextView mDisplayDate;
     private DatePickerDialog.OnDateSetListener mDateSetListener;
     private JSONArray tickets = new JSONArray();
+    private JSONArray ticketsTmp = new JSONArray();
     public static JSONObject selectedTicket = new JSONObject();
     ExecutorService es = Executors.newScheduledThreadPool(30);
     static int errores = 0;
     static String mensaje = "";
+    List<BancaClass> bancas = new ArrayList<>();
+    Spinner spinnerBanca;
+    EditText txtTicket;
+
 
 
     @Override
@@ -94,6 +109,34 @@ public class MonitoreoActivity extends AppCompatActivity {
         tableLayout = (TableLayout)findViewById(R.id.tableMonitoreo);
         txtFechaMonitoreo = (TextView) findViewById(R.id.txtFechaMonitoreo);
         progressBar = (ProgressBar)findViewById(R.id.progressBarPrincipal);
+        txtTicket = (EditText)findViewById(R.id.txtTicket);
+        txtTicket.addTextChangedListener(new TextWatcher() {
+            public void onTextChanged(CharSequence cs, int s, int b, int c) {
+                Log.i("Key:", cs.toString());
+                buscarTicket(cs.toString());
+            }
+            public void afterTextChanged(Editable editable) { }
+            public void beforeTextChanged(CharSequence cs, int i, int j, int
+                    k) { }
+        });
+        spinnerBanca = (Spinner)findViewById(R.id.spinnerBancas);
+        spinnerBanca.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                // Get the spinner selected item text
+                //String selectedItemText = (String) adapterView.getItemAtPosition(i);
+                // Display the selected item into the TextView
+                //mTextView.setText("Selected : " + selectedItemText);
+                getMonitoreo();
+            }
+
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                Toast.makeText(mContext,"No selection",Toast.LENGTH_LONG).show();
+            }
+        });
 
 
         Calendar calendarIncial = Calendar.getInstance();
@@ -138,6 +181,12 @@ public class MonitoreoActivity extends AppCompatActivity {
         };
 
 
+        if(Utilidades.getAdministrador(mContext) == true){
+            spinnerBanca.setVisibility(View.VISIBLE);
+            getBancas();
+        }else{
+            spinnerBanca.setVisibility(View.GONE);
+        }
     }
 
     public void aceptaCancelarTicket(final JSONObject ticket){
@@ -149,11 +198,8 @@ public class MonitoreoActivity extends AppCompatActivity {
 //                return;
 //            }
 
-            if(Utilidades.hayImpresorasRegistradas(mContext) == false){
-                Main2Activity.txtBluetooth.performClick();
-                Toast.makeText(mContext, "Debe registrar una impresora", Toast.LENGTH_SHORT).show();
-                return;
-            }
+
+
 
 
             DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
@@ -163,7 +209,19 @@ public class MonitoreoActivity extends AppCompatActivity {
                         case DialogInterface.BUTTON_POSITIVE:
                             //Yes button clicked
 
-                            cancelarTicket(ticket);
+                            if(Utilidades.getAdministrador(mContext) == true){
+                                deseaImprimir(ticket);
+                            }
+                            else{
+                                if(Utilidades.hayImpresorasRegistradas(mContext) == false){
+                                    Main2Activity.txtBluetooth.performClick();
+                                    Toast.makeText(mContext, "Debe registrar una impresora", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+
+                                cancelarTicket(ticket, true);
+                            }
+
                             break;
 
                         case DialogInterface.BUTTON_NEGATIVE:
@@ -174,7 +232,56 @@ public class MonitoreoActivity extends AppCompatActivity {
             };
 
             AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-            builder.setMessage("Seguro desea cancelar el ticket" + Utilidades.toSecuencia(ticket.getString("idTicket"), ticket.getString("codigo")) + " ?").setPositiveButton("Yes", dialogClickListener)
+            builder.setMessage("Seguro desea cancelar el ticket" + Utilidades.toSecuencia(ticket.getString("idTicket"), ticket.getString("codigo")) + " ?").setPositiveButton("Si", dialogClickListener)
+                    .setNegativeButton("No", dialogClickListener).show();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    //Desea imprimir
+    public void deseaImprimir(final JSONObject ticket){
+        try {
+//            if(JPrinterConnectService.isPrinterConnected() == false){
+//                Toast.makeText(mContext, "Debe conectarse a una impresora culo", Toast.LENGTH_SHORT).show();
+//                mostrarFragmentDialogBluetoothSearch();
+////                mostrarDispositivosBluetooth();
+//                return;
+//            }
+
+
+
+
+
+            DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    switch (which){
+                        case DialogInterface.BUTTON_POSITIVE:
+                            //Yes button clicked
+
+
+                                if(Utilidades.hayImpresorasRegistradas(mContext) == false){
+                                    Main2Activity.txtBluetooth.performClick();
+                                    Toast.makeText(mContext, "Debe registrar una impresora", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+
+                                cancelarTicket(ticket, true);
+
+
+                            break;
+
+                        case DialogInterface.BUTTON_NEGATIVE:
+                            //No button clicked
+                            cancelarTicket(ticket, false);
+                            break;
+                    }
+                }
+            };
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+            builder.setMessage("Desea imprimir ticket cancelado" + " ?").setPositiveButton("Si", dialogClickListener)
                     .setNegativeButton("No", dialogClickListener).show();
         }catch (Exception e){
             e.printStackTrace();
@@ -366,7 +473,16 @@ public class MonitoreoActivity extends AppCompatActivity {
         try {
             dato.put("idUsuario", Utilidades.getIdUsuario(mContext));
             dato.put("fecha", txtFechaMonitoreo.getText());
-            dato.put("idBanca", Utilidades.getIdBanca(mContext));
+            if(Utilidades.getAdministrador(mContext) == true){
+                if(bancas.size() > 0)
+                    dato.put("idBanca", bancas.get((int)spinnerBanca.getSelectedItemId()).getId());
+                else{
+                    Toast.makeText(mContext, "No hay bancas seleccionadas", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            }
+            else
+                dato.put("idBanca", Utilidades.getIdBanca(mContext));
             dato.put("layout", "Principal");
             datosObj.put("datos", dato);
 
@@ -384,6 +500,7 @@ public class MonitoreoActivity extends AppCompatActivity {
                         progressBar.setVisibility(View.GONE);
                         try {
                             JSONArray jsonArray = response.getJSONArray("monitoreo");
+
                             updateTable(jsonArray);
                         } catch (JSONException e) {
                             Log.d("Error: ", e.toString());
@@ -430,7 +547,7 @@ public class MonitoreoActivity extends AppCompatActivity {
         return jsonObject;
     }
 
-    private void cancelarTicket(JSONObject jsonObject){
+    private void cancelarTicket(JSONObject jsonObject, boolean imprimir_o_no){
         String url = Utilidades.URL + "/api/principal/cancelarMovil";
 
         JSONObject loteria = new JSONObject();
@@ -459,7 +576,7 @@ public class MonitoreoActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        cancelarHttp c = new cancelarHttp(datosObj);
+        cancelarHttp c = new cancelarHttp(datosObj, imprimir_o_no);
         c.execute();
 
 //        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, datosObj,
@@ -511,9 +628,11 @@ public class MonitoreoActivity extends AppCompatActivity {
 
         HttpURLConnection urlConnection;
         JSONObject data;
+        boolean imprimir_o_no;
 
-        public cancelarHttp(JSONObject data) {
+        public cancelarHttp(JSONObject data, boolean imprimir_o_no) {
             this.data = data;
+            this.imprimir_o_no = imprimir_o_no;
         }
 
         @Override
@@ -583,8 +702,16 @@ public class MonitoreoActivity extends AppCompatActivity {
                         Toast.makeText(mContext, "Error: " + mensaje, Toast.LENGTH_SHORT).show();
                         return;
                     }
+
+
+                tickets = new JSONArray();
+                ticketsTmp = new JSONArray();
+
                 //Final
-                ImprimirTicketCancelado(ventasClass);
+                if(imprimir_o_no)
+                    ImprimirTicketCancelado(ventasClass);
+                else
+                    getMonitoreo();
             }
             else{
                 Toast.makeText(mContext, "Error del servidor", Toast.LENGTH_SHORT).show();
@@ -600,6 +727,7 @@ public class MonitoreoActivity extends AppCompatActivity {
         Log.e("llenarJugadaLoterias", "prueba: " + result);
         VentasClass ventasClass = null;
         Gson gson = new GsonBuilder().create();
+        errores = 0;
         try (com.google.gson.stream.JsonReader reader1 = new com.google.gson.stream.JsonReader(new StringReader(result))){
             reader1.beginObject();
 
@@ -804,6 +932,169 @@ public class MonitoreoActivity extends AppCompatActivity {
     public static void VerTicket(){
         VerTicketDialog verTicketDialog = new VerTicketDialog();
         verTicketDialog.show(mActivity.getSupportFragmentManager(), "Ver ticket");
+    }
+
+
+
+    private void getBancas()
+    {
+        String url = Utilidades.URL +"/api/bancas";
+
+
+        bancas.clear();
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        progressBar.setVisibility(View.GONE);
+                        try {
+                            JSONArray bancasArray = response.getJSONArray("bancas");
+                            for(int i=0; i<bancasArray.length() ; i++){
+                                BancaClass banca = new BancaClass();
+                                banca.setId(bancasArray.getJSONObject(i).getInt("id"));
+                                banca.setDescripcion(bancasArray.getJSONObject(i).getString("descripcion"));
+                                bancas.add(banca);
+                            }
+                            fillSpinner();
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            progressBar.setVisibility(View.GONE);
+                            Log.d("Error: ", e.toString());
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                if(error instanceof NetworkError){
+                    Toast.makeText(MonitoreoActivity.this, "Verifique coneccion e intente nuevamente", Toast.LENGTH_SHORT).show();
+                }
+                else if(error instanceof ServerError){
+                    Toast.makeText(MonitoreoActivity.this, "No se puede encontrar el servidor", Toast.LENGTH_SHORT).show();
+                }
+                else if(error instanceof TimeoutError){
+                    Toast.makeText(MonitoreoActivity.this, "Conexion lenta, verifique conexion e intente nuevamente", Toast.LENGTH_SHORT).show();
+                }
+                error.printStackTrace();
+                progressBar.setVisibility(View.GONE);
+                Log.d("responseerror: ", String.valueOf(error));
+            }
+        });
+
+//        mQueue.add(request);
+
+        MySingleton.getInstance(MonitoreoActivity.this).addToRequestQueue(request);
+    }
+
+
+    public void fillSpinner(){
+        /********* Prepare value for spinner *************/
+        // jsonArrayVentas = jsonArrayVentas2;
+        String[] bancasSpinner = new String[bancas.size()];
+        int contador = 0;
+        for (BancaClass banca : bancas)
+        {
+            bancasSpinner[contador] = banca.getDescripcion();
+            contador++;
+        }
+
+
+        /********* Set value to spinner *************/
+        if(bancasSpinner == null)
+            return;
+        try{
+            ArrayAdapter<String> adapter =new ArrayAdapter<String>(MonitoreoActivity.this,android.R.layout.simple_spinner_item, bancasSpinner);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spinnerBanca.setAdapter(adapter);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        seleccionarBancaPertenecienteAUsuario();
+    }
+
+
+    public void seleccionarBancaPertenecienteAUsuario(){
+        int idBanca = Utilidades.getIdBanca(MonitoreoActivity.this);
+        int contador = 0;
+        for (BancaClass banca : bancas)
+        {
+            if(idBanca == banca.getId()){
+                break;
+            }
+            contador++;
+        }
+//        bancas.get((int)spinnerBanca.getSelectedItemId());
+        spinnerBanca.setSelection(contador);
+    }
+
+    public void buscarTicket(String cadenaABuscar)
+    {
+        try{
+            if(tickets == null){
+                return;
+            }
+
+
+            if(tickets.length() > 0){
+
+                if(ticketsTmp.length() == 0)
+                    ticketsTmp = tickets;
+
+                tickets = new JSONArray();
+
+
+                Log.i("buscarTicket", tickets.toString());
+                int encontrados = 0;
+                for(int i=0; i < ticketsTmp.length(); i++){
+                    JSONObject t = ticketsTmp.getJSONObject(i);
+                    Log.e("buscarTicket1", "idTicket" + t.toString());
+                    if(t.getString("idTicket").indexOf(cadenaABuscar) != -1 && t.getInt("status") != 0){
+                        tickets.put(t);
+                        encontrados++;
+                    }
+                }
+
+                if(encontrados == 0){
+                    tickets = new JSONArray();
+                    Log.i("encontrados", tickets.toString());
+                }
+
+                updateTable(tickets);
+            }
+            else if(tickets.length() == 0 && ticketsTmp.length() > 0 && cadenaABuscar.equals("") == false){
+
+                Log.i("buscarTicket", tickets.toString());
+                int encontrados = 0;
+                for(int i=0; i < ticketsTmp.length(); i++){
+                    JSONObject t = ticketsTmp.getJSONObject(i);
+                    Log.e("buscarTicket", "idTicket2" + t.getString("idTicket"));
+                    if(t.getString("idTicket").indexOf(cadenaABuscar) != -1 && t.getInt("status") != 0){
+                        tickets.put(t);
+                        encontrados++;
+                    }
+                }
+
+                if(encontrados == 0){
+                    tickets = new JSONArray();
+                    Log.i("encontrados", tickets.toString());
+                }
+
+                updateTable(tickets);
+            }
+            else if(tickets.length() == 0 && ticketsTmp.length() > 0 && cadenaABuscar.equals("") == true){
+
+
+
+                tickets = ticketsTmp;
+
+                updateTable(tickets);
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
 }

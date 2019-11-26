@@ -121,7 +121,8 @@ public class DuplicarAvanzadoDialog extends AppCompatDialogFragment {
                                 else{
                                     descripcion = spinner.getSelectedItem().toString();
                                     itemIndex = Arrays.asList(PrincipalFragment.listDescripcionLoterias).indexOf(descripcion);
-                                    idLoteria = Utilidades.toInt(PrincipalFragment.idLoteriasMap.get(itemIndex));
+                                    //idLoteria = Utilidades.toInt(PrincipalFragment.idLoteriasMap.get(itemIndex));
+                                    idLoteria = PrincipalFragment.loteriasLista.get(itemIndex).getId();
                                 }
 
                                 List<JugadaClass> jugadas = jugadasPertenecientesALoteria(loteria.getId());

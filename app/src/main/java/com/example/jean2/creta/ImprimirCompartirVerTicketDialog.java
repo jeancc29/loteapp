@@ -765,6 +765,7 @@ public class ImprimirCompartirVerTicketDialog extends AppCompatDialogFragment {
 
         Log.e("llenarJugadaLoterias", "prueba: " + result);
         VentasClass ventasClass = null;
+        errores = 0;
         Gson gson = new GsonBuilder().create();
         try (com.google.gson.stream.JsonReader reader1 = new com.google.gson.stream.JsonReader(new StringReader(result))){
             reader1.beginObject();
