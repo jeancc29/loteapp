@@ -1503,6 +1503,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
             super.onPostExecute(result);
             Main2Activity.progressBarToolbar.setVisibility(View.GONE);
             if(!result.equals("Error")){
+                idVenta = null;
                 if(llenarVentasLoteriasTickets(result) == false)
                     return;
 
@@ -1513,6 +1514,8 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                 limpiar();
                 fillSpinner();
                 setDescuento();
+
+
 
                 if(ckbPrint.isChecked()){
                     //Utilidades.imprimir(mContext,response, 1);
