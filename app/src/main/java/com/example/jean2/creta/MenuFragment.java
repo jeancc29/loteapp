@@ -37,6 +37,7 @@ import static android.content.Context.BLUETOOTH_SERVICE;
  */
 public class MenuFragment extends Fragment implements DuplicarDialog.DuplicarDialogListener {
 
+    Button btnRegistrarPremios;
     Button btnMonitoreo;
     Button btnHistoricoVentas;
     Button btnVentas;
@@ -59,6 +60,18 @@ public class MenuFragment extends Fragment implements DuplicarDialog.DuplicarDia
         View view = inflater.inflate(R.layout.fragment_menu, container, false);
 
        // mQueue = Volley.newRequestQueue(mContext);
+
+        btnRegistrarPremios = (Button)view.findViewById(R.id.btnRegistrarPremios);
+        if(Utilidades.getAdministrador(mContext) == false){
+            btnRegistrarPremios.setVisibility(View.GONE);
+        }
+        btnRegistrarPremios.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getContext(), RegistrarPremios.class);
+                startActivity(intent);
+            }
+        });
 
         btnMonitoreo = (Button)view.findViewById(R.id.btnMonitoreo);
         btnMonitoreo.setOnClickListener(new View.OnClickListener() {

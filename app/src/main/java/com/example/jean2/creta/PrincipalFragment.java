@@ -1465,6 +1465,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                         Log.e("guardarHttpError", answer.toString());
 
                     }
+
                     Log.e("guardarHttp", urlConnection.getResponseMessage());
                     return "Error";
                 }
@@ -1489,13 +1490,17 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
 
             } catch (Exception e) {
+                result.append("Error");
                 e.printStackTrace();
             } finally {
                 urlConnection.disconnect();
+
+                urlConnection = null;
+                return result.toString();
             }
 
 
-            return result.toString();
+            //return result.toString();
         }
 
         @Override
@@ -1558,6 +1563,10 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
             }
         }
     }
+
+
+
+
 
 
     //IndexPostHttp

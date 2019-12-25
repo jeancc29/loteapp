@@ -38,4 +38,12 @@ public class MySingleton {
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         requestQueue.add(request);
     }
+
+    public <T> void addToRequestQueue(Request<T> request, int initialTimeOutMs){
+        request.setRetryPolicy(new DefaultRetryPolicy(
+                initialTimeOutMs,
+                0,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        requestQueue.add(request);
+    }
 }

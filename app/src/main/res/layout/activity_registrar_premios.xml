@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.jean2.creta.RegistrarPremios"
+    android:orientation="vertical">
+
+    <include layout="@layout/toolbar_monitoreo"/>
+
+    <ProgressBar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:id="@+id/progressBarPrincipal"
+        />
+
+    <Spinner
+        android:id="@+id/spinnerLoterias"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="2dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginLeft="30dp"
+        android:padding="10dp"
+        />
+
+
+
+
+
+
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:layout_editor_absoluteX="9dp"
+                tools:layout_editor_absoluteY="301dp"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="40dp"
+                android:layout_marginRight="40dp"
+                >
+
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/txtPrimera"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="1ra"
+                    android:maxLines="1"
+                    android:inputType="number"
+                    android:imeOptions="actionNext"
+                    android:maxLength="2"
+
+                    />
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:layout_editor_absoluteX="9dp"
+                tools:layout_editor_absoluteY="301dp"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="40dp"
+                android:layout_marginRight="40dp">
+
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/txtSegunda"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="2da"
+                    android:maxLines="1"
+                    android:inputType="number"
+                    android:imeOptions="actionNext"
+                    android:maxLength="2"/>
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:layout_editor_absoluteX="9dp"
+                tools:layout_editor_absoluteY="301dp"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="40dp"
+                android:layout_marginRight="40dp"
+                >
+
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/txtTercera"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="3ra"
+                    android:maxLines="1"
+                    android:inputType="number"
+                    android:imeOptions="actionNext"
+                    android:maxLength="2"/>
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:layout_editor_absoluteX="9dp"
+                tools:layout_editor_absoluteY="301dp"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="40dp"
+                android:layout_marginRight="40dp"
+                >
+
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/txtPick3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Pick 3"
+                    android:maxLines="1"
+                    android:inputType="number"
+                    android:imeOptions="actionNext"
+                    android:maxLength="3"/>
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:layout_editor_absoluteX="9dp"
+                tools:layout_editor_absoluteY="301dp"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="40dp"
+                android:layout_marginRight="40dp">
+
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/txtPick4"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Pick 4"
+                    android:maxLines="1"
+                    android:inputType="number"
+                    android:imeOptions="actionNext"
+                    android:maxLength="4"/>
+            </android.support.design.widget.TextInputLayout>
+
+
+            <Button
+                android:id="@+id/btnGuardar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/rounded_corners"
+                android:text="Guardar premios"
+                android:layout_marginLeft="40dp"
+                android:layout_marginRight="40dp"
+                tools:layout_editor_absoluteX="0dp"
+                tools:layout_editor_absoluteY="457dp" />
+
+            <Button
+                android:id="@+id/btnBorrar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/rounded_red_corners"
+                android:text="Borrar premios"
+                android:layout_marginLeft="40dp"
+                android:layout_marginRight="40dp"
+                tools:layout_editor_absoluteX="0dp"
+                tools:layout_editor_absoluteY="457dp"
+                android:layout_marginTop="5dp"
+                android:textColor="@color/WHITE"/>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+
+</LinearLayout>

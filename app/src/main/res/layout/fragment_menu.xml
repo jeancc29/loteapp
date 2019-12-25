@@ -16,6 +16,14 @@
         android:orientation="vertical">
 
         <Button
+            android:id="@+id/btnRegistrarPremios"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Registrar Premios"
+            android:paddingBottom="25dp"
+            android:paddingTop="25dp"/>
+
+        <Button
             android:id="@+id/btnVentas"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
