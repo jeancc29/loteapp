@@ -317,6 +317,7 @@ public class MonitoreoActivity extends AppCompatActivity {
             Toast.makeText(mContext, "No hay datos", Toast.LENGTH_SHORT).show();
             return;
         }
+
         for(int i=0; i < datos.length(); i++){
             try {
 

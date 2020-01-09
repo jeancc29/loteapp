@@ -47,8 +47,10 @@
         android:roundIcon="@mipmap/ic_loterias_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".RegistrarPremios"
-            android:parentActivityName=".Main2Activity"></activity>
+        <activity android:name=".Historico"></activity>
+        <activity
+            android:name=".RegistrarPremios"
+            android:parentActivityName=".Main2Activity" />
         <activity
             android:name=".BluetoothDevices"
             android:parentActivityName=".Main2Activity" />

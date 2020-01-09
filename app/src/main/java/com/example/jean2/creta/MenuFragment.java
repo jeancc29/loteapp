@@ -86,7 +86,8 @@ public class MenuFragment extends Fragment implements DuplicarDialog.DuplicarDia
         btnHistoricoVentas.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getContext(), HistoricoVentasActivity.class);
+//                Intent intent = new Intent(getContext(), HistoricoVentasActivity.class);
+                Intent intent = new Intent(getContext(), Historico.class);
                 startActivity(intent);
             }
         });
