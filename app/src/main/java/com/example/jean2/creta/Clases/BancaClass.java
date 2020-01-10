@@ -10,6 +10,13 @@ public class BancaClass {
     public int imprimirCodigoQr;
     public double descontar;
     public double deCada;
+    public double ventas;
+    public double comisiones;
+    public double descuentos;
+    public double neto;
+    public double balanceActual;
+    public double premios;
+    public int ticketsPendientes;
 
     public BancaClass(){}
 
@@ -96,5 +103,61 @@ public class BancaClass {
 
     public void setDeCada(double deCada) {
         this.deCada = deCada;
+    }
+
+    public double getVentas() {
+        return ventas;
+    }
+
+    public void setVentas(double ventas) {
+        this.ventas = ventas;
+    }
+
+    public double getComisiones() {
+        return comisiones;
+    }
+
+    public void setComisiones(double comisiones) {
+        this.comisiones = comisiones;
+    }
+
+    public double getDescuentos() {
+        return descuentos;
+    }
+
+    public void setDescuentos(double descuentos) {
+        this.descuentos = descuentos;
+    }
+
+    public double getNeto() {
+        return neto;
+    }
+
+    public void setNeto(double neto) {
+        this.neto = neto;
+    }
+
+    public double getBalanceActual() {
+        return balanceActual;
+    }
+
+    public void setBalanceActual(double balanceActual) {
+        this.balanceActual = balanceActual;
+    }
+
+    public double getPremios() {
+        return premios;
+    }
+
+    public void setPremios(double premios) {
+        this.premios = premios;
+    }
+
+    public int getTicketsPendientes() {
+        return ticketsPendientes;
+    }
+
+    public void setTicketsPendientes(int ticketsPendientes) {
+        this.ticketsPendientes = ticketsPendientes;
     }
 }

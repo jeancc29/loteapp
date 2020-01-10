@@ -7,14 +7,18 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -27,15 +31,19 @@ import com.android.volley.ServerError;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.example.jean2.creta.Clases.BancaClass;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 public class Historico extends AppCompatActivity {
+    private Toolbar toolbar;
     Context mContext;
     TableLayout table;
     public static ProgressBar progressBarToolbar;
@@ -45,6 +53,9 @@ public class Historico extends AppCompatActivity {
     private DatePickerDialog.OnDateSetListener mDateSetListenerHasta;
     private DatePickerDialog.OnDateSetListener mDateSetListenerFinal;
     Button btnBuscar;
+    Spinner spinnerOpcion;
+    List<BancaClass> bancas = new ArrayList<>();
+
 
 
 
@@ -55,7 +66,30 @@ public class Historico extends AppCompatActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         progressBarToolbar = (ProgressBar)findViewById(R.id.toolbar_progress_bar);
         mContext = this;
+        toolbar = findViewById(R.id.toolBar);
+        setSupportActionBar(toolbar);
+        toolbar.setTitle("Historico ventas");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        spinnerOpcion = (Spinner)findViewById(R.id.spinnerOpcion);
+        fillSpinner();
+        spinnerOpcion.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                // Get the spinner selected item text
+                //String selectedItemText = (String) adapterView.getItemAtPosition(i);
+                // Display the selected item into the TextView
+                //mTextView.setText("Selected : " + selectedItemText);
+                updatetable();
+            }
+
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+//                Toast.makeText(mContext,"No selection",Toast.LENGTH_LONG).show();
+            }
+        });
 
 
         table = (TableLayout)findViewById(R.id.tableTotalesPorLoteria);
@@ -111,7 +145,7 @@ public class Historico extends AppCompatActivity {
                 DatePickerDialog dialog = new DatePickerDialog(
                         mContext,
                         android.R.style.Theme_Holo_Light_Dialog_MinWidth,
-                        mDateSetListener,
+                        mDateSetListenerHasta,
                         year,month,day);
                 dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                 dialog.show();
@@ -163,6 +197,7 @@ public class Historico extends AppCompatActivity {
         }
 
         String jsonString = datosObj.toString();
+        bancas.clear();
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, datosObj,
                 new Response.Listener<JSONObject>() {
@@ -205,8 +240,21 @@ public class Historico extends AppCompatActivity {
 //                                txtBalance.setBackgroundColor(Color.parseColor("#eae9e9"));
 //                            }
 
-
-                            updatetable(response.getJSONArray("bancas"));
+                            JSONArray jsonArrayBancas = response.getJSONArray("bancas");
+                            for(int i=0; i< jsonArrayBancas.length(); i++){
+                                BancaClass bancaClass = new BancaClass();
+                                JSONObject jsonObject = jsonArrayBancas.getJSONObject(i);
+                                bancaClass.setDescripcion(jsonObject.getString("descripcion"));
+                                bancaClass.setVentas(jsonObject.getDouble("ventas"));
+                                bancaClass.setComisiones(jsonObject.getDouble("comisiones"));
+                                bancaClass.setDescuentos(jsonObject.getDouble("descuentos"));
+                                bancaClass.setPremios(jsonObject.getDouble("premios"));
+                                bancaClass.setNeto(jsonObject.getDouble("totalNeto"));
+                                bancaClass.setBalanceActual(jsonObject.getDouble("balanceActual"));
+                                bancaClass.setTicketsPendientes(jsonObject.getInt("pendientes"));
+                                bancas.add(bancaClass);
+                            }
+                            updatetable();
                         } catch (JSONException e) {
                             Log.d("Error: ", e.toString());
                             e.printStackTrace();
@@ -246,26 +294,22 @@ public class Historico extends AppCompatActivity {
         MySingleton.getInstance(mContext).addToRequestQueue(request);
     }
 
-    public  void updatetable(JSONArray datos){
-        Log.d("JugadasFragment:", mContext.toString());
+    public  void updatetable(){
 
-
-        if(datos == null){
+        if(bancas == null){
             return ;
         }
         table.removeAllViews();
         int idRow = 0;
 
-        if(datos.length() == 0){
+        if(bancas.size() == 0){
             table.removeAllViews();
             Toast.makeText(mContext, "No hay datos", Toast.LENGTH_SHORT).show();
             return;
         }
-        for(int i=0; i < datos.length(); i++){
-            try {
-
-                JSONObject dato = datos.getJSONObject(i);
-
+        int i =0;
+        boolean primerCiclo = true;
+        for(BancaClass b : bancas){
 
                 LinearLayout.LayoutParams tableRowParams = new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
@@ -285,7 +329,7 @@ public class Historico extends AppCompatActivity {
 
 
 
-                if(i == 0){
+                if(primerCiclo){
                     /* add views to the row */
                     TableRow tableRow1 = new TableRow(mContext);
                     tableRow1.setId(idRow);
@@ -299,24 +343,51 @@ public class Historico extends AppCompatActivity {
                     tableRow1.addView(createTv("Neto", true, mContext, true));
                     tableRow1.addView(createTv("Balance", true, mContext, true));
                     table.addView(tableRow1);
+                    primerCiclo = false;
+                }
+
+
+
+                if(spinnerOpcion.getSelectedItem().toString().equals("Con ventas")){
+                    if(b.getVentas() <= 0){
+                        continue;
+                    }
+                }
+                else if(spinnerOpcion.getSelectedItem().toString().equals("Con premios")){
+                    if(b.getPremios() <= 0){
+                        continue;
+                    }
+                }
+                else if(spinnerOpcion.getSelectedItem().toString().equals("Con tickets pendientes")){
+                    if(b.getTicketsPendientes() <= 0){
+                        continue;
+                    }
                 }
                 /* add views to the row */
                 tableRow.setId(idRow);
-                tableRow.addView(createTv(dato.getString("descripcion"), false, mContext, true));
-                tableRow.addView(createTv(dato.getString("ventas"), false, mContext, true));
-                tableRow.addView(createTv(dato.getString("comisiones"), false, mContext, true));
-                tableRow.addView(createTv(dato.getString("descuentos"), false, mContext, true));
-                tableRow.addView(createTv(dato.getString("premios"), false, mContext, true));
+                tableRow.addView(createTv(b.getDescripcion(), false, mContext, true));
+                tableRow.addView(createTv(String.valueOf(b.getVentas()), false, mContext, true));
+                tableRow.addView(createTv(String.valueOf(b.getComisiones()), false, mContext, true));
+                tableRow.addView(createTv(String.valueOf(b.getDescuentos()), false, mContext, true));
+                tableRow.addView(createTv(String.valueOf(b.getPremios()), false, mContext, true));
 
-                TextView txtNeto = createTv(dato.getString("totalNeto"), false, mContext, true);
-                if(dato.getDouble("totalNeto") < 0){
+                TextView txtNeto = createTv(String.valueOf(b.getNeto()), false, mContext, true);
+                if(b.getNeto() < 0){
                     txtNeto.setBackgroundColor(Color.parseColor("#ffcccc"));
+                    txtNeto.setTextColor(Color.parseColor("#e22c2c"));
+                }else{
+                    txtNeto.setBackgroundColor(Color.parseColor("#bfdde0"));
+                    txtNeto.setTextColor(Color.parseColor("#095861"));
                 }
                 tableRow.addView(txtNeto);
 
-                TextView txtBalanceActual = createTv(dato.getString("balanceActual"), false, mContext, true);
-                if(dato.getDouble("balanceActual") < 0){
+                TextView txtBalanceActual = createTv(String.valueOf(b.getBalanceActual()), false, mContext, true);
+                if(b.getBalanceActual() < 0){
                     txtBalanceActual.setBackgroundColor(Color.parseColor("#ffcccc"));
+                    txtBalanceActual.setTextColor(Color.parseColor("#e22c2c"));
+                }else{
+                    txtBalanceActual.setBackgroundColor(Color.parseColor("#bfdde0"));
+                    txtBalanceActual.setTextColor(Color.parseColor("#095861"));
                 }
                 tableRow.addView(txtBalanceActual);
 
@@ -325,10 +396,7 @@ public class Historico extends AppCompatActivity {
 
                 table.addView(tableRow);
                 idRow++;
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-
+                i++;
         }
 
     }
@@ -360,4 +428,47 @@ public class Historico extends AppCompatActivity {
 
         return tv;
     }
+
+    public void fillSpinner(){
+        /********* Prepare value for spinner *************/
+        // jsonArrayVentas = jsonArrayVentas2;
+        String[] opcionesSpinner = new String[4];
+        int contador = 0;
+
+        opcionesSpinner[0] = "Con ventas";
+        opcionesSpinner[1] = "Todos";
+        opcionesSpinner[2] = "Con premios";
+        opcionesSpinner[3] = "Con tickets pendientes";
+
+
+
+
+        /********* Set value to spinner *************/
+        if(opcionesSpinner == null)
+            return;
+        try{
+            ArrayAdapter<String> adapter =new ArrayAdapter<String>(Historico.this,android.R.layout.simple_spinner_item, opcionesSpinner);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spinnerOpcion.setAdapter(adapter);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+//        seleccionarBancaPertenecienteAUsuario();
+    }
+
+
+//    public void seleccionarBancaPertenecienteAUsuario(){
+//        int idBanca = Utilidades.getIdBanca(Historico.this);
+//        int contador = 0;
+//        for (BancaClass banca : bancas)
+//        {
+//            if(idBanca == banca.getId()){
+//                break;
+//            }
+//            contador++;
+//        }
+////        bancas.get((int)spinnerBanca.getSelectedItemId());
+//        spinnerBanca.setSelection(contador);
+//    }
 }

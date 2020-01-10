@@ -10,7 +10,7 @@
     <include layout="@layout/toolbar_layout"/>
 
     <LinearLayout
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="2dp"
         android:layout_margin="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -60,6 +60,16 @@
             android:background="@drawable/rounded_corners"
             android:text="Buscar"
             android:textColor="#ffffff"
+            />
+
+        <Spinner
+            android:id="@+id/spinnerOpcion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="2dp"
+            android:layout_marginRight="30dp"
+            android:layout_marginLeft="30dp"
             />
     </LinearLayout>
 
