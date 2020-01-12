@@ -250,6 +250,7 @@ public class Historico extends AppCompatActivity {
                                 bancaClass.setDescuentos(jsonObject.getDouble("descuentos"));
                                 bancaClass.setPremios(jsonObject.getDouble("premios"));
                                 bancaClass.setNeto(jsonObject.getDouble("totalNeto"));
+                                bancaClass.setBalance(jsonObject.getDouble("balance"));
                                 bancaClass.setBalanceActual(jsonObject.getDouble("balanceActual"));
                                 bancaClass.setTicketsPendientes(jsonObject.getInt("pendientes"));
                                 bancas.add(bancaClass);
@@ -342,6 +343,7 @@ public class Historico extends AppCompatActivity {
                     tableRow1.addView(createTv("Premios", true, mContext, true));
                     tableRow1.addView(createTv("Neto", true, mContext, true));
                     tableRow1.addView(createTv("Balance", true, mContext, true));
+                    tableRow1.addView(createTv("Balance mas ventas", true, mContext, true));
                     table.addView(tableRow1);
                     primerCiclo = false;
                 }
@@ -380,6 +382,16 @@ public class Historico extends AppCompatActivity {
                     txtNeto.setTextColor(Color.parseColor("#095861"));
                 }
                 tableRow.addView(txtNeto);
+
+                TextView txtBalance = createTv(String.valueOf(b.getBalance()), false, mContext, true);
+                if(b.getBalanceActual() < 0){
+                    txtBalance.setBackgroundColor(Color.parseColor("#ffcccc"));
+                    txtBalance.setTextColor(Color.parseColor("#e22c2c"));
+                }else{
+                    txtBalance.setBackgroundColor(Color.parseColor("#bfdde0"));
+                    txtBalance.setTextColor(Color.parseColor("#095861"));
+                }
+                tableRow.addView(txtBalance);
 
                 TextView txtBalanceActual = createTv(String.valueOf(b.getBalanceActual()), false, mContext, true);
                 if(b.getBalanceActual() < 0){
