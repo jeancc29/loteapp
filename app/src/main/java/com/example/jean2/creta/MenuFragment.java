@@ -39,6 +39,7 @@ public class MenuFragment extends Fragment implements DuplicarDialog.DuplicarDia
 
     Button btnRegistrarPremios;
     Button btnMonitoreo;
+    Button btnHistoricoVentasAdministrador;
     Button btnHistoricoVentas;
     Button btnVentas;
     Button btnPagar;
@@ -82,18 +83,26 @@ public class MenuFragment extends Fragment implements DuplicarDialog.DuplicarDia
             }
         });
 
+        btnHistoricoVentasAdministrador = (Button)view.findViewById(R.id.btnHistoricoVentasAdministrador);
         btnHistoricoVentas = (Button)view.findViewById(R.id.btnHistoricoVentas);
+        if(Utilidades.getAdministrador(mContext) == false){
+            btnHistoricoVentas.setVisibility(View.VISIBLE);
+            btnHistoricoVentasAdministrador.setVisibility(View.GONE);
+        }else{
+            btnHistoricoVentas.setVisibility(View.GONE);
+            btnHistoricoVentasAdministrador.setVisibility(View.VISIBLE);
+        }
+        btnHistoricoVentasAdministrador.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getContext(), Historico.class);
+                startActivity(intent);
+            }
+        });
         btnHistoricoVentas.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent;
-//                Intent intent = new Intent(getContext(), HistoricoVentasActivity.class);
-                if(Utilidades.getAdministrador(mContext) == false){
-                    intent = new Intent(getContext(), HistoricoVentasActivity.class);
-                }else{
-                    intent = new Intent(getContext(), Historico.class);
-                }
-
+                Intent intent = new Intent(getContext(), HistoricoVentasActivity.class);
                 startActivity(intent);
             }
         });

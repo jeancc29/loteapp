@@ -24,7 +24,7 @@
             android:paddingTop="25dp"/>
 
             <Button
-                android:id="@+id/btnHistoricoVentas"
+                android:id="@+id/btnHistoricoVentasAdministrador"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Historico de ventas"
@@ -67,6 +67,14 @@
             android:text="Pagar ticket"
             android:paddingBottom="25dp"
             android:paddingTop="25dp"/>
+
+            <Button
+                android:id="@+id/btnHistoricoVentas"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Historico de ventas"
+                android:paddingBottom="25dp"
+                android:paddingTop="25dp"/>
 
         <Button
         android:id="@+id/btnAyuda"
