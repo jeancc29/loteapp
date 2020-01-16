@@ -363,7 +363,7 @@ public class RegistrarPremios extends AppCompatActivity {
         });
 
         //mQueue.add(request);
-        MySingleton.getInstance(RegistrarPremios.this).addToRequestQueue(request, 10000);
+        MySingleton.getInstance(RegistrarPremios.this).addToRequestQueue(request, 20000);
     }
 
     public boolean validarCampos(LoteriaClass l)

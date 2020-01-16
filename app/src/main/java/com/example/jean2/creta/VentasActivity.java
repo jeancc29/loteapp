@@ -266,7 +266,7 @@ public class VentasActivity extends AppCompatActivity {
         });
 
 //        mQueue.add(request);
-        MySingleton.getInstance(mContext).addToRequestQueue(request);
+        MySingleton.getInstance(mContext).addToRequestQueue(request, 20000);
     }
 
 
