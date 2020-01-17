@@ -259,9 +259,17 @@ public class Main2Activity extends AppCompatActivity implements DuplicarDialog.D
 
     }
 
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        mContext.startService(new Intent(mContext, VerificarAccesoAlSistemaService.class));
+        mContext.startService(new Intent(mContext, ActualizarService.class));
+//        Toast.makeText(mContext, "On resume", Toast.LENGTH_SHORT).show();
+    }
+
     public void iniciarServicio(){
         //mContext.startService(new Intent(getActivity(), VerificarAccesoAlSistemaService.class));
-        startService(new Intent(Main2Activity.this, ActualizarService.class));
+//        startService(new Intent(Main2Activity.this, ActualizarService.class));
     }
 
     public String getVersionName(Context ctx){

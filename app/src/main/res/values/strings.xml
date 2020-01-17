@@ -42,6 +42,7 @@
     <string name="icon_delete">&#xf37f;</string>
     <string name="icon_bluetooth">&#xf116;</string>
     <string name="icon_camara">&#xf2d3;</string>
+    <string name="icon_back">&#xf2ca;</string>
 
 
     <string-array name="tickets">

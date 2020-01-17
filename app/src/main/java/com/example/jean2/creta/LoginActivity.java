@@ -83,6 +83,7 @@ public class LoginActivity extends AppCompatActivity {
         if(Utilidades.esSessionGuardada(LoginActivity.this)){
             Intent intent = new Intent(LoginActivity.this, Main2Activity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         }
     }

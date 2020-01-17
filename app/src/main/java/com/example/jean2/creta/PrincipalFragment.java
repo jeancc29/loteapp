@@ -176,7 +176,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 //    }
 
     public void iniciarServicio(){
-        mContext.startService(new Intent(getActivity(), VerificarAccesoAlSistemaService.class));
+//        mContext.startService(new Intent(getActivity(), VerificarAccesoAlSistemaService.class));
        // mContext.startService(new Intent(getActivity(), ActualizarService.class));
     }
 

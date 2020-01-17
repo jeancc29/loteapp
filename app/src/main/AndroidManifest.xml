@@ -47,7 +47,9 @@
         android:roundIcon="@mipmap/ic_loterias_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".DashboardActivity"></activity>
+        <activity
+            android:name=".DashboardActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"></activity>
         <activity
             android:name=".Historico"
             android:parentActivityName=".Main2Activity" />
@@ -88,7 +90,7 @@
             android:parentActivityName=".Main2Activity" />
         <activity
             android:name=".Main2Activity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
+            android:configChanges="orientation|keyboardHidden|screenSize" />
         <activity
             android:name=".MonitoreoActivity"
             android:parentActivityName=".Main2Activity" /> <!-- <application android:name="YOURPACKAGENAME.AppController" -->

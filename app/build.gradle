@@ -7,8 +7,8 @@ android {
 //        applicationId "com.example.jean2.creta"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 34
-        versionName "1.29"
+        versionCode 35
+        versionName "1.30"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -48,5 +48,5 @@ dependencies {
     implementation 'com.github.mazenrashed:Printooth:1.2.1'
     implementation 'com.android.support:cardview-v7:28.0.0'
     implementation 'com.google.code.gson:gson:2.8.2'
-
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 }
