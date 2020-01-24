@@ -35,7 +35,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class Utilidades {
-    public static String URL = "https://loterias.ml";
+    public static String URL = "https://loteriasdo.ml";
 
     public static boolean guardarUsuario(Context context, boolean recordar, JSONObject jsonObjectUsuario){
         SharedPreferences preferences = context.getSharedPreferences("usuario", Context.MODE_PRIVATE);

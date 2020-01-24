@@ -2,17 +2,24 @@ package com.example.jean2.creta;
 
 import android.app.DatePickerDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.AsyncTask;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -25,6 +32,9 @@ import com.android.volley.ServerError;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.example.jean2.creta.Clases.JugadaClass;
+import com.example.jean2.creta.Clases.LoteriaClass;
+import com.example.jean2.creta.Clases.SorteosClass;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
@@ -32,14 +42,25 @@ import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Type;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 public class DashboardActivity extends AppCompatActivity {
     private BarChart barChart;
@@ -49,6 +70,8 @@ public class DashboardActivity extends AppCompatActivity {
     TextView_Icon txtBack;
     public static ProgressBar progressBar;
     TableLayout tableTotalesPorLoteria;
+    Spinner spinnerLoterias;
+    List<LoteriaClass> loterias = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +82,34 @@ public class DashboardActivity extends AppCompatActivity {
         txtFecha = (TextView) findViewById(R.id.txtFecha);
         barChart = findViewById(R.id.chart1);
         tableTotalesPorLoteria = (TableLayout)findViewById(R.id.tableTotalesPorLoteria);
+        spinnerLoterias = (Spinner) findViewById(R.id.spinnerLoterias);
+        spinnerLoterias.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                // Get the spinner selected item text
+                //String selectedItemText = (String) adapterView.getItemAtPosition(i);
+                // Display the selected item into the TextView
+                //mTextView.setText("Selected : " + selectedItemText);
+                if(loterias.size() ==0)
+                    return;
+
+                LoteriaClass loteria = loterias.get((int)spinnerLoterias.getSelectedItemId());
+                for(SorteosClass s : loteria.getSorteos()){
+                    for(JugadaClass j: s.getJugadas()){
+                        Log.e("channel", j.getJugada());
+                    }
+                }
+
+
+            }
+
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                Toast.makeText(DashboardActivity.this,"No selection",Toast.LENGTH_LONG).show();
+            }
+        });
 
         txtBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -107,7 +158,9 @@ public class DashboardActivity extends AppCompatActivity {
         };
 
         startChart();
-        getVentas();
+//        getVentas();
+//        dashboardHttp dashboardHttp = new dashboardHttp();
+//        dashboardHttp.execute();
     }
 
     void startChart()
@@ -221,6 +274,65 @@ public class DashboardActivity extends AppCompatActivity {
                             updateChart(response.getJSONArray("ventasGrafica"));
                             updateTableTotalesPorLoteria(response.getJSONArray("loterias"), response.getInt("totalVentasLoterias"), response.getInt("totalPremiosLoterias"));
 
+                            JSONArray jsonArrayLoterias = response.getJSONArray("loteriasJugadasDashboard");
+                            Gson gson = new Gson();
+                                Type listType = new TypeToken<List<LoteriaClass>>(){}.getType();
+                                List<LoteriaClass> posts = gson.fromJson(jsonArrayLoterias.toString(), listType);
+
+                                Log.e("loterias", jsonArrayLoterias.toString());
+                                loterias = posts;
+//                            for(int i=0; i < jsonArrayLoterias.length(); i++){
+//                                JSONObject object = jsonArrayLoterias.getJSONObject(i);
+//                                JSONArray jsonArraySorteos = object.getJSONArray("sorteos");
+//
+//                                LoteriaClass l = new LoteriaClass();
+//                                List<SorteosClass> sorteos = new ArrayList<>();
+//
+//
+//                                l.setDescripcion(object.getString("descripcion"));
+//
+//                                Gson gson = new Gson();
+//                                Type listType = new TypeToken<List<SorteosClass>>(){}.getType();
+//                                List<SorteosClass> posts = gson.fromJson(jsonArraySorteos.toString(), listType);
+//                                l.setSorteos(posts);
+//                                Log.e("sorteos", posts.toString());
+//
+////                                for(int c=0; c < jsonArraySorteos.length(); c++){
+////                                    SorteosClass s = new SorteosClass();
+////                                    List<JugadaClass> jugadas = new ArrayList<>();
+////                                    JSONObject jsonObjectSorteo = jsonArraySorteos.getJSONObject(c);
+//////                                    JSONArray jsonArrayJugadas = jsonObjectSorteo.getJSONArray("jugadas");
+////                                    JSONArray jsonArrayJugadas;
+////
+////
+////
+////
+//////                                    for(int c2=0; c2 < jsonArrayJugadas.length(); c2++){
+//////                                        JugadaClass j = new JugadaClass();
+//////                                        JSONObject jsonObjectJugada = jsonArrayJugadas.getJSONObject(c2);
+//////                                        j.setJugada(jsonObjectJugada.getString("jugada"));
+//////                                        j.setDescripcion(jsonObjectJugada.getString("descripcion"));
+//////
+//////                                        jugadas.add(j);
+//////                                    }
+////
+////
+//////                                    jsonObjectSorteo.getJSONArray("jugadas");
+//////                                    Log.d("jugadas", jsonObjectSorteo.getJSONArray("jugadas").toString());
+////
+//////                                    s.setDescripcion(jsonObjectSorteo.getString("descripcion"));
+//////                                    s.setJugadas(jugadas);
+//////                                    sorteos.add(s);
+////                                }
+//
+////                                for(SorteosClass s : l.getSorteos()){
+////                                    Log.e("sorteos", s.getDescripcion());
+////                                }
+//
+////                                l.setSorteos(sorteos);
+//                                loterias.add(l);
+//                            }
+                            fillSpinner();
                         } catch (JSONException e) {
                             Log.d("Error: ", e.toString());
                             e.printStackTrace();
@@ -258,6 +370,164 @@ public class DashboardActivity extends AppCompatActivity {
 
 //        mQueue.add(request);
         MySingleton.getInstance(DashboardActivity.this).addToRequestQueue(request, 20000);
+    }
+
+    public  class dashboardHttp extends AsyncTask<String, String, String> {
+
+        HttpURLConnection urlConnection;
+        JSONObject data;
+
+        public dashboardHttp() {
+        }
+
+        @Override
+        protected String doInBackground(String... args) {
+
+            StringBuilder result = new StringBuilder();
+
+            try {
+                //URL url = new URL("https://api.github.com/users/dmnugent80/repos");
+                String urlString = Utilidades.URL +"/api/dashboard?fecha=" + txtFecha.getText() + "&idUsuario=" + String.valueOf(Utilidades.getIdUsuario(DashboardActivity.this));
+                URL url = new URL(urlString);
+                urlConnection = (HttpURLConnection) url.openConnection();
+//                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+                urlConnection.setRequestProperty("Content-Type", "application/json");
+                urlConnection.setRequestMethod("GET");
+
+
+
+
+                if (urlConnection.getResponseCode() != 201){
+                    StringBuffer answer = new StringBuffer();
+                    InputStream inputstream = null;
+
+                    if(urlConnection.getResponseCode() == 500 ) {
+
+                        inputstream = urlConnection.getErrorStream();
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(inputstream));
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            answer.append(line);
+                        }
+                        Log.e("guardarHttpError", answer.toString());
+
+                    }
+
+                    Log.e("guardarHttp", urlConnection.getResponseMessage());
+                    return "Error";
+                }
+
+                //GET THE REQUEST DATA
+                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    result.append(line);
+                }
+
+                //SE LLENAN LAS LISTAS CON LOS JSONSTRING
+                Log.i("guardarHttp", result.toString());
+
+            } catch (Exception e) {
+                result.append("Error");
+                e.printStackTrace();
+            } finally {
+                urlConnection.disconnect();
+
+                urlConnection = null;
+                return result.toString();
+            }
+
+
+            //return result.toString();
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            progressBar.setVisibility(View.GONE);
+            if(!result.equals("Error")){
+//                idVenta = null;
+//                if(llenarVentasLoteriasTickets(result) == false)
+//                    return;
+//
+//                if(errores == 1){
+//                    Toast.makeText(mContext, "Error: " +mensaje, Toast.LENGTH_SHORT).show();
+//                    return;
+//                }
+//                limpiar();
+//                fillSpinner();
+//                setDescuento();
+//
+//
+//
+//                if(ckbPrint.isChecked()){
+//                    //Utilidades.imprimir(mContext,response, 1);
+//                    Utilidades.imprimir(mContext, venta, 1);
+//                }
+//                else if(ckbSms.isChecked()){
+//                    venta.setImg(imgHtmlTmp);
+//                    PrincipalFragment.compartirTicketHttp c = new PrincipalFragment.compartirTicketHttp(venta, true);
+//                    c.execute();
+//                }
+//                else if(ckbWhatsapp.isChecked()){
+//                    venta.setImg(imgHtmlTmp);
+//                    PrincipalFragment.compartirTicketHttp c = new PrincipalFragment.compartirTicketHttp(venta, false);
+//                    c.execute();
+//                }
+
+
+            }else{
+//                Toast.makeText(mContext, "Error del servidor", Toast.LENGTH_SHORT).show();
+//                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        switch (which){
+//                            case DialogInterface.BUTTON_POSITIVE:
+//                                //Yes button clicked
+//                                guardar();
+//                                break;
+//
+//                            case DialogInterface.BUTTON_NEGATIVE:
+//                                //No button clicked
+//                                break;
+//                        }
+//                    }
+//                };
+//
+//
+//                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+//                builder.setMessage("Ha ocurrido un error de conexion, desea realizar la venta otra vez?").setPositiveButton("Si", dialogClickListener)
+//                        .setNegativeButton("No", dialogClickListener).show();
+            }
+        }
+    }
+
+    public void fillSpinner(){
+        /********* Prepare value for spinner *************/
+        // jsonArrayVentas = jsonArrayVentas2;
+        String[] loteriasSpinner = new String[loterias.size()];
+        int contador = 0;
+        for (LoteriaClass loteria : loterias)
+        {
+            loteriasSpinner[contador] = loteria.getDescripcion();
+            contador++;
+        }
+
+
+        /********* Set value to spinner *************/
+        if(loteriasSpinner == null)
+            return;
+        try{
+            ArrayAdapter<String> adapter =new ArrayAdapter<String>(DashboardActivity.this,android.R.layout.simple_spinner_item, loteriasSpinner);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spinnerLoterias.setAdapter(adapter);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+//        seleccionarBancaPertenecienteAUsuario();
     }
 
     public void updateChart(JSONArray datos)
@@ -365,6 +635,8 @@ public class DashboardActivity extends AppCompatActivity {
 
         //***** IMPORTANT
     }
+
+
     public  void updateTableTotalesPorLoteria(JSONArray datos, int totalVentasLoterias, int totalPremiosLoterias){
 
 
@@ -380,61 +652,42 @@ public class DashboardActivity extends AppCompatActivity {
             Toast.makeText(DashboardActivity.this, "No hay datos", Toast.LENGTH_SHORT).show();
             return;
         }
+
+        LinearLayout.LayoutParams tableRowParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        int color_normal_gris = 1;
+
         for(int i=0; i < datos.length(); i++){
             try {
 
                 JSONObject dato = datos.getJSONObject(i);
 
-
-                LinearLayout.LayoutParams tableRowParams = new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT);
-
-                /* create a table row */
-                TableRow tableRow = new TableRow(DashboardActivity.this);
-                tableRow.setLayoutParams(tableRowParams);
-
-                if((i % 2) != 0){
-                    tableRow.setBackgroundColor(Color.parseColor("#eae9e9"));
-                }
-
-                tableRow.setId(idRow);
-
-
-
+                //DESCRIPCION
+                String ventas = (dato.getString("ventas").equals("null")) ? "0" : dato.getString("ventas");
+                String premios = (dato.getString("premios").equals("null")) ? "0" : dato.getString("premios");
+                String descripcion = (dato.getString("descripcion").equals("null")) ? "" : dato.getString("descripcion");
 
                 if(i == 0){
                     /* add views to the row */
-                    TableRow tableRow1 = new TableRow(DashboardActivity.this);
-                    tableRow1.setId(idRow);
-                    tableRow1.setLayoutParams(tableRowParams);
+                    TableRow tableRow = createRow(tableRowParams, idRow, color_normal_gris, new TextView[]{createTv("Loteria", 1, DashboardActivity.this, true), createTv("Venta total", 1, DashboardActivity.this, true), createTv("Premios", 1, DashboardActivity.this, true)});
+                    tableTotalesPorLoteria.addView(tableRow);
                     idRow ++;
-                    tableRow1.addView(createTv("Loteria", 1, DashboardActivity.this, true));
-                    tableRow1.addView(createTv("Venta total", 1, DashboardActivity.this, true));
-                    tableRow1.addView(createTv("Premios", 1, DashboardActivity.this, true));
-                    tableTotalesPorLoteria.addView(tableRow1);
                 }
+
                 /* add views to the row */
-                tableRow.setId(idRow);
-                String ventas = (dato.getString("ventas").equals("null")) ? "0" : dato.getString("ventas");
-                String premios = (dato.getString("premios").equals("null")) ? "0" : dato.getString("premios");
-                tableRow.addView(createTv(dato.getString("descripcion"), 3, DashboardActivity.this, true));
-                tableRow.addView(createTv(ventas, 3, DashboardActivity.this, true));
-                tableRow.addView(createTv(premios, 3, DashboardActivity.this, true));
+                if((i % 2) != 0){
+                    color_normal_gris = 2;
+                }else{
+                    color_normal_gris = 1;
+                }
 
-
-
-
+                TableRow tableRow = createRow(tableRowParams, idRow, color_normal_gris, new TextView[]{createTv(descripcion, 3, DashboardActivity.this, true), createTv(ventas, 3, DashboardActivity.this, true), createTv(premios, 3, DashboardActivity.this, true)});
                 tableTotalesPorLoteria.addView(tableRow);
-                idRow++;
 
+                idRow++;
                 if(i + 1 < datos.length() == false){
-                    TableRow tableRow1 = new TableRow(DashboardActivity.this);
-                    tableRow1.setId(idRow);
-                    tableRow1.setLayoutParams(tableRowParams);
-                    tableRow1.addView(createTv("Total", 2, DashboardActivity.this, true));
-                    tableRow1.addView(createTv(String.valueOf(totalVentasLoterias), 2, DashboardActivity.this, true));
-                    tableRow1.addView(createTv(String.valueOf(totalPremiosLoterias), 2, DashboardActivity.this, true));
+                    TableRow tableRow1 = createRow(tableRowParams, idRow, 1, new TextView[]{createTv("Total", 2, DashboardActivity.this, true), createTv(String.valueOf(totalVentasLoterias), 2, DashboardActivity.this, true), createTv(String.valueOf(totalPremiosLoterias), 2, DashboardActivity.this, true)});
                     tableTotalesPorLoteria.addView(tableRow1);
                 }
             }catch (Exception e){
@@ -472,6 +725,25 @@ public class DashboardActivity extends AppCompatActivity {
             tv.setGravity(Gravity.CENTER);
 
         return tv;
+    }
+
+    private TableRow createRow(LinearLayout.LayoutParams tableRowParams, int id, int color_normal_gris, TextView[] textViews)
+    {
+
+        /* create a table row */
+        TableRow tableRow = new TableRow(DashboardActivity.this);
+        tableRow.setLayoutParams(tableRowParams);
+
+        //GRIS
+        if(color_normal_gris == 2){
+            tableRow.setBackgroundColor(Color.parseColor("#eae9e9"));
+        }
+
+        for(int i=0; i < textViews.length ; i++){
+            tableRow.addView(textViews[i]);
+        }
+
+        return tableRow;
     }
 
 }

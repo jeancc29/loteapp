@@ -208,8 +208,12 @@ public class RegistrarPremios extends AppCompatActivity {
                 LoteriaClass loteria = loterias.get((int)spinnerLoteria.getSelectedItemId());
                 if(!loteria.primera.equals("null"))
                     txtPrimera.setText(loteria.primera);
-                else
+                else{
                     txtPrimera.setText("");
+//                    if(existeSorteo(loteria.sorteos, "Directo") == true || existeSorteo(loteria.sorteos, "Pale") == true || existeSorteo(loteria.sorteos, "Tripleta") == true || existeSorteo(loteria.sorteos, "Super pale") == true){
+//                        txtPrimera.requestFocus();
+//                    }
+                }
 
                 if(!loteria.segunda.equals("null"))
                     txtSegunda.setText(loteria.segunda);
@@ -223,8 +227,13 @@ public class RegistrarPremios extends AppCompatActivity {
 
                 if(!loteria.pick3.equals("null"))
                     txtPick3.setText(loteria.pick3);
-                else
+                else{
                     txtPick3.setText("");
+//                    if(existeSorteo(loteria.sorteos, "Pick 3 Box") == true || existeSorteo(loteria.sorteos, "Pick 3 Straight")){
+//                        txtPick3.requestFocus();
+//                    }
+                }
+
 
                 if(!loteria.pick4.equals("null"))
                     txtPick4.setText(loteria.pick4);
