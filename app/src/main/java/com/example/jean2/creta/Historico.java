@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -324,9 +325,30 @@ public class Historico extends AppCompatActivity {
             Toast.makeText(mContext, "No hay datos", Toast.LENGTH_SHORT).show();
             return;
         }
+
+        List<BancaClass> bancasTemporal = new ArrayList<>();
+        for(BancaClass b : bancas){
+            if(spinnerOpcion.getSelectedItem().toString().equals("Con ventas")){
+                if(b.getVentas() <= 0){
+                    continue;
+                }
+            }
+            else if(spinnerOpcion.getSelectedItem().toString().equals("Con premios")){
+                if(b.getPremios() <= 0){
+                    continue;
+                }
+            }
+            else if(spinnerOpcion.getSelectedItem().toString().equals("Con tickets pendientes")){
+                if(b.getTicketsPendientes() <= 0){
+                    continue;
+                }
+            }
+
+            bancasTemporal.add(b);
+        }
         int i =0;
         boolean primerCiclo = true;
-        for(BancaClass b : bancas){
+        for(BancaClass b : bancasTemporal){
 
                 LinearLayout.LayoutParams tableRowParams = new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
@@ -352,44 +374,30 @@ public class Historico extends AppCompatActivity {
                     tableRow1.setId(idRow);
                     tableRow1.setLayoutParams(tableRowParams);
                     idRow ++;
-                    tableRow1.addView(createTv("Banca", true, mContext, true));
-                    tableRow1.addView(createTv("Venta", true, mContext, true));
-                    tableRow1.addView(createTv("Comis.", true, mContext, true));
-                    tableRow1.addView(createTv("Desc.", true, mContext, true));
-                    tableRow1.addView(createTv("Premios", true, mContext, true));
-                    tableRow1.addView(createTv("Neto", true, mContext, true));
-                    tableRow1.addView(createTv("Balance", true, mContext, true));
-                    tableRow1.addView(createTv("Balance mas ventas", true, mContext, true));
+                    tableRow1.addView(createTv("Banca", 1, mContext, true));
+                    tableRow1.addView(createTv("Venta", 1, mContext, true));
+                    tableRow1.addView(createTv("Comis.", 1, mContext, true));
+                    tableRow1.addView(createTv("Desc.", 1, mContext, true));
+                    tableRow1.addView(createTv("Premios", 1, mContext, true));
+                    tableRow1.addView(createTv("Neto", 1, mContext, true));
+                    tableRow1.addView(createTv("Balance", 1, mContext, true));
+                    tableRow1.addView(createTv("Balance mas ventas", 1, mContext, true));
                     table.addView(tableRow1);
                     primerCiclo = false;
                 }
 
 
 
-                if(spinnerOpcion.getSelectedItem().toString().equals("Con ventas")){
-                    if(b.getVentas() <= 0){
-                        continue;
-                    }
-                }
-                else if(spinnerOpcion.getSelectedItem().toString().equals("Con premios")){
-                    if(b.getPremios() <= 0){
-                        continue;
-                    }
-                }
-                else if(spinnerOpcion.getSelectedItem().toString().equals("Con tickets pendientes")){
-                    if(b.getTicketsPendientes() <= 0){
-                        continue;
-                    }
-                }
+
                 /* add views to the row */
                 tableRow.setId(idRow);
-                tableRow.addView(createTv(b.getDescripcion(), false, mContext, true));
-                tableRow.addView(createTv(String.valueOf(b.getVentas()), false, mContext, true));
-                tableRow.addView(createTv(String.valueOf(b.getComisiones()), false, mContext, true));
-                tableRow.addView(createTv(String.valueOf(b.getDescuentos()), false, mContext, true));
-                tableRow.addView(createTv(String.valueOf(b.getPremios()), false, mContext, true));
+                tableRow.addView(createTv(b.getDescripcion(), 3, mContext, true));
+                tableRow.addView(createTv(String.valueOf(b.getVentas()), 3, mContext, true));
+                tableRow.addView(createTv(String.valueOf(b.getComisiones()), 3, mContext, true));
+                tableRow.addView(createTv(String.valueOf(b.getDescuentos()), 3, mContext, true));
+                tableRow.addView(createTv(String.valueOf(b.getPremios()), 3, mContext, true));
 
-                TextView txtNeto = createTv(String.valueOf(b.getNeto()), false, mContext, true);
+                TextView txtNeto = createTv(String.valueOf(b.getNeto()), 3, mContext, true);
                 if(b.getNeto() < 0){
                     txtNeto.setBackgroundColor(Color.parseColor("#ffcccc"));
                     txtNeto.setTextColor(Color.parseColor("#e22c2c"));
@@ -399,7 +407,7 @@ public class Historico extends AppCompatActivity {
                 }
                 tableRow.addView(txtNeto);
 
-                TextView txtBalance = createTv(String.valueOf(b.getBalance()), false, mContext, true);
+                TextView txtBalance = createTv(String.valueOf(b.getBalance()), 3, mContext, true);
                 if(b.getBalanceActual() < 0){
                     txtBalance.setBackgroundColor(Color.parseColor("#ffcccc"));
                     txtBalance.setTextColor(Color.parseColor("#e22c2c"));
@@ -409,7 +417,7 @@ public class Historico extends AppCompatActivity {
                 }
                 tableRow.addView(txtBalance);
 
-                TextView txtBalanceActual = createTv(String.valueOf(b.getBalanceActual()), false, mContext, true);
+                TextView txtBalanceActual = createTv(String.valueOf(b.getBalanceActual()), 3, mContext, true);
                 if(b.getBalanceActual() < 0){
                     txtBalanceActual.setBackgroundColor(Color.parseColor("#ffcccc"));
                     txtBalanceActual.setTextColor(Color.parseColor("#e22c2c"));
@@ -419,18 +427,96 @@ public class Historico extends AppCompatActivity {
                 }
                 tableRow.addView(txtBalanceActual);
 
+            table.addView(tableRow);
+            idRow++;
+            i++;
+
+            if(i < bancasTemporal.size() == false){
+                    TableRow tableRow1 = new TableRow(mContext);
+                    tableRow1.setId(idRow);
+                    tableRow1.setLayoutParams(tableRowParams);
+                    idRow ++;
+                    try{
+                        JSONObject object = calcularTotal(bancasTemporal);
+                        tableRow1.addView(createTv("Totales", 2, mContext, true));
+                        tableRow1.addView(asignarColor(createTv(object.getString("ventas"), 2, mContext, true), object.getDouble("ventas")));
+                        tableRow1.addView(asignarColor(createTv(object.getString("comisiones"), 2, mContext, true), object.getDouble("comisiones")));
+                        tableRow1.addView(asignarColor(createTv(object.getString("descuentos"), 2, mContext, true), object.getDouble("descuentos")));
+                        tableRow1.addView(asignarColor(createTv(object.getString("premios"), 2, mContext, true), object.getDouble("premios")));
+                        tableRow1.addView(asignarColor(createTv(object.getString("netos"), 2, mContext, true), object.getDouble("netos")));
+                        tableRow1.addView(asignarColor(createTv(object.getString("balances"), 2, mContext, true), object.getDouble("balances")));
+                        tableRow1.addView(asignarColor(createTv(object.getString("balancesMasVentas"), 2, mContext, true), object.getDouble("balancesMasVentas")));
+                        table.addView(tableRow1);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+
+                    TableRow tableRow2 = new TableRow(mContext);
+                    tableRow2.setId(idRow);
+                    tableRow2.setLayoutParams(tableRowParams);
+                    idRow ++;
+                    tableRow2.addView(createTv("", 2, mContext, true));
+                    tableRow2.addView(createTv("Venta", 2, mContext, true));
+                    tableRow2.addView(createTv("Comis.", 2, mContext, true));
+                    tableRow2.addView(createTv("Desc.", 2, mContext, true));
+                    tableRow2.addView(createTv("Premios", 2, mContext, true));
+                    tableRow2.addView(createTv("Neto", 2, mContext, true));
+                    tableRow2.addView(createTv("Balance", 2, mContext, true));
+                    tableRow2.addView(createTv("Balance mas ventas", 2, mContext, true));
+                    table.addView(tableRow2);
+                }
 
 
-
-                table.addView(tableRow);
-                idRow++;
-                i++;
         }
 
     }
 
+    private TextView asignarColor(TextView txt, double valor){
+        if(valor < 0){
+            txt.setTextColor(ContextCompat.getColor(mContext, R.color.bgRed));
+        }
 
-    private static TextView createTv(String text, boolean es_header, Context context, boolean center){
+        return txt;
+    }
+
+    private JSONObject calcularTotal(List<BancaClass> bancaClass)
+    {
+        JSONObject object = new JSONObject();
+        double ventas = 0;
+        double comisiones = 0;
+        double descuentos = 0;
+        double premios = 0;
+        double netos = 0;
+        double balances = 0;
+        double balancesMasVentas = 0;
+
+        for(BancaClass b : bancaClass){
+            ventas += b.getVentas();
+            comisiones += b.getComisiones();
+            descuentos += b.getDescuentos();
+            premios += b.getPremios();
+            netos += b.getNeto();
+            balances += b.getBalance();
+            balancesMasVentas += b.getBalanceActual();
+        }
+
+        try {
+            object.put("ventas", ventas);
+            object.put("comisiones", comisiones);
+            object.put("descuentos", descuentos);
+            object.put("premios", premios);
+            object.put("netos", netos);
+            object.put("balances", balances);
+            object.put("balancesMasVentas", balancesMasVentas);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return object;
+    }
+
+
+    private static TextView createTv(String text, int es_header_total_normal, Context context, boolean center){
         /* create cell element - textview */
         TextView tv = new TextView(context);
         TableRow.LayoutParams cellParams = new TableRow.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT);
@@ -440,10 +526,15 @@ public class Historico extends AppCompatActivity {
         //tv.setBackgroundColor(0xff12dd12);
         tv.setText(text);
 
-        if(es_header){
+        if(es_header_total_normal == 1){
             tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
             tv.setBackgroundResource(R.color.colorPrimary);
             tv.setTextColor(Color.WHITE);
+            tv.setPadding(2, 10, 2, 10);
+        }
+        else if(es_header_total_normal == 2){
+            tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
+            tv.setTextColor(ContextCompat.getColor(context, R.color.colorPrimary));
             tv.setPadding(2, 10, 2, 10);
         }
         else{

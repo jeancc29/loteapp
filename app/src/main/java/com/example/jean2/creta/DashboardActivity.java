@@ -70,8 +70,12 @@ public class DashboardActivity extends AppCompatActivity {
     TextView_Icon txtBack;
     public static ProgressBar progressBar;
     TableLayout tableTotalesPorLoteria;
+    TableLayout tableJugadas;
     Spinner spinnerLoterias;
+    Spinner spinnerSorteos;
     List<LoteriaClass> loterias = new ArrayList<>();
+    List<SorteosClass> sorteos = new ArrayList<>();
+    List<JugadaClass> jugadas = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +86,7 @@ public class DashboardActivity extends AppCompatActivity {
         txtFecha = (TextView) findViewById(R.id.txtFecha);
         barChart = findViewById(R.id.chart1);
         tableTotalesPorLoteria = (TableLayout)findViewById(R.id.tableTotalesPorLoteria);
+        tableJugadas = (TableLayout)findViewById(R.id.tableJugadas);
         spinnerLoterias = (Spinner) findViewById(R.id.spinnerLoterias);
         spinnerLoterias.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
@@ -95,11 +100,41 @@ public class DashboardActivity extends AppCompatActivity {
                     return;
 
                 LoteriaClass loteria = loterias.get((int)spinnerLoterias.getSelectedItemId());
-                for(SorteosClass s : loteria.getSorteos()){
-                    for(JugadaClass j: s.getJugadas()){
-                        Log.e("channel", j.getJugada());
-                    }
-                }
+                sorteos = loteria.getSorteos();
+                fillSpinnerSorteos();
+//                for(SorteosClass s : loteria.getSorteos()){
+//                    for(JugadaClass j: s.getJugadas()){
+//                        Log.e("channel", j.getJugada());
+//                    }
+//                }
+
+
+            }
+
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                Toast.makeText(DashboardActivity.this,"No selection",Toast.LENGTH_LONG).show();
+            }
+        });
+
+        spinnerSorteos = (Spinner) findViewById(R.id.spinnerSorteos);
+        spinnerSorteos.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                // Get the spinner selected item text
+                //String selectedItemText = (String) adapterView.getItemAtPosition(i);
+                // Display the selected item into the TextView
+                //mTextView.setText("Selected : " + selectedItemText);
+                if(sorteos.size() ==0)
+                    return;
+
+                SorteosClass sorteo = sorteos.get((int)spinnerSorteos.getSelectedItemId());
+                updateTableJugadas(sorteo);
+//                for(JugadaClass j : sorteo.getJugadas()){
+//                    Log.e("channel", j.getJugada());
+//                }
 
 
             }
@@ -117,6 +152,10 @@ public class DashboardActivity extends AppCompatActivity {
                 onBackPressed();
             }
         });
+
+
+
+
 
         Calendar calendarIncial = Calendar.getInstance();
         int yearActual = calendarIncial.get(Calendar.YEAR);
@@ -372,137 +411,7 @@ public class DashboardActivity extends AppCompatActivity {
         MySingleton.getInstance(DashboardActivity.this).addToRequestQueue(request, 20000);
     }
 
-    public  class dashboardHttp extends AsyncTask<String, String, String> {
 
-        HttpURLConnection urlConnection;
-        JSONObject data;
-
-        public dashboardHttp() {
-        }
-
-        @Override
-        protected String doInBackground(String... args) {
-
-            StringBuilder result = new StringBuilder();
-
-            try {
-                //URL url = new URL("https://api.github.com/users/dmnugent80/repos");
-                String urlString = Utilidades.URL +"/api/dashboard?fecha=" + txtFecha.getText() + "&idUsuario=" + String.valueOf(Utilidades.getIdUsuario(DashboardActivity.this));
-                URL url = new URL(urlString);
-                urlConnection = (HttpURLConnection) url.openConnection();
-//                urlConnection.setDoOutput(true);
-                urlConnection.setDoInput(true);
-                urlConnection.setRequestProperty("Content-Type", "application/json");
-                urlConnection.setRequestMethod("GET");
-
-
-
-
-                if (urlConnection.getResponseCode() != 201){
-                    StringBuffer answer = new StringBuffer();
-                    InputStream inputstream = null;
-
-                    if(urlConnection.getResponseCode() == 500 ) {
-
-                        inputstream = urlConnection.getErrorStream();
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(inputstream));
-                        String line;
-                        while ((line = reader.readLine()) != null) {
-                            answer.append(line);
-                        }
-                        Log.e("guardarHttpError", answer.toString());
-
-                    }
-
-                    Log.e("guardarHttp", urlConnection.getResponseMessage());
-                    return "Error";
-                }
-
-                //GET THE REQUEST DATA
-                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    result.append(line);
-                }
-
-                //SE LLENAN LAS LISTAS CON LOS JSONSTRING
-                Log.i("guardarHttp", result.toString());
-
-            } catch (Exception e) {
-                result.append("Error");
-                e.printStackTrace();
-            } finally {
-                urlConnection.disconnect();
-
-                urlConnection = null;
-                return result.toString();
-            }
-
-
-            //return result.toString();
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            super.onPostExecute(result);
-            progressBar.setVisibility(View.GONE);
-            if(!result.equals("Error")){
-//                idVenta = null;
-//                if(llenarVentasLoteriasTickets(result) == false)
-//                    return;
-//
-//                if(errores == 1){
-//                    Toast.makeText(mContext, "Error: " +mensaje, Toast.LENGTH_SHORT).show();
-//                    return;
-//                }
-//                limpiar();
-//                fillSpinner();
-//                setDescuento();
-//
-//
-//
-//                if(ckbPrint.isChecked()){
-//                    //Utilidades.imprimir(mContext,response, 1);
-//                    Utilidades.imprimir(mContext, venta, 1);
-//                }
-//                else if(ckbSms.isChecked()){
-//                    venta.setImg(imgHtmlTmp);
-//                    PrincipalFragment.compartirTicketHttp c = new PrincipalFragment.compartirTicketHttp(venta, true);
-//                    c.execute();
-//                }
-//                else if(ckbWhatsapp.isChecked()){
-//                    venta.setImg(imgHtmlTmp);
-//                    PrincipalFragment.compartirTicketHttp c = new PrincipalFragment.compartirTicketHttp(venta, false);
-//                    c.execute();
-//                }
-
-
-            }else{
-//                Toast.makeText(mContext, "Error del servidor", Toast.LENGTH_SHORT).show();
-//                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialog, int which) {
-//                        switch (which){
-//                            case DialogInterface.BUTTON_POSITIVE:
-//                                //Yes button clicked
-//                                guardar();
-//                                break;
-//
-//                            case DialogInterface.BUTTON_NEGATIVE:
-//                                //No button clicked
-//                                break;
-//                        }
-//                    }
-//                };
-//
-//
-//                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-//                builder.setMessage("Ha ocurrido un error de conexion, desea realizar la venta otra vez?").setPositiveButton("Si", dialogClickListener)
-//                        .setNegativeButton("No", dialogClickListener).show();
-            }
-        }
-    }
 
     public void fillSpinner(){
         /********* Prepare value for spinner *************/
@@ -528,6 +437,48 @@ public class DashboardActivity extends AppCompatActivity {
         }
 
 //        seleccionarBancaPertenecienteAUsuario();
+    }
+
+    public void fillSpinnerSorteos(){
+        /********* Prepare value for spinner *************/
+        // jsonArrayVentas = jsonArrayVentas2;
+        String[] sorteosSpinner = new String[sorteos.size()];
+        int contador = 0;
+        for (SorteosClass sorteo: sorteos)
+        {
+            sorteosSpinner[contador] = sorteo.getDescripcion();
+            contador++;
+        }
+
+
+        /********* Set value to spinner *************/
+        if(sorteosSpinner == null)
+            return;
+        try{
+            ArrayAdapter<String> adapter =new ArrayAdapter<String>(DashboardActivity.this,android.R.layout.simple_spinner_item, sorteosSpinner);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spinnerSorteos.setAdapter(adapter);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        seleccionarSorteoPale();
+    }
+
+    public void seleccionarSorteoPale(){
+        int contador = 0;
+        for (SorteosClass s : sorteos)
+        {
+            if(s.getDescripcion().equals("Pale")){
+                break;
+            }
+            contador++;
+        }
+        try{
+            spinnerSorteos.setSelection(contador);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public void updateChart(JSONArray datos)
@@ -696,7 +647,63 @@ public class DashboardActivity extends AppCompatActivity {
         }
     }
 
-    private static TextView createTv(String text, int es_header_total_normal, Context context, boolean center){
+
+    //udpate jugadas
+    public  void updateTableJugadas(SorteosClass sorteo){
+
+
+
+        if(sorteo == null){
+            return ;
+        }
+        tableJugadas.removeAllViews();
+        int idRow = 0;
+
+        if(sorteo.getJugadas().size() == 0){
+            tableJugadas.removeAllViews();
+            Toast.makeText(DashboardActivity.this, "No hay datos", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        LinearLayout.LayoutParams tableRowParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        int color_normal_gris = 1;
+
+        int i=0;
+        for(JugadaClass jugada : sorteo.getJugadas()){
+            try {
+
+                if(i == 0){
+                    /* add views to the row */
+                    TableRow tableRow = createRow(tableRowParams, idRow, color_normal_gris, new TextView[]{createTv("Loteria", 4, DashboardActivity.this, true), createTv("Jugada", 4, DashboardActivity.this, true), createTv("Monto", 4, DashboardActivity.this, true)});
+                    tableJugadas.addView(tableRow);
+                    idRow ++;
+                }
+
+                /* add views to the row */
+                if((i % 2) != 0){
+                    color_normal_gris = 2;
+                }else{
+                    color_normal_gris = 1;
+                }
+
+                TableRow tableRow = createRow(tableRowParams, idRow, color_normal_gris, new TextView[]{createTv(jugada.getDescripcion(), 3, DashboardActivity.this, true), createTv(jugada.getJugada(), 3, DashboardActivity.this, true), createTv(String.valueOf(jugada.getMonto()), 3, DashboardActivity.this, true)});
+                tableJugadas.addView(tableRow);
+
+                idRow++;
+//                if(i + 1 < sorteo.getJugadas().size() == false){
+//                    TableRow tableRow1 = createRow(tableRowParams, idRow, 1, new TextView[]{createTv("Total", 2, DashboardActivity.this, true), createTv(String.valueOf(totalVentasLoterias), 2, DashboardActivity.this, true), createTv(String.valueOf(totalPremiosLoterias), 2, DashboardActivity.this, true)});
+//                    tableJugadas.addView(tableRow1);
+//                }
+                i++;
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private static TextView createTv(String text, int es_header_total_normal_headerverde, Context context, boolean center){
         /* create cell element - textview */
         TextView tv = new TextView(context);
         TableRow.LayoutParams cellParams = new TableRow.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT);
@@ -706,13 +713,19 @@ public class DashboardActivity extends AppCompatActivity {
         //tv.setBackgroundColor(0xff12dd12);
         tv.setText(text);
 
-        if(es_header_total_normal == 1){
+        if(es_header_total_normal_headerverde == 1){
             tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
             tv.setBackgroundResource(R.color.colorPrimary);
             tv.setTextColor(Color.WHITE);
             tv.setPadding(2, 10, 2, 10);
         }
-        else if(es_header_total_normal == 2){
+        else if(es_header_total_normal_headerverde == 4){
+            tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
+            tv.setBackgroundResource(R.color.bgVerde);
+            tv.setTextColor(Color.WHITE);
+            tv.setPadding(2, 10, 2, 10);
+        }
+        else if(es_header_total_normal_headerverde == 2){
             tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
             tv.setPadding(2, 10, 2, 10);
         }

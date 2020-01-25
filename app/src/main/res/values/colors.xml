@@ -29,5 +29,6 @@
     <color name="bgInfo">#00bcd4</color>
     <color name="bgRosa">#ffcccc</color>
     <color name="bgGris">#eae9e9</color>
+    <color name="bgVerde">#75b281</color>
 
 </resources>
