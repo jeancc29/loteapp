@@ -32,10 +32,18 @@
             android:paddingTop="25dp"/>
 
             <Button
-                android:id="@+id/btnHistoricoVentasAdministrador"
+            android:id="@+id/btnHistoricoVentasAdministrador"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Historico de ventas"
+            android:paddingBottom="25dp"
+            android:paddingTop="25dp"/>
+
+            <Button
+                android:id="@+id/btnBalanceBancas"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Historico de ventas"
+                android:text="Balance bancas"
                 android:paddingBottom="25dp"
                 android:paddingTop="25dp"/>
 

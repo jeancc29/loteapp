@@ -41,6 +41,7 @@ public class MenuFragment extends Fragment implements DuplicarDialog.DuplicarDia
     Button btnRegistrarPremios;
     Button btnMonitoreo;
     Button btnHistoricoVentasAdministrador;
+    Button btnBalanceBancas;
     Button btnHistoricoVentas;
     Button btnVentas;
     Button btnPagar;
@@ -112,6 +113,21 @@ public class MenuFragment extends Fragment implements DuplicarDialog.DuplicarDia
                 startActivity(intent);
             }
         });
+
+
+        btnBalanceBancas = (Button)view.findViewById(R.id.btnBalanceBancas);
+        if(Utilidades.getAdministrador(mContext) == false){
+            btnBalanceBancas.setVisibility(View.GONE);
+        }
+        btnBalanceBancas.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getContext(), BalanceBancasActivity.class);
+                startActivity(intent);
+            }
+        });
+
+
         btnHistoricoVentas.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

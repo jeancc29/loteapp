@@ -47,9 +47,10 @@
         android:roundIcon="@mipmap/ic_loterias_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".BalanceBancasActivity"></activity>
         <activity
             android:name=".DashboardActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"></activity>
+            android:configChanges="orientation|keyboardHidden|screenSize" />
         <activity
             android:name=".Historico"
             android:parentActivityName=".Main2Activity" />

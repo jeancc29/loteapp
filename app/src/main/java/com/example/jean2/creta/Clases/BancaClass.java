@@ -3,6 +3,8 @@ package com.example.jean2.creta.Clases;
 public class BancaClass {
     public int id;
     public String descripcion;
+    public String dueno;
+    public String usuario;
     public String piepagina1;
     public String piepagina2;
     public String piepagina3;
@@ -17,6 +19,7 @@ public class BancaClass {
     public double balance;
     public double balanceActual;
     public double premios;
+    public double prestamo;
     public int ticketsPendientes;
 
     public BancaClass(){}
@@ -168,5 +171,29 @@ public class BancaClass {
 
     public void setTicketsPendientes(int ticketsPendientes) {
         this.ticketsPendientes = ticketsPendientes;
+    }
+
+    public String getDueno() {
+        return dueno;
+    }
+
+    public void setDueno(String dueno) {
+        this.dueno = dueno;
+    }
+
+    public double getPrestamo() {
+        return prestamo;
+    }
+
+    public void setPrestamo(double prestamo) {
+        this.prestamo = prestamo;
+    }
+
+    public String getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(String usuario) {
+        this.usuario = usuario;
     }
 }
