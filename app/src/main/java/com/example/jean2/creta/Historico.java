@@ -203,7 +203,7 @@ public class Historico extends AppCompatActivity {
         try {
             dato.put("idUsuario", Utilidades.getIdUsuario(mContext));
             dato.put("fechaDesde", txtFechaDesde.getText());
-            dato.put("fechaHasta", txtFechaDesde.getText());
+            dato.put("fechaHasta", txtFechaHasta.getText());
 
             dato.put("layout", "Principal");
             datosObj.put("datos", dato);
@@ -396,36 +396,11 @@ public class Historico extends AppCompatActivity {
                 tableRow.addView(createTv(String.valueOf(b.getComisiones()), 3, mContext, true));
                 tableRow.addView(createTv(String.valueOf(b.getDescuentos()), 3, mContext, true));
                 tableRow.addView(createTv(String.valueOf(b.getPremios()), 3, mContext, true));
+                tableRow.addView(asignarColorBackground(createTv(String.valueOf(b.getNeto()), 3, mContext, true), b.getNeto()));
+                tableRow.addView(asignarColorBackground(createTv(String.valueOf(b.getBalance()), 3, mContext, true), b.getBalance()));
+                tableRow.addView(asignarColorBackground(createTv(String.valueOf(b.getBalanceActual()), 3, mContext, true), b.getBalanceActual()));
 
-                TextView txtNeto = createTv(String.valueOf(b.getNeto()), 3, mContext, true);
-                if(b.getNeto() < 0){
-                    txtNeto.setBackgroundColor(Color.parseColor("#ffcccc"));
-                    txtNeto.setTextColor(Color.parseColor("#e22c2c"));
-                }else{
-                    txtNeto.setBackgroundColor(Color.parseColor("#bfdde0"));
-                    txtNeto.setTextColor(Color.parseColor("#095861"));
-                }
-                tableRow.addView(txtNeto);
 
-                TextView txtBalance = createTv(String.valueOf(b.getBalance()), 3, mContext, true);
-                if(b.getBalanceActual() < 0){
-                    txtBalance.setBackgroundColor(Color.parseColor("#ffcccc"));
-                    txtBalance.setTextColor(Color.parseColor("#e22c2c"));
-                }else{
-                    txtBalance.setBackgroundColor(Color.parseColor("#bfdde0"));
-                    txtBalance.setTextColor(Color.parseColor("#095861"));
-                }
-                tableRow.addView(txtBalance);
-
-                TextView txtBalanceActual = createTv(String.valueOf(b.getBalanceActual()), 3, mContext, true);
-                if(b.getBalanceActual() < 0){
-                    txtBalanceActual.setBackgroundColor(Color.parseColor("#ffcccc"));
-                    txtBalanceActual.setTextColor(Color.parseColor("#e22c2c"));
-                }else{
-                    txtBalanceActual.setBackgroundColor(Color.parseColor("#bfdde0"));
-                    txtBalanceActual.setTextColor(Color.parseColor("#095861"));
-                }
-                tableRow.addView(txtBalanceActual);
 
             table.addView(tableRow);
             idRow++;
@@ -473,7 +448,21 @@ public class Historico extends AppCompatActivity {
 
     private TextView asignarColor(TextView txt, double valor){
         if(valor < 0){
+            Log.e("Historico", "asignarColor: " + String.valueOf(valor) );
             txt.setTextColor(ContextCompat.getColor(mContext, R.color.bgRed));
+        }
+
+        return txt;
+    }
+
+    private TextView asignarColorBackground(TextView txt, double valor){
+        if(valor < 0){
+            Log.e("Historico", "asignarColor: " + String.valueOf(valor) );
+            txt.setBackgroundColor(Color.parseColor("#ffcccc"));
+            txt.setTextColor(ContextCompat.getColor(mContext, R.color.bgRed));
+        }else{
+            txt.setBackgroundColor(Color.parseColor("#bfdde0"));
+            txt.setTextColor(Color.parseColor("#095861"));
         }
 
         return txt;
@@ -501,13 +490,13 @@ public class Historico extends AppCompatActivity {
         }
 
         try {
-            object.put("ventas", ventas);
-            object.put("comisiones", comisiones);
-            object.put("descuentos", descuentos);
-            object.put("premios", premios);
-            object.put("netos", netos);
-            object.put("balances", balances);
-            object.put("balancesMasVentas", balancesMasVentas);
+            object.put("ventas", Utilidades.redondear(ventas));
+            object.put("comisiones", Utilidades.redondear(comisiones));
+            object.put("descuentos", Utilidades.redondear(descuentos));
+            object.put("premios", Utilidades.redondear(premios));
+            object.put("netos", Utilidades.redondear(netos));
+            object.put("balances", Utilidades.redondear(balances));
+            object.put("balancesMasVentas", Utilidades.redondear(balancesMasVentas));
         }catch (Exception e){
             e.printStackTrace();
         }

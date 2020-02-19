@@ -1,0 +1,104 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.jean2.creta.TransaccionAgregarFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+
+
+   <LinearLayout
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:orientation="vertical">
+
+       <LinearLayout
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:orientation="vertical">
+           <Spinner
+               android:id="@+id/spinnerTipoTransaccion"
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:layout_marginTop="10dp"
+               android:layout_marginBottom="2dp"
+               android:layout_marginRight="30dp"
+               android:layout_marginLeft="30dp"
+               />
+
+           <Spinner
+               android:id="@+id/spinnerTipoConcepto"
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:layout_marginTop="10dp"
+               android:layout_marginBottom="2dp"
+               android:layout_marginRight="30dp"
+               android:layout_marginLeft="30dp"
+               />
+       </LinearLayout>
+
+       <LinearLayout
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:orientation="horizontal">
+
+           <Spinner
+               android:id="@+id/spinnerBancas"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_marginTop="10dp"
+               android:layout_marginBottom="2dp"
+               android:layout_marginRight="30dp"
+               android:layout_marginLeft="30dp"
+               />
+
+           <TextView
+               android:id="@+id/txtBanca"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:text="POS1"/>
+           <!--<TextView-->
+           <!--android:layout_width="match_parent"-->
+           <!--android:layout_height="wrap_content"-->
+           <!--android:gravity="right"-->
+           <!--android:text="POS1"/>-->
+
+
+
+       </LinearLayout>
+
+       <LinearLayout
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:orientation="horizontal">
+
+           <Spinner
+               android:id="@+id/spinnerEntidad"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_marginTop="10dp"
+               android:layout_marginBottom="2dp"
+               android:layout_marginRight="30dp"
+               android:layout_marginLeft="30dp"
+               />
+
+           <TextView
+               android:id="@+id/txtEntidad"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:text="Entidad 1"/>
+           <!--<TextView-->
+           <!--android:layout_width="match_parent"-->
+           <!--android:layout_height="wrap_content"-->
+           <!--android:gravity="right"-->
+           <!--android:text="POS1"/>-->
+
+
+
+       </LinearLayout>
+
+   </LinearLayout>
+
+
+
+</FrameLayout>

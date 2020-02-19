@@ -205,6 +205,8 @@ public class MonitoreoActivity extends AppCompatActivity {
         super.onBackPressed();
     }
 
+
+
     public void aceptaCancelarTicket(final JSONObject ticket){
         try {
 //            if(JPrinterConnectService.isPrinterConnected() == false){
@@ -720,6 +722,8 @@ public class MonitoreoActivity extends AppCompatActivity {
                         return;
                     }
 
+
+                Utilidades.indicarQueHayCambiosParaFragmentPrincipal();
 
                 tickets = new JSONArray();
                 ticketsTmp = new JSONArray();

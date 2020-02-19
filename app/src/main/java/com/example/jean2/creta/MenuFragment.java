@@ -40,6 +40,7 @@ public class MenuFragment extends Fragment implements DuplicarDialog.DuplicarDia
     Button btnDashboard;
     Button btnRegistrarPremios;
     Button btnMonitoreo;
+    Button btnAgregarTransaccion;
     Button btnHistoricoVentasAdministrador;
     Button btnBalanceBancas;
     Button btnHistoricoVentas;
@@ -84,6 +85,15 @@ public class MenuFragment extends Fragment implements DuplicarDialog.DuplicarDia
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getContext(), RegistrarPremios.class);
+                startActivity(intent);
+            }
+        });
+
+        btnAgregarTransaccion = (Button)view.findViewById(R.id.btnAgregarTransaccion);
+        btnAgregarTransaccion.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getContext(), TransaccionesActivity.class);
                 startActivity(intent);
             }
         });

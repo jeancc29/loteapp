@@ -29,13 +29,19 @@ import com.example.jean2.creta.Servicios.PrintService;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.SimpleDateFormat;
+import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class Utilidades {
-    public static String URL = "https://loterias.ml";
+    public static String URL = "https://loteriasdo.ga";
 
     public static boolean guardarUsuario(Context context, boolean recordar, JSONObject jsonObjectUsuario){
         SharedPreferences preferences = context.getSharedPreferences("usuario", Context.MODE_PRIVATE);
@@ -422,7 +428,13 @@ public class Utilidades {
     static void imprimir(Context context, VentasClass venta, int original_cancelado_copia)
     {
         PrinterClass printerClass = new PrinterClass(context, venta);
-        printerClass.conectarEImprimir(true, original_cancelado_copia);
+        printerClass.conectarEImprimir(1, original_cancelado_copia);
+    }
+
+    static void imprimirCuadre(Context context, JSONObject cuadre, int original_cancelado_copia)
+    {
+        PrinterClass printerClass = new PrinterClass(context, cuadre);
+        printerClass.conectarEImprimir(2, original_cancelado_copia);
     }
 
     public static boolean jugadaExiste(List<JugadaClass> jugadas, String jugada, String idLoteria){
@@ -712,6 +724,69 @@ public class Utilidades {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public static void indicarQueHayCambiosParaFragmentPrincipal(){
+        PrincipalFragment.hayCambios = true;
+    }
+
+    public static boolean toTimeZoneRD(String horaCierre)
+    {
+        Calendar calendar = Calendar.getInstance();
+        String day = (String.valueOf(calendar.get(Calendar.DAY_OF_MONTH)).length() > 1) ? String.valueOf(calendar.get(Calendar.DAY_OF_MONTH)) : "0" + String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
+        int month = calendar.get((Calendar.MONTH));
+        month++;
+        String monthString = (String.valueOf(month).length() > 1) ? String.valueOf(month) : "0" + String.valueOf(month);
+        String year = String.valueOf(calendar.get(Calendar.YEAR));
+        String hour = (String.valueOf(calendar.get(Calendar.HOUR)).length() > 1) ? String.valueOf(calendar.get(Calendar.HOUR)) : "0" + String.valueOf(calendar.get(Calendar.HOUR));
+        String minute = (String.valueOf(calendar.get(Calendar.MINUTE)).length() > 1) ? String.valueOf(calendar.get(Calendar.MINUTE)) : "0" + String.valueOf(calendar.get(Calendar.MINUTE));
+        String second = (String.valueOf(calendar.get(Calendar.SECOND)).length() > 1) ? String.valueOf(calendar.get(Calendar.SECOND)) : "0" + String.valueOf(calendar.get(Calendar.SECOND));
+
+        String fechaHoraCierre = year + "-" + monthString + "-" + day + " " + horaCierre;
+        String fechaActual = year + "-" + monthString + "-" + day + " " + hour + ":"+ minute + ":" + second;
+
+
+        Calendar date1 = Calendar.getInstance();
+        date1.set(Calendar.HOUR_OF_DAY, date1.get(Calendar.HOUR) );
+        date1.set(Calendar.MINUTE,  date1.get(Calendar.MINUTE));
+        date1.set(Calendar.SECOND, date1.get(Calendar.SECOND));
+
+        String[] parts = horaCierre.split(":");
+        Calendar date2 = Calendar.getInstance();
+        date2.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parts[0]));
+        date2.set(Calendar.MINUTE, Integer.parseInt(parts[1]));
+        date2.set(Calendar.SECOND, 0);
+
+        try{
+
+
+            Log.e("Utilidades1", horaCierre + " : " + date1.after(date2));
+//            Log.e("Utilidades2", );
+
+            if(date1.after(date2))
+                return true;
+            else
+                return false;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+
+    }
+
+    public static double redondear(double numero)
+    {
+        DecimalFormatSymbols separadoresPersonalizados = new DecimalFormatSymbols();
+        separadoresPersonalizados.setDecimalSeparator('.');
+
+        DecimalFormat formato1 = new DecimalFormat("#.00", separadoresPersonalizados);
+        Log.e("Utilidades", "redondear:"  + formato1.format(numero));
+        return Double.parseDouble(formato1.format(numero)); // Resultado => 3.30
+//        System.out.println(formato1.format(numero2)); // Resultado => 3.33
+
+//        DecimalFormat formato2 = new DecimalFormat("#.##", separadoresPersonalizados);
+//        System.out.println(formato2.format(numero1)); // Resultado => 3.3
+//        System.out.println(formato2.format(numero2)); // Resultado => 3.33
     }
 
 }

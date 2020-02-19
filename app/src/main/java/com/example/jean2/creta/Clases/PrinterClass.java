@@ -69,10 +69,11 @@ public class PrinterClass {
     long startTime = 0;
     boolean conectando = false;
     Handler timerHandler = new Handler();
-    boolean imprimir_o_probar_impresora_este_activa;
+    int imprimirticket_cuadre_o_probar_impresora_este_activa;
     int original_copia_cancelado_pagado;
     ExecutorService es = Executors.newScheduledThreadPool(30);
     ConnectedThread mConnectedThread;
+    JSONObject cuadre;
 
 
     public PrinterClass(Context context){this.mContext = context; this.address = Utilidades.getAddressImpresora(mContext);}
@@ -82,9 +83,15 @@ public class PrinterClass {
         this.address = Utilidades.getAddressImpresora(mContext);
     }
 
-    public void conectarEImprimir(boolean imprimir_o_probar_impresora_este_activa, int original_copia_cancelado_pagado)
+    public PrinterClass(Context context, JSONObject cuadre){
+        this.mContext = context;
+        this.address = Utilidades.getAddressImpresora(mContext);
+        this.cuadre = cuadre;
+    }
+
+    public void conectarEImprimir(int imprimirticket_cuadre_o_probar_impresora_este_activa, int original_copia_cancelado_pagado)
     {
-        this.imprimir_o_probar_impresora_este_activa = imprimir_o_probar_impresora_este_activa;
+        this.imprimirticket_cuadre_o_probar_impresora_este_activa = imprimirticket_cuadre_o_probar_impresora_este_activa;
         this.original_copia_cancelado_pagado = original_copia_cancelado_pagado;
         Utilidades.killAppServiceByPackageName(mContext, null);
 //        BluetoothConnectAsyncTask bluetoothConnectAsyncTask = new BluetoothConnectAsyncTask(imprimir_o_probar_impresora_este_activa,original_copia_cancelado_pagado);
@@ -92,6 +99,10 @@ public class PrinterClass {
         bluetoothConnectAsyncTask.execute("");
         Log.d("PrinterClass", "Ejecutando impresion");
     }
+
+
+
+
 
     private class BluetoothConnectAsyncTask extends AsyncTask<String, Void, String> {
         //Cuando es true es para imprimir y false para probar la conexion de la impresora
@@ -123,24 +134,24 @@ public class PrinterClass {
                 mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
                 mBluetoothDevice = mBluetoothAdapter.getRemoteDevice(address);
 
-//                CONNECT MEDIANTE UUID
-//                mBluetoothSocket = mBluetoothDevice.createRfcommSocketToServiceRecord(applicationUUID);
-//                mBluetoothAdapter.cancelDiscovery();
-//                mBluetoothSocket.connect();
+                //CONNECT MEDIANTE UUID
+                //mBluetoothSocket = mBluetoothDevice.createRfcommSocketToServiceRecord(applicationUUID);
+                //mBluetoothAdapter.cancelDiscovery();
+                //mBluetoothSocket.connect();
 
 
-//                CONNECT MEDIANTE PORT
+                //CONNECT MEDIANTE PORT
                 int bt_port_to_connect = 5; // just an example, could be any port number you wish
                 BluetoothDevice device = mBluetoothDevice ; // get the bluetooth device (e.g., using bt discovery)
                 BluetoothSocket deviceSocket = null;
-//                Method m = device.getClass().getMethod("createInsecureRfcommSocket", new Class[] {int.class});
-//                mBluetoothSocket = (BluetoothSocket) m.invoke(device,bt_port_to_connect);
+                //Method m = device.getClass().getMethod("createInsecureRfcommSocket", new Class[] {int.class});
+                //mBluetoothSocket = (BluetoothSocket) m.invoke(device,bt_port_to_connect);
 
                 UUID uuid = mBluetoothDevice.getUuids()[0].getUuid();
                 mBluetoothSocket = mBluetoothDevice.createRfcommSocketToServiceRecord(applicationUUID);
                 mBluetoothSocket.connect();
                 //mHandler.sendEmptyMessage(0);
-//                IOException
+                //IOException
             } catch (Exception e) {
                 e.printStackTrace();
                 //closeSocket(mBluetoothSocket, false);
@@ -160,20 +171,21 @@ public class PrinterClass {
             mConnectedThread = new ConnectedThread(mBluetoothSocket, "secure");
             mConnectedThread.start();
             if(result.equals("Success")) {
-                if(imprimir_o_probar_impresora_este_activa == true)
-                    //ticket(original_copia_cancelado_pagado);
-                es.submit(new TaskImprimir(original_copia_cancelado_pagado));
-                else{
-                    POS_S_TextOut("**PRUEBA EXISTOSA**\n\n\n", 0, 1, 1, 0, 0x00, true);
+                if(imprimirticket_cuadre_o_probar_impresora_este_activa == 1)
+                    ticket(original_copia_cancelado_pagado);
+                else if(imprimirticket_cuadre_o_probar_impresora_este_activa == 2){
+                    cuadre();
+                }
+                else {
+                    POS_S_TextOut("**PRUEBA EXISTOSA**\n\n\n", 0, 1, 1, 0, 0x00);
                 }
 
-//                mConnectedThread.cancel(true);
-               //closeSocket(mBluetoothSocket, false);
+                desconectarDesdeApp();
+
+                //mConnectedThread.cancel(true);
+                //closeSocket(mBluetoothSocket, false);
             }
-//            else {
-//                BluetoothConnectAsyncTask bluetoothConnectAsyncTask = new BluetoothConnectAsyncTask();
-//                bluetoothConnectAsyncTask.execute("");
-//            }
+
         }
     }
 
@@ -211,7 +223,7 @@ public class PrinterClass {
 //                    bluetoothConnectAsyncTask.execute("");
                     if(intentosDeConeccion <= 5){
                         intentosDeConeccion++;
-                        conectarEImprimir(imprimir_o_probar_impresora_este_activa, original_copia_cancelado_pagado);
+                        conectarEImprimir(imprimirticket_cuadre_o_probar_impresora_este_activa, original_copia_cancelado_pagado);
                     }
                     else{
                         intentosDeConeccion = 1;
@@ -256,7 +268,7 @@ public class PrinterClass {
 //                        break;
                         if(intentosDeConeccion <= 5){
                             intentosDeConeccion++;
-                            conectarEImprimir(imprimir_o_probar_impresora_este_activa, original_copia_cancelado_pagado);
+                            conectarEImprimir(imprimirticket_cuadre_o_probar_impresora_este_activa, original_copia_cancelado_pagado);
                         }
                         else{
                             intentosDeConeccion = 1;
@@ -264,7 +276,7 @@ public class PrinterClass {
                             //Toast.makeText(mContext, "Ha fallado la impresora, verifique de que la impresora este encendida y con carga suficiente", Toast.LENGTH_LONG).show();
                         }
 //                        conectarEImprimir(imprimir_o_probar_impresora_este_activa, original_copia_cancelado_pagado);
-                        Log.d("Connected", "Conexion fallo: imprimir:" + imprimir_o_probar_impresora_este_activa + " original:"+ original_copia_cancelado_pagado);
+                        Log.d("Connected", "Conexion fallo: imprimir:" + imprimirticket_cuadre_o_probar_impresora_este_activa + " original:"+ original_copia_cancelado_pagado);
                     }
 
 
@@ -321,7 +333,7 @@ public class PrinterClass {
                     switch (which){
                         case DialogInterface.BUTTON_POSITIVE:
                             //Yes button clicked
-                            conectarEImprimir(imprimir_o_probar_impresora_este_activa, original_copia_cancelado_pagado);
+                            conectarEImprimir(imprimirticket_cuadre_o_probar_impresora_este_activa, original_copia_cancelado_pagado);
                             break;
 
                         case DialogInterface.BUTTON_NEGATIVE:
@@ -428,47 +440,20 @@ public class PrinterClass {
 
     }
 
-    public void POS_S_TextOut(String pszString, int nOrgx, int nWidthTimes, int nHeightTimes, int nFontType, int nFontStyle, boolean desconectar) {
-
-
+    public void desconectarDesdeApp()
+    {
         try {
-            if (nOrgx > 65535 || nOrgx < 0 || nWidthTimes > 7 || nWidthTimes < 0 || nHeightTimes > 7 || nHeightTimes < 0 || nFontType < 0 || nFontType > 4 || pszString.length() == 0) {
-                throw new Exception("invalid args");
-            }
-            OutputStream os = mBluetoothSocket
-                    .getOutputStream();
 
-            Cmd.ESC_dollors_nL_nH[2] = (byte)(nOrgx % 256);
-            Cmd.ESC_dollors_nL_nH[3] = (byte)(nOrgx / 256);
-            byte[] intToWidth = new byte[]{0, 16, 32, 48, 64, 80, 96, 112};
-            byte[] intToHeight = new byte[]{0, 1, 2, 3, 4, 5, 6, 7};
-            Cmd.GS_exclamationmark_n[2] = (byte)(intToWidth[nWidthTimes] + intToHeight[nHeightTimes]);
-            byte[] tmp_ESC_M_n = Cmd.ESC_M_n;
-            if (nFontType != 0 && nFontType != 1) {
-                tmp_ESC_M_n = new byte[0];
-            } else {
-                tmp_ESC_M_n[2] = (byte)nFontType;
-            }
-
-            Cmd.GS_E_n[2] = (byte)(nFontStyle >> 3 & 1);
-            Cmd.ESC_line_n[2] = (byte)(nFontStyle >> 7 & 3);
-            Cmd.FS_line_n[2] = (byte)(nFontStyle >> 7 & 3);
-            Cmd.ESC_lbracket_n[2] = (byte)(nFontStyle >> 9 & 1);
-            Cmd.GS_B_n[2] = (byte)(nFontStyle >> 10 & 1);
-            Cmd.ESC_V_n[2] = (byte)(nFontStyle >> 12 & 1);
-            Cmd.ESC_9_n[2] = 1;
-            byte[] pbString = pszString.getBytes();
-            byte[] data = byteArraysToBytes(new byte[][]{Cmd.ESC_dollors_nL_nH, Cmd.GS_exclamationmark_n, tmp_ESC_M_n, Cmd.GS_E_n, Cmd.ESC_line_n, Cmd.FS_line_n, Cmd.ESC_lbracket_n, Cmd.GS_B_n, Cmd.ESC_V_n, Cmd.FS_AND, Cmd.ESC_9_n, pbString});
-            os.write(data, 0, data.length);
+            OutputStream os = mBluetoothSocket.getOutputStream();
             os.flush();
-                Log.d("PrinterClass", "POst out:" + pszString);
             mConnectedThread.cancel(true);
-        } catch (Exception var15) {
-            Log.i("Pos", var15.toString());
+        }catch (Exception e){
+            e.printStackTrace();
         }
 
-
     }
+
+
 
 
     public void POS_S_Align(int align) {
@@ -700,10 +685,51 @@ public class PrinterClass {
                 }
                 if(venta.getBanca().imprimirCodigoQr == 1)
                     POS_S_SetQRcode(venta.getCodigoQr(), 8, 0, 3);
-                POS_S_TextOut("\n\n\n", 1, 0, 1, 0, 0x00, true);
+                POS_S_TextOut("\n\n\n", 1, 0, 1, 0, 0x00);
             }else{
-                POS_S_TextOut("\n\n\n", 1, 0, 1, 0, 0x00, true);
+                POS_S_TextOut("\n\n\n", 1, 0, 1, 0, 0x00);
             }
+
+
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+
+        return true;
+    }
+
+
+    //cuadre
+
+    public boolean cuadre()
+    {
+        try {
+            boolean pagado = false;
+            if(original_copia_cancelado_pagado == 4){
+                original_copia_cancelado_pagado = 1;
+                pagado = true;
+            }
+
+
+
+            POS_S_Align(1);
+            POS_S_TextOut("Cuadre\n", 0, 1, 1, 0, 0x00);
+            POS_S_TextOut(this.cuadre.getJSONObject("banca").getString("descripcion")+"\n", 0, 1, 1, 0, 0x00);
+
+            POS_S_Align(0);
+//            POS_SetRightSpacing(0);
+            POS_S_TextOut("Balanace hasta la fecha: "  +this.cuadre.getString("balanceHastaLaFecha")+ "\n", 0, 0, 1, 0, 0x00);
+            POS_S_TextOut("Tickets pendientes:  "  +this.cuadre.getString("pendientes")+ "\n", 0, 0, 1, 0, 0x00);
+            POS_S_TextOut("Tickets perdedores:  "  +this.cuadre.getString("perdedores")+ "\n", 0, 0, 1, 0, 0x00);
+            POS_S_TextOut("Tickets ganadores:   "  +this.cuadre.getString("ganadores")+ "\n", 0, 0, 1, 0, 0x00);
+            POS_S_TextOut("Total:               "  +this.cuadre.getString("total")+ "\n", 0, 0, 1, 0, 0x00);
+            POS_S_TextOut("Ventas:              "  +this.cuadre.getString("ventas")+ "\n", 0, 0, 1, 0, 0x00);
+            POS_S_TextOut("Comisiones:          "  +this.cuadre.getString("comisiones")+ "\n", 0, 0, 1, 0, 0x00);
+            POS_S_TextOut("Descuentos:          "  +this.cuadre.getString("descuentos")+ "\n", 0, 0, 1, 0, 0x00);
+            POS_S_TextOut("Premios:             "  +this.cuadre.getString("premios")+ "\n", 0, 0, 1, 0, 0x00);
+            POS_S_TextOut("Neto:                "  +this.cuadre.getString("neto")+ "\n", 0, 0, 1, 0, 0x00);
+            POS_S_TextOut("Balance mas ventas:  "  +this.cuadre.getString("balanceActual")+ "\n\n\n\n\n", 0, 0, 1, 0, 0x08  );
 
 
         }catch (Exception e){
@@ -772,27 +798,6 @@ public class PrinterClass {
         return total;
     }
 
-    public class TaskImprimir implements Runnable
-    {
-        int original_copia_cancelado_pagado = 0;
-        TaskImprimir(int original_copia_cancelado_pagado){this.original_copia_cancelado_pagado = original_copia_cancelado_pagado;}
-        @Override
-        public void run() {
-            // TODO Auto-generated method stub
-
-            final boolean bPrintResult = ticket(this.original_copia_cancelado_pagado);
 
 
-            ((Activity)mContext).runOnUiThread(new Runnable(){
-                @Override
-                public void run() {
-                    // TODO Auto-generated method stub
-                    Log.d("PrinterClass", "TaskImprimir:" + bPrintResult);
-                   // mConnectedThread.cancel(true);
-                    //btnPrint.setEnabled(bIsOpened);
-                }
-            });
-
-        }
-    }
 }

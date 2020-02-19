@@ -12,6 +12,7 @@ public class LoteriaClass {
     public String pick3;
     public String pick4;
     public List<SorteosClass> sorteos;
+    public String horaCierre;
 
     public LoteriaClass(){}
     public LoteriaClass(int id, String descripcion, String abreviatura) {
@@ -90,5 +91,13 @@ public class LoteriaClass {
 
     public void setSorteos(List<SorteosClass> sorteos) {
         this.sorteos = sorteos;
+    }
+
+    public String getHoraCierre() {
+        return horaCierre;
+    }
+
+    public void setHoraCierre(String horaCierre) {
+        this.horaCierre = horaCierre;
     }
 }

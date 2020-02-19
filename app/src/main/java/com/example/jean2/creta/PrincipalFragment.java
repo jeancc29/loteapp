@@ -87,10 +87,12 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.jar.JarException;
 
 import androidmads.library.qrgenearator.QRGContents;
@@ -136,6 +138,7 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
     static String imgHtmlTmp;
     static int errores;
     static String mensaje;
+    public static boolean hayCambios = false;
 
     View view;
     TextView txtBanca;
@@ -412,14 +415,15 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                     }
                 });
 
-                mBuilder.setNegativeButton(R.string.dismiss_label, new DialogInterface.OnClickListener() {
+                //R.string.dismiss_label
+                mBuilder.setNegativeButton("Cerrar", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         dialogInterface.dismiss();
                     }
                 });
 
-                mBuilder.setNeutralButton(R.string.clear_all_label, new DialogInterface.OnClickListener() {
+                mBuilder.setNeutralButton("Limpiar", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int which) {
                         for (int i = 0; i < checkedItems.length; i++) {
@@ -449,6 +453,16 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
 
         mContext=(FragmentActivity) context;
         super.onAttach(context);
+    }
+
+    @Override
+    public void onResume() {
+        Log.d("onResumePrincipal", String.valueOf(hayCambios));
+        if(hayCambios){
+            jsonParse();
+            hayCambios = false;
+        }
+        super.onResume();
     }
 
     public void seleccionarLoteriasMultiSelect(JSONArray loteriasASeleccionar, boolean seleccionarPrimeraLoteria ){
@@ -1978,6 +1992,12 @@ public class PrincipalFragment extends Fragment implements View.OnClickListener,
                 //JSONObject dataobj = array.getJSONObject(i);
                 //spinnerMap.put(i,dataobj.getString("id"));
                 //idLoteriasMap.put(i,dataobj.getString("id"));
+            Calendar calendar = Calendar.getInstance();
+
+            int day = calendar.get(Calendar.DAY_OF_MONTH);
+//            Utilidades.toTimeZoneRD(loteria.getHoraCierre());
+            //calendar.getTimeZone().getID()
+//            Log.d("principalFragmentHora", loteria.getDescripcion() + " : " +String.valueOf(Utilidades.toTimeZoneRD(loteria.getHoraCierre())) + " : " + loteria.getHoraCierre());
                 spinnerArray[contador] = loteria.getDescripcion();
                 contador++;
 //            } catch (JSONException e) {

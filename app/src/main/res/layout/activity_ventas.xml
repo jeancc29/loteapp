@@ -38,6 +38,16 @@
             android:layout_marginRight="20dp"
             />
 
+        <Spinner
+            android:id="@+id/spinnerBancas"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="2dp"
+            android:layout_marginRight="30dp"
+            android:layout_marginLeft="30dp"
+            />
+
 
         <Button
             android:id="@+id/btnBuscar"
@@ -45,6 +55,16 @@
             android:layout_height="wrap_content"
             android:background="@drawable/rounded_corners"
             android:text="Buscar"
+            android:textColor="#ffffff"
+            android:layout_marginRight="10dp"
+            />
+
+        <Button
+            android:id="@+id/btnImprimir"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rounded_corners_green"
+            android:text="Imprimir"
             android:textColor="#ffffff"
             />
     </LinearLayout>
@@ -415,11 +435,12 @@
                 </TableRow>
 
                 <TableRow android:layout_height="wrap_content"
-                    android:layout_width="wrap_content">
+                    android:layout_width="wrap_content"
+                    android:background="@color/WHITE">
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Balance"
+                        android:text="Balance mas ventas"
                         android:textStyle="bold"
                         android:layout_weight="1"
                         android:gravity="center"
@@ -430,7 +451,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="$0.00"
-
+                        android:background="@color/WHITE"
                         android:layout_weight="1"
                         android:gravity="center"
                         android:textSize="20dp" />

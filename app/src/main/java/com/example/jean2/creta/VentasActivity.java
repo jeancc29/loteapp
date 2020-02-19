@@ -13,10 +13,13 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -29,13 +32,19 @@ import com.android.volley.ServerError;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.example.jean2.creta.Clases.BancaClass;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 public class VentasActivity extends AppCompatActivity {
     private Toolbar toolbar;
@@ -45,6 +54,8 @@ public class VentasActivity extends AppCompatActivity {
     TextView txtFechaInicial;
     TextView txtFechaFinal;
     Button btnBuscar;
+    Button btnImprimir;
+    Spinner spinnerBanca;
 
     Context mContext;
     ProgressBar progressBar;
@@ -72,6 +83,10 @@ public class VentasActivity extends AppCompatActivity {
     TextView txtFinal;
 
 
+    JSONObject ventas;
+    List<BancaClass> bancas = new ArrayList<>();
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,6 +110,7 @@ public class VentasActivity extends AppCompatActivity {
         tableTicketsGanadores = (TableLayout)findViewById(R.id.tableTicketsGanadores);
         txtFechaInicial = (TextView) findViewById(R.id.txtFechaInicial);
         btnBuscar= (Button) findViewById(R.id.btnBuscar);
+        btnImprimir= (Button) findViewById(R.id.btnImprimir);
 
 
         txtBalanceHastaLaFecha = (TextView)findViewById(R.id.txtBalanceHastaLaFecha);
@@ -111,6 +127,10 @@ public class VentasActivity extends AppCompatActivity {
         txtNeto = (TextView)findViewById(R.id.txtNeto);
         txtFinal = (TextView)findViewById(R.id.txtFinal);
         txtBalance = (TextView)findViewById(R.id.txtBalance);
+        spinnerBanca = (Spinner)findViewById(R.id.spinnerBancas);
+
+
+
 
 
         Calendar calendarIncial = Calendar.getInstance();
@@ -156,10 +176,29 @@ public class VentasActivity extends AppCompatActivity {
         btnBuscar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                getVentas();
+                getVentas(false);
             }
         });
-        btnBuscar.performClick();
+        btnImprimir.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(ventas != null){
+                    if(Utilidades.hayImpresorasRegistradas(mContext) == false){
+                        Main2Activity.txtBluetooth.performClick();
+                        Toast.makeText(mContext, "Debe registrar una impresora", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    Utilidades.imprimirCuadre(mContext, ventas, 1);
+                }
+            }
+        });
+        getVentas(true);
+
+        if(Utilidades.getAdministrador(mContext) == true){
+            spinnerBanca.setVisibility(View.VISIBLE);
+        }else{
+            spinnerBanca.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -178,7 +217,7 @@ public class VentasActivity extends AppCompatActivity {
     }
 
 
-    private void getVentas(){
+    private void getVentas(boolean onCreate){
         String url = Utilidades.URL +"/api/reportes/ventas";
         progressBarToolbar.setVisibility(View.VISIBLE);
 
@@ -189,7 +228,17 @@ public class VentasActivity extends AppCompatActivity {
         try {
             dato.put("idUsuario", Utilidades.getIdUsuario(mContext));
             dato.put("fecha", txtFechaInicial.getText());
-            dato.put("idBanca", Utilidades.getIdBanca(mContext));
+            if(Utilidades.getAdministrador(mContext) == true && onCreate == false){
+                if(bancas.size() > 0)
+                    dato.put("idBanca", bancas.get((int)spinnerBanca.getSelectedItemId()).getId());
+                else{
+                    Toast.makeText(mContext, "No hay bancas seleccionadas", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            }else{
+                Log.d("getVentas", "dentro no admin: " + Utilidades.getIdBanca(mContext));
+                dato.put("idBanca", Utilidades.getIdBanca(mContext));
+            }
 
             dato.put("layout", "Principal");
             datosObj.put("datos", dato);
@@ -207,6 +256,17 @@ public class VentasActivity extends AppCompatActivity {
                     public void onResponse(JSONObject response) {
                         progressBarToolbar.setVisibility(View.GONE);
                         try {
+
+                            ventas = response;
+                            if(onCreate) {
+                                Gson gson = new Gson();
+                                Type listType = new TypeToken<List<BancaClass>>() {
+                                }.getType();
+                                List<BancaClass> bancasLista = gson.fromJson(response.getJSONArray("bancas").toString(), listType);
+                                bancas = bancasLista;
+                                fillSpinner();
+                            }
+
                             txtBalanceHastaLaFecha.setText(response.getString("balanceHastaLaFecha"));
                             JSONObject jsonObject = response.getJSONObject("banca");
                             txtBancaDescripcion.setText(jsonObject.getString("descripcion"));
@@ -239,7 +299,7 @@ public class VentasActivity extends AppCompatActivity {
                             if(response.getDouble("balanceActual") < 0){
                                 txtBalance.setBackgroundColor(Color.parseColor("#ffcccc"));
                             }else{
-                                txtBalance.setBackgroundColor(Color.parseColor("#eae9e9"));
+                                txtBalance.setBackgroundColor(Color.parseColor("#ffffff"));
                             }
 
 
@@ -574,5 +634,46 @@ public class VentasActivity extends AppCompatActivity {
             tv.setGravity(Gravity.CENTER);
 
         return tv;
+    }
+
+    public void fillSpinner(){
+        /********* Prepare value for spinner *************/
+        // jsonArrayVentas = jsonArrayVentas2;
+        String[] bancasSpinner = new String[bancas.size()];
+        int contador = 0;
+        for (BancaClass banca : bancas)
+        {
+            bancasSpinner[contador] = banca.getDescripcion();
+            contador++;
+        }
+
+
+        /********* Set value to spinner *************/
+        if(bancasSpinner == null)
+            return;
+        try{
+            ArrayAdapter<String> adapter =new ArrayAdapter<String>(VentasActivity.this,android.R.layout.simple_spinner_item, bancasSpinner);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spinnerBanca.setAdapter(adapter);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        seleccionarBancaPertenecienteAUsuario();
+    }
+
+
+    public void seleccionarBancaPertenecienteAUsuario(){
+        int idBanca = Utilidades.getIdBanca(VentasActivity.this);
+        int contador = 0;
+        for (BancaClass banca : bancas)
+        {
+            if(idBanca == banca.getId()){
+                break;
+            }
+            contador++;
+        }
+//        bancas.get((int)spinnerBanca.getSelectedItemId());
+        spinnerBanca.setSelection(contador);
     }
 }

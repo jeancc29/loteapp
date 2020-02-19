@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -44,6 +45,21 @@ public class BluetoothDevices extends AppCompatActivity {
 
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                break;
+        }
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
+
     public static void mostrarCardView()
     {
         Map<String,?> impresoras = Utilidades.getTodasImpresoras(mContext);
@@ -73,7 +89,7 @@ public class BluetoothDevices extends AppCompatActivity {
         if(Utilidades.hayImpresorasRegistradas(BluetoothDevices.this))
         {
             PrinterClass printerClass = new PrinterClass(BluetoothDevices.this);
-            printerClass.conectarEImprimir(false, 1);
+            printerClass.conectarEImprimir(3, 1);
         }
         else
         {

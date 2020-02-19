@@ -293,6 +293,7 @@ public class RegistrarPremios extends AppCompatActivity {
 
     }
 
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -307,6 +308,7 @@ public class RegistrarPremios extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
     }
+
 
     private void guardar()
     {
@@ -361,7 +363,7 @@ public class RegistrarPremios extends AppCompatActivity {
                     @Override
                     public void onResponse(JSONObject response) {
                         progressBar.setVisibility(View.GONE);
-
+                        Utilidades.indicarQueHayCambiosParaFragmentPrincipal();
                         Toast.makeText(RegistrarPremios.this, "Se ha guardado correctamente", Toast.LENGTH_SHORT).show();
                         LoteriaClass l = loterias.get((int)spinnerLoteria.getSelectedItemId());
                         String loteria = l.getDescripcion();
@@ -474,6 +476,7 @@ public class RegistrarPremios extends AppCompatActivity {
                     @Override
                     public void onResponse(JSONObject response) {
                         progressBar.setVisibility(View.GONE);
+                        Utilidades.indicarQueHayCambiosParaFragmentPrincipal();
 
                         try{
                             Toast.makeText(RegistrarPremios.this, response.getString("mensaje"), Toast.LENGTH_SHORT).show();
