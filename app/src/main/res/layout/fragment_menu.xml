@@ -45,7 +45,8 @@
                 android:layout_height="wrap_content"
                 android:text="Agregar transacciones"
                 android:paddingBottom="25dp"
-                android:paddingTop="25dp"/>
+                android:paddingTop="25dp"
+                android:visibility="gone"/>
 
             <Button
                 android:id="@+id/btnBalanceBancas"

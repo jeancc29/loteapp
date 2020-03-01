@@ -64,6 +64,7 @@ public class RegistrarPremios extends AppCompatActivity {
     Button btnBorrar;
     static String mensaje = null;
     static Context mContext;
+    boolean onCreate = true;
 
 
 
@@ -99,13 +100,24 @@ public class RegistrarPremios extends AppCompatActivity {
         });
 
         txtPrimera = (TextInputEditText)findViewById(R.id.txtPrimera);
+        txtPrimera.requestFocus();
+
         txtPrimera.addTextChangedListener(new TextWatcher() {
+            final boolean onCreate2 = onCreate;
             public void onTextChanged(CharSequence cs, int s, int b, int c) {
-                Log.i("Key:", cs.toString());
+                Log.i("Keyprimera:", cs.toString());
+                if(onCreate){
+                    onCreate = false;
+                    txtPrimera.setSelectAllOnFocus(true);
+                    txtPrimera.requestFocus();
+                    return;
+                }
                 if(cs.toString().length() == 2 && txtPrimera.hasFocus()){
                     txtSegunda.setSelectAllOnFocus(true);
                     txtSegunda.requestFocus();
+
                 }
+
             }
             public void afterTextChanged(Editable editable) { }
             public void beforeTextChanged(CharSequence cs, int i, int j, int
@@ -215,6 +227,8 @@ public class RegistrarPremios extends AppCompatActivity {
 //                    }
                 }
 
+                onCreate = true;
+
                 if(!loteria.segunda.equals("null"))
                     txtSegunda.setText(loteria.segunda);
                 else
@@ -260,7 +274,7 @@ public class RegistrarPremios extends AppCompatActivity {
                 if(existeSorteo(loteria.sorteos, "Pick 3 Box") == false && existeSorteo(loteria.sorteos, "Pick 3 Straight") == false){
 //                    txtPrimera.setInputType(InputType.TYPE_NUMBER_FLAG_SIGNED);
                     txtPick3.setVisibility(View.GONE);
-                    txtPrimera.setInputType(InputType.TYPE_NUMBER_FLAG_SIGNED);
+//                    txtPrimera.setInputType(InputType.TYPE_NUMBER_FLAG_SIGNED);
                     txtPrimera.setFocusableInTouchMode(true);
                     txtPrimera.setSelectAllOnFocus(true);
                 }else{
@@ -307,6 +321,10 @@ public class RegistrarPremios extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+    }
+
+    void setOnCreateToFalse(){
+        onCreate = false;
     }
 
 

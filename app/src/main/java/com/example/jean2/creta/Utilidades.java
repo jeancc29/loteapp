@@ -41,7 +41,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class Utilidades {
-    public static String URL = "https://loteriasdo.ga";
+    public static String URL = "https://loteriasdo.ml";
 
     public static boolean guardarUsuario(Context context, boolean recordar, JSONObject jsonObjectUsuario){
         SharedPreferences preferences = context.getSharedPreferences("usuario", Context.MODE_PRIVATE);
@@ -431,9 +431,9 @@ public class Utilidades {
         printerClass.conectarEImprimir(1, original_cancelado_copia);
     }
 
-    static void imprimirCuadre(Context context, JSONObject cuadre, int original_cancelado_copia)
+    static void imprimirCuadre(Context context, JSONObject cuadre, int original_cancelado_copia, String fecha)
     {
-        PrinterClass printerClass = new PrinterClass(context, cuadre);
+        PrinterClass printerClass = new PrinterClass(context, cuadre, fecha);
         printerClass.conectarEImprimir(2, original_cancelado_copia);
     }
 

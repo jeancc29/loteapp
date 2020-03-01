@@ -74,6 +74,7 @@ public class PrinterClass {
     ExecutorService es = Executors.newScheduledThreadPool(30);
     ConnectedThread mConnectedThread;
     JSONObject cuadre;
+    String fecha;
 
 
     public PrinterClass(Context context){this.mContext = context; this.address = Utilidades.getAddressImpresora(mContext);}
@@ -83,10 +84,11 @@ public class PrinterClass {
         this.address = Utilidades.getAddressImpresora(mContext);
     }
 
-    public PrinterClass(Context context, JSONObject cuadre){
+    public PrinterClass(Context context, JSONObject cuadre, String fecha){
         this.mContext = context;
         this.address = Utilidades.getAddressImpresora(mContext);
         this.cuadre = cuadre;
+        this.fecha = fecha;
     }
 
     public void conectarEImprimir(int imprimirticket_cuadre_o_probar_impresora_este_activa, int original_copia_cancelado_pagado)
@@ -716,10 +718,11 @@ public class PrinterClass {
             POS_S_Align(1);
             POS_S_TextOut("Cuadre\n", 0, 1, 1, 0, 0x00);
             POS_S_TextOut(this.cuadre.getJSONObject("banca").getString("descripcion")+"\n", 0, 1, 1, 0, 0x00);
+            POS_S_TextOut(  this.fecha + "\n\n", 0, 1, 1, 0, 0x00);
 
             POS_S_Align(0);
 //            POS_SetRightSpacing(0);
-            POS_S_TextOut("Balanace hasta la fecha: "  +this.cuadre.getString("balanceHastaLaFecha")+ "\n", 0, 0, 1, 0, 0x00);
+            POS_S_TextOut("Balanace a la fecha: "  +this.cuadre.getString("balanceHastaLaFecha")+ "\n", 0, 0, 1, 0, 0x00);
             POS_S_TextOut("Tickets pendientes:  "  +this.cuadre.getString("pendientes")+ "\n", 0, 0, 1, 0, 0x00);
             POS_S_TextOut("Tickets perdedores:  "  +this.cuadre.getString("perdedores")+ "\n", 0, 0, 1, 0, 0x00);
             POS_S_TextOut("Tickets ganadores:   "  +this.cuadre.getString("ganadores")+ "\n", 0, 0, 1, 0, 0x00);

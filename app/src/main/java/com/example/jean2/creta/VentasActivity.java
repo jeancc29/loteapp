@@ -188,7 +188,7 @@ public class VentasActivity extends AppCompatActivity {
                         Toast.makeText(mContext, "Debe registrar una impresora", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    Utilidades.imprimirCuadre(mContext, ventas, 1);
+                    Utilidades.imprimirCuadre(mContext, ventas, 1, txtFechaInicial.getText().toString());
                 }
             }
         });

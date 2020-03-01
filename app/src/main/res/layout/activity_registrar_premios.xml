@@ -52,6 +52,7 @@
                 android:layout_marginRight="40dp"
                 >
 
+
                 <android.support.design.widget.TextInputEditText
                     android:id="@+id/txtPrimera"
                     android:layout_width="match_parent"
@@ -60,9 +61,7 @@
                     android:maxLines="1"
                     android:inputType="number"
                     android:imeOptions="actionNext"
-                    android:maxLength="2"
-
-                    />
+                    android:maxLength="2"/>
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
